@@ -1,0 +1,16 @@
+mkdocs
+mkdocs-cinder
+cookiecutter
+pytest
+numpy
+scipy
+matplotlib
+python-dotenv
+torch
+torchvision
+gdown
+scikit-image
+scikit-learn
+dask
+jupyterlab
+pandas
