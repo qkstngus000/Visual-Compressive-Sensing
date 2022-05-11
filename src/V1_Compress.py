@@ -1,22 +1,10 @@
-import os
-import os.path as path
-from tqdm import tqdm
-
-import matplotlib.pyplot as plt
 import numpy as np
-import numpy.linalg as la
 
 from src.structured_random_features.src.models.weights import V1_weights
 
 # Packages for fft and fitting data
 from scipy import fftpack as fft
 from sklearn.linear_model import Lasso
-
-# Package for importing image representation
-from PIL import Image, ImageOps
-
-# Package for storing reformed image
-import imageio
 
 def generateY(W, img):
     n, m = img.shape
