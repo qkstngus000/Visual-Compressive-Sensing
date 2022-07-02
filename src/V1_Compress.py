@@ -7,6 +7,22 @@ from scipy import fftpack as fft
 from sklearn.linear_model import Lasso
 
 def generate_Y(W, img):
+    ''' Fetch image pixel values to V1 weights to generate data for fitting comoress sensing
+    
+    Parameters
+    ----------
+    W : array_like
+        (num_V1_weights, n*m) shape array. Lists of V1 weights.
+        
+    img : array_like
+          (n, m) shape image array
+    
+    Returns
+    ----------
+    y : vector
+        Dot product of W and image
+    
+    '''
     n, m = img.shape
     y = W @ img.reshape(n * m, 1)
     return y
