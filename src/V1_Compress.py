@@ -41,7 +41,7 @@ def generate_V1_variables(num_cell, cell_size, sparse_freq, img):
     W = W.reshape(num_cell, dim[0], dim[1])
     return W, y
 
-def compress(W, y, alpha):
+def compress(W, y, alpha, fit_intercept = False):
     sample_sz, n, m = W.shape
     
     ## WΨ
@@ -49,7 +49,7 @@ def compress(W, y, alpha):
     theta = theta.reshape(sample_sz, n * m)
 
     ## Initialize Lasso and Fit data
-    mini = Lasso(alpha = alpha)
+    mini = Lasso(alpha = alpha, fit_intercept = fit_intercept)
     mini.fit(theta, y)
     
     ## Retrieve sparse vector s
