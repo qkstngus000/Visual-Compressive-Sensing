@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.structured_random_features.src.models.weights import V1_weights
+from structured_random_features.src.models.weights import V1_weights
 
 # Packages for fft and fitting data
 from scipy import fftpack as fft
@@ -44,6 +44,9 @@ def generate_V1_variables(num_cell, cell_size, sparse_freq, img):
 def compress(W, y, alpha, fit_intercept = False):
     sample_sz, n, m = W.shape
     
+    if fit_intercept:
+        raise Exception("fit_intercept = True not implemented")
+    
     ## WΨ
     theta = fft.dctn(W.reshape(sample_sz, n, m), norm = 'ortho', axes = [1, 2])
     theta = theta.reshape(sample_sz, n * m)
@@ -57,6 +60,8 @@ def compress(W, y, alpha, fit_intercept = False):
     
     # Reform the image using sparse vector s with inverse descrete cosine
     reform = fft.idctn(s.reshape(n, m), norm='ortho', axes=[0,1])
+    if fit_intercept:
+        reform += mini.intercept_ # not sure this is right
     
     #return theta, reformed img, sparse vectors
     return theta, reform, s
