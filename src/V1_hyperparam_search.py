@@ -30,7 +30,7 @@ def run_sim(rep, alp, num, sz, freq, img_arr):
     
     # Call function and calculate error
     theta, reform, s = compress(W_model, y, alp)
-    error = np.linalg.norm(img - reform, 'fro') / np.sqrt(m*n)
+    error = np.linalg.norm(img_arr - reform, 'fro') / np.sqrt(m*n)
     
     return error, theta, reform, s
 
@@ -60,7 +60,7 @@ def main() :
 
     search_list = [rep, alpha, num_cell, cell_sz, sparse_freq]
 
-    # All combinations of hyperparameter to try
+    # All combinations of hyperparameter to try 
     search = list(itertools.product(*search_list))             
     search_df = pd.DataFrame(search, columns= [ 'rep', 'alp', 'num_cell', 'cell_sz', 'sparse_freq'])
     print(search_df.head())
@@ -91,6 +91,6 @@ def main() :
     # save parameter_error data with error_results data
     params_result_df.to_csv(os.path.join(save_path, "param_" + "_".join(str.split(time.ctime().replace(":", "_"))) + ".csv"))
     results_df.to_csv(os.path.join(save_path, "result_" + "_".join(str.split(time.ctime().replace(":", "_"))) + ".csv"))
-
+    print("Execution Complete")
 if __name__ == "__main__":
     main()
