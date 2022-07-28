@@ -43,7 +43,7 @@ def main() :
     delay_list = []
     params = []
     alpha = np.logspace(-3, 3, 7)
-    rep = np.arange(30)
+    rep = np.arange(20)
     num_cell = [50, 100, 200, 500]
     cell_sz = [2, 5, 7]
     sparse_freq = [1, 2, 5]
