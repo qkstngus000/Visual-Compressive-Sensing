@@ -1,6 +1,9 @@
+
 import numpy as np
-from src.structured_random_features.src.models.weights import V1_weights
-from src.V1_Compress import generate_Y, compress
+import sys
+sys.path.append("../")
+from structured_random_features.src.models.weights import V1_weights
+from src.V1_reconst import generate_Y, reconstruct
 import os.path
 
 
