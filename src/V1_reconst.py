@@ -24,7 +24,9 @@ def generate_Y(W, img):
         Dot product of W and image
     
     '''
+    num_cell = W.shape[0]
     n, m = img.shape
+    W = W.reshape(num_cell, n*m)
     y = W @ img.reshape(n * m, 1)
     return y
 
