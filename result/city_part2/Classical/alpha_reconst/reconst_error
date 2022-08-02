@@ -1,0 +1,23 @@
+$\alpha = 0.0001, sample_size = 20.0%$
+Error: 19.17179349787882
+
+$\alpha = 0.001, sample_size = 20.0%$
+Error: 18.97984909955784
+
+$\alpha = 0.01, sample_size = 20.0%$
+Error: 21.587046115740996
+
+$\alpha = 0.1, sample_size = 20.0%$
+Error: 17.366696748864587
+
+$\alpha = 1.0, sample_size = 20.0%$
+Error: 16.667272741837007
+
+$\alpha = 10.0, sample_size = 20.0%$
+Error: 17.727633205577455
+
+$\alpha = 100.0, sample_size = 20.0%$
+Error: 24.35440304575956
+
+$\alpha = 1000.0, sample_size = 20.0%$
+Error: 51.13939681080371
