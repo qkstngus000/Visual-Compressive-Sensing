@@ -44,6 +44,17 @@ def generate_V1_variables(num_cell, cell_size, sparse_freq, img):
     W = W.reshape(num_cell, dim[0], dim[1])
     return W, y
 
+# Function: reconstruct
+# Parameters:
+##     W: An opened index for measurement
+##     y: the value of the opened index W
+##     alpha: panelty value to fit for Lasso
+##     dim (n, m): image size that needs to be reformed
+
+# Return:
+##     theta: matrix of W when FFT took in place
+##     reformed: Reformed image in array
+##     s: sparse vector s which is a estimated coefficient generated from LASSO
 def reconstruct(W, y, alpha, fit_intercept = False):
     sample_sz, n, m = W.shape
     

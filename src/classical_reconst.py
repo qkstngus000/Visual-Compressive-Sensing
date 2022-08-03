@@ -39,7 +39,7 @@ def main():
         plt.title("Original {img_nm} image".format(img_nm = image_nm))
         plt.axis("off")
         plt.clim(0, 255)
-        plt.savefig("../result/{img_nm}/Classical/alpha_reconst/Original image.png".format(img_nm = image_nm).replace(" ", "_"), dpi = 1000)
+        plt.savefig("../result/{img_nm}/Classical/alpha_reconst/Original image.png".format(img_nm = image_nm).replace(" ", "_"), dpi = 1000, transparent = True)
         plt.show()
         
     flag = False
@@ -59,12 +59,13 @@ def main():
             theta, classical_reconst, s, error = reconst(img_arr, alp, sample_sz)
             if (save):
                 title = "$\\alpha = {alpha}, sample\_size = {sample_sz}%, error = {err}$".format(alpha = alp, err = error, sample_sz = sample_sz * 100)
+                plt.figure(figsize=(6,6))
                 plt.imshow(classical_reconst, 'gray')
                 plt.clim(0, 255)
                 plt.title(title)
                 plt.axis("off")
                 plt.savefig("../result/{img_nm}/Classical/alpha_reconst/alpha_{alp}_sample_{samp}.png".
-                            format(img_nm = image_nm, alp = alp, samp = sample_sz), dpi = 1000)
+                            format(img_nm = image_nm, alp = alp, samp = sample_sz), dpi = 300, transparent = True)
                 plt.show()
 
     else :
@@ -76,7 +77,7 @@ def main():
             plt.title(title)
             plt.axis("off")
             plt.savefig("../result/{img_nm}/Classical/alpha_reconst/alpha_{alp}_sample_{samp}.png".
-                        format(img_nm = image_nm, alp = alp, samp = sample_sz), dpi = 1000)
+                        format(img_nm = image_nm, alp = alp, samp = sample_sz), dpi = 300, transparent = True)
             plt.show()
 
 main()
