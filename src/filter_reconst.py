@@ -25,8 +25,14 @@ def filter_reconstruction(num_cell, img_arr, cell_size, sparse_freq, filter_dim 
         W = V1_weights(num_cell, filter_dim, cell_size, sparse_freq) 
 
     # Preprocess image and add zeros so the cols and rows would fit to the filter for any size
-    new_n = n + (filt_n - (n % filt_n))
-    new_m = m + (filt_m - (m % filt_m))
+    if n % filt_n != 0 :
+        new_n = n + (filt_n - (n % filt_n))
+    else :
+        new_n = n
+    if m % filt_m != 0 :
+        new_m = m + (filt_m - (m % filt_m))
+    else :
+        new_m = m
 
     img_arr_aug = np.zeros((new_n, new_m))
     img_arr_aug[:n, :m] = img_arr
@@ -36,9 +42,10 @@ def filter_reconstruction(num_cell, img_arr, cell_size, sparse_freq, filter_dim 
     result = np.zeros(img_arr.shape)
     cur_n, cur_m = (0, 0)
     num_work = (new_n * new_m) // (filt_n * filt_m)
+    
     for pt in range(num_work):
-        if (i % (num_work // 5) == 0) :
-            print("iteration", i)
+#         if (i % (num_work // 5) == 0) :
+#             print("iteration", i)
         # Randomize V1 weights for each batch if random_weight param is set to false
         if (rand_weight != True) :
             W = V1_weights(num_cell, filter_dim, cell_size, sparse_freq) 
@@ -53,7 +60,7 @@ def filter_reconstruction(num_cell, img_arr, cell_size, sparse_freq, filter_dim 
 
         y = generate_Y(W, pt)
         W_model = W.reshape(num_cell, filt_n, filt_m)
-        theta, reform, s = compress(W_model, y, alpha)
+        theta, reform, s = reconstruct(W_model, y, alpha)
 
         img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m] = reform
         cur_m = nxt_m
