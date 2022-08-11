@@ -45,7 +45,7 @@ def generate_V1_variables(num_cell, cell_size, sparse_freq, img):
     return W, y
 
 
-def reconstruct(W, y, alpha, fit_intercept = False, color = False):
+def reconstruct(W, y, alpha = None, fit_intercept = False,):
     # Function: reconstruct
     # Parameters:
     ##     W: An opened index for measurement
@@ -59,6 +59,10 @@ def reconstruct(W, y, alpha, fit_intercept = False, color = False):
     ##     s: sparse vector s which is a estimated coefficient generated from LASSO
     sample_sz, n, m = W.shape
     
+    
+    if alpha == None :
+        alpha = 1 * 50 / num_cell
+        
     if fit_intercept:
         raise Exception("fit_intercept = True not implemented")
     
@@ -81,4 +85,30 @@ def reconstruct(W, y, alpha, fit_intercept = False, color = False):
     #return theta, reformed img, sparse vectors
     return theta, reform, s
 
-def color_reconstruct()
+def color_reconstruct(img_arr, num_cell, cell_size, sparse_freq, alpha = None) :
+    if alpha == None :
+        alpha = 1 * 50 / num_cell
+    i = 0
+    dim = img_arr[:,:,i].shape
+
+    W = V1_weights(num_cell, dim, cell_size, sparse_freq) 
+    final = np.zeros(img_arr.shape)
+
+    # with same V1 cells generated, reconstruct images for each of 3 rgb arrays and append to final
+    while (i < 3):
+        img_arr_pt = img_arr[:,:,i]
+        img_arr_pt_dim = img_arr_pt.shape
+        n_pt, m_pt = img_arr_pt_dim
+        y = generate_Y(W, img_arr_pt)
+        W_model = W.reshape(num_cell, n_pt, m_pt)
+        theta, reconst, s = reconstruct(W_model, y, alpha)
+        final[:,:,i] = reconst
+        i+=1
+        
+    final = np.round(final).astype(int)
+    final[final < 0] = 0
+    final[final > 255] = 255
+    final = final.astype(int)
+    return final
+
+        
