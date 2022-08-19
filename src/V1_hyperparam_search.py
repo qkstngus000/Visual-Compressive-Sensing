@@ -1,6 +1,7 @@
 import numpy as np
 import numpy.linalg as la
 import sys
+sys.path.append("../")
 import matplotlib.pyplot as plt
 
 from structured_random_features.src.models.weights import V1_weights
@@ -9,7 +10,7 @@ from structured_random_features.src.models.weights import V1_weights
 # Package for importing image representation
 from PIL import Image, ImageOps
 
-from V1_Compress import generate_Y, compress
+from V1_reconst import generate_Y, reconstruct
 import pandas as pd
 import itertools
 import dask
