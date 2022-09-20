@@ -30,7 +30,7 @@ def run_sim(rep, alp, num, sz, freq, img_arr):
     W_model = W.reshape(num, n, m)
     
     # Call function and calculate error
-    theta, reform, s = compress(W_model, y, alp)
+    theta, reform, s = reconstruct(W_model, y, alp)
     error = np.linalg.norm(img_arr - reform, 'fro') / np.sqrt(m*n)
     
     return error, theta, reform, s
