@@ -13,7 +13,7 @@ def generate_Y(W, img):
     Parameters
     ----------
     W : array_like
-        (num_V1_weights, n*m) shape array. Lists of V1 weights.
+        (num_V1_weights, n*m) shape array. Lists of V1 weights
         
     img : array_like
           (n, m) shape image array
@@ -24,6 +24,8 @@ def generate_Y(W, img):
         Dot product of W and image
     
     '''
+    
+    
     num_cell = W.shape[0]
     n, m = img.shape
     W = W.reshape(num_cell, n*m)
@@ -31,6 +33,31 @@ def generate_Y(W, img):
     return y
 
 def generate_V1_variables(num_cell, cell_size, sparse_freq, img):
+    ''' TODO Function Description
+    
+    Parameters
+    ----------
+    num_cell : int
+        number of blobs that will be used to be determining which pixles to grab and use
+    
+    cell_size : int
+        TODO Description
+        
+    sparse_freq : int
+        TODO Description
+    
+    img : array_like
+          (n, m) shape image array
+    
+    Returns
+    ----------
+    y : vector
+        Dot product of W and image
+    
+    W : array_like
+        (num_V1_weights, n*m) shape array. Lists of V1 weights.
+    
+    '''
     # Get size of image
     dim = np.asanyarray(img).shape
     n, m = dim
@@ -44,8 +71,24 @@ def generate_V1_variables(num_cell, cell_size, sparse_freq, img):
     W = W.reshape(num_cell, dim[0], dim[1])
     return W, y
 
-
+# Depending on basis, make dwt or fft works
 def reconstruct(W, y, alpha = None, fit_intercept = False,):
+    ''' TODO Function Description
+    
+    Parameters
+    ----------
+    W : array_like
+        (num_V1_weights, n*m) shape array. Lists of V1 weights
+        
+    img : array_like
+          (n, m) shape image array
+    
+    Returns
+    ----------
+    y : vector
+        Dot product of W and image
+    
+    '''
     # Function: reconstruct
     # Parameters:
     ##     W: An opened index for measurement
@@ -67,6 +110,12 @@ def reconstruct(W, y, alpha = None, fit_intercept = False,):
         raise Exception("fit_intercept = True not implemented")
     
     ## WΨ
+    #W_reshaped = W.reshape(sample_sz, n, m)
+    theta = np.zeros(sample_sz, n * m)
+    for i in range(sample_sz):
+        theta_i = dwt2(W[i, :, :])
+        theta[i, :] = pywt.ravel_coeffs(theta_i)
+    
     theta = fft.dctn(W.reshape(sample_sz, n, m), norm = 'ortho', axes = [1, 2])
     theta = theta.reshape(sample_sz, n * m)
 
@@ -86,6 +135,23 @@ def reconstruct(W, y, alpha = None, fit_intercept = False,):
     return theta, reform, s
 
 def color_reconstruct(img_arr, num_cell, cell_size, sparse_freq, alpha = None) :
+    ''' TODO Function Description
+    
+    Parameters
+    ----------
+    W : array_like
+        (num_V1_weights, n*m) shape array. Lists of V1 weights
+        
+    img : array_like
+          (n, m) shape image array
+    
+    Returns
+    ----------
+    y : vector
+        Dot product of W and image
+    
+    '''
+    
     if alpha == None :
         alpha = 1 * 50 / num_cell
     i = 0

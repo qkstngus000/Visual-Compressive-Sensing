@@ -7,6 +7,23 @@ import matplotlib.pyplot as plt
 from V1_reconst import reconstruct
 
 def reconst(img_arr, alpha, sample_sz):
+    ''' TODO Function Description
+    
+    Parameters
+    ----------
+    W : array_like
+        (num_V1_weights, n*m) shape array. Lists of V1 weights
+        
+    img : array_like
+          (n, m) shape image array
+    
+    Returns
+    ----------
+    y : vector
+        Dot product of W and image
+    
+    '''
+        
     cn, cm = img_arr.shape
     classical_samp = np.floor(cn * cm * 0.5).astype(int)
     rand_index = np.random.randint(0, cn * cm, classical_samp)
@@ -64,20 +81,20 @@ def main():
                 plt.clim(0, 255)
                 plt.title(title)
                 plt.axis("off")
-                plt.savefig("../result/{img_nm}/Classical/alpha_reconst/alpha_{alp}_sample_{samp}.png".
-                            format(img_nm = image_nm, alp = alp, samp = sample_sz), dpi = 300, transparent = True)
+                plt.savefig("../result/{img_nm}/Classical/alpha_reconst/alpha_{alpha}_sample_{samp}_error_{err: .3f}.png".
+                            format(img_nm = image_nm, alpha = alp, samp = sample_sz, err = error), dpi = 300, transparent = True)
                 plt.show()
 
     else :
         theta, classical_reconst, s, error = reconst(img_arr, alpha, sample_sz)
         if (save):
-            title = "$\\alpha = {alpha}, sample\_size = {sample_sz}%, error = {err}$".format(alpha = alp, sample_sz = sample_sz * 100, err = error)
+            title = "$\\alpha = {alpha}, sample\_size = {sample_sz}%, error = {err}$".format(alpha = alpha, sample_sz = sample_sz * 100, err = error)
             plt.imshow(classical_reconst, 'gray')
             plt.clim(0, 255)
             plt.title(title)
             plt.axis("off")
-            plt.savefig("../result/{img_nm}/Classical/alpha_reconst/alpha_{alp}_sample_{samp}.png".
-                        format(img_nm = image_nm, alp = alp, samp = sample_sz), dpi = 300, transparent = True)
+            plt.savefig("../result/{img_nm}/Classical/alpha_reconst/alpha_{alp}_sample_{samp}_error_{err}.png".
+                        format(img_nm = image_nm, alp = alpha, samp = sample_sz, err = error), dpi = 300, transparent = True)
             plt.show()
 
 main()
