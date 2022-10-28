@@ -8,20 +8,20 @@ from scipy import fftpack as fft
 from sklearn.linear_model import Lasso
 
 def generate_Y(W, img):
-    ''' Fetch image pixel values to V1 weights to generate data for fitting comoress sensing
+    ''' Generate sample y vector variable for data reconstruction using constant matrix W (containing open indices). Function does inner product W matrix with image array to find sample y vector, 
     
     Parameters
     ----------
     W : array_like
-        (num_V1_weights, n*m) shape array. Lists of V1 weights
+        (num_V1_weights/sample_size, n*m) shape array. Lists of weighted data
         
     img : array_like
-          (n, m) shape image array
+          (n, m) shape image containing array of pixels
     
     Returns
     ----------
     y : vector
-        Dot product of W and image
+        (num_V1_weights/sample_size, 1) shape. Dot product of W and image
     
     '''
     
@@ -33,29 +33,29 @@ def generate_Y(W, img):
     return y
 
 def generate_V1_variables(num_cell, cell_size, sparse_freq, img):
-    ''' TODO Function Description
+    ''' Automatically generates variables needed for data reconstruction using V1 weights.
     
     Parameters
     ----------
     num_cell : int
-        number of blobs that will be used to be determining which pixles to grab and use
+        Number of blobs that will be used to be determining which pixles to grab and use
     
     cell_size : int
-        TODO Description
+        Determines field size of opened and closed blob of data. Affect the data training
         
     sparse_freq : int
-        TODO Description
+        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
     
     img : array_like
-          (n, m) shape image array
+          (n, m) shape image containing array of pixels
     
     Returns
     ----------
     y : vector
-        Dot product of W and image
+        (num_V1_weights/sample_size, 1) shape. Dot product of W and image
     
     W : array_like
-        (num_V1_weights, n*m) shape array. Lists of V1 weights.
+        (num_V1_weights, n*m) shape array. Lists of weighted data
     
     '''
     # Get size of image
@@ -73,33 +73,34 @@ def generate_V1_variables(num_cell, cell_size, sparse_freq, img):
 
 # Depending on basis, make dwt or fft works
 def reconstruct(W, y, alpha = None, fit_intercept = False,):
-    ''' TODO Function Description
+    ''' Reconstruct gray-scaled image using sample data fitting into LASSO model
     
     Parameters
     ----------
     W : array_like
-        (num_V1_weights, n*m) shape array. Lists of V1 weights
+        (num_V1_weights, n*m) shape array. Lists of weighted data
         
-    img : array_like
-          (n, m) shape image array
+    y : vector
+        (num_V1_weights/sample_size, 1) shape. Dot product of W and image
+        
+    alpha : float
+        Penalty for fitting data onto LASSO function to search for significant coefficents
+    
+    fit_intercept : bool
+        default set to false to prevent LASSO function to calculate intercept for model
     
     Returns
     ----------
-    y : vector
-        Dot product of W and image
+    theta : array_like
+        (num_V1_weights/sample_size, n * m) shape. Data after discrete fourier transform applied 
     
+    reformed : array_like
+        (n, m) shape array. Reconstructed image pixel array
+        
+    s : vector
+        (num_V1_weights/sample_size, 1) shape. Coefficient value generated from fitting data to LASSO. Contains significant values with most of vector zeroed out.
     '''
-    # Function: reconstruct
-    # Parameters:
-    ##     W: An opened index for measurement
-    ##     y: the value of the opened index W
-    ##     alpha: panelty value to fit for Lasso
-    ##     dim (n, m): image size that needs to be reformed
-
-    # Return:
-    ##     theta: matrix of W when FFT took in place
-    ##     reformed: Reformed image in array
-    ##     s: sparse vector s which is a estimated coefficient generated from LASSO
+    
     sample_sz, n, m = W.shape
     
     
@@ -111,10 +112,11 @@ def reconstruct(W, y, alpha = None, fit_intercept = False,):
     
     ## WΨ
     #W_reshaped = W.reshape(sample_sz, n, m)
-    theta = np.zeros(sample_sz, n * m)
-    for i in range(sample_sz):
-        theta_i = dwt2(W[i, :, :])
-        theta[i, :] = pywt.ravel_coeffs(theta_i)
+#     Possible dwt solution
+#     theta = np.zeros(sample_sz, n * m)
+#     for i in range(sample_sz):
+#         theta_i = dwt2(W[i, :, :])
+#         theta[i, :] = pywt.ravel_coeffs(theta_i)
     
     theta = fft.dctn(W.reshape(sample_sz, n, m), norm = 'ortho', axes = [1, 2])
     theta = theta.reshape(sample_sz, n * m)
@@ -135,20 +137,29 @@ def reconstruct(W, y, alpha = None, fit_intercept = False,):
     return theta, reform, s
 
 def color_reconstruct(img_arr, num_cell, cell_size, sparse_freq, alpha = None) :
-    ''' TODO Function Description
+    ''' Reconstruct colored (RGB) image with sample data
     
     Parameters
     ----------
-    W : array_like
-        (num_V1_weights, n*m) shape array. Lists of V1 weights
-        
-    img : array_like
-          (n, m) shape image array
+    img_arr : numpy_array
+          (n, m) shape image containing array of pixels
+          
+    num_cell : int
+        Number of blobs that will be used to be determining which pixles to grab and use
     
+    cell_size : int
+        Determines field size of opened and closed blob of data. Affect the data training
+        
+    sparse_freq : int
+        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
+      
+    alpha : float
+        Penalty for fitting data onto LASSO function to search for significant coefficents
+
     Returns
     ----------
-    y : vector
-        Dot product of W and image
+    final : numpy_array
+        (n * m) shape array containing reconstructed RGB image array pixels.
     
     '''
     
