@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from PIL import Image, ImageOps
-from V1_reconst import reconstruct, generate_Y
+from src.V1_reconst import reconstruct, generate_Y
 import sys
 
 def gaussian_W(num_cell, img_dim):
@@ -20,7 +20,7 @@ def main():
     alpha_list = [int(i) for i in alpha_list]
     
     # Open image
-    img = Image.open("image/{image}".format(image = file))
+    img = Image.open("../image/{image}".format(image = file))
     img = ImageOps.grayscale(img)
     img_arr = np.asarray(img)
     
@@ -41,4 +41,4 @@ def main():
         print("error is {error}".format(error = error))
     
     
-main()
+# main()
