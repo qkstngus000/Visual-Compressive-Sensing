@@ -87,8 +87,7 @@ def generate_classical_variables(img_arr, sample_size) :
 def gaussian_W(num_cell, img_dim):
     n, m = img_dim
     W = np.zeros((num_cell, n, m))
-    for i in range(num_cell):
-        W[i, :, :] = np.random.randn(n, m)
+    W[:, :, :] = np.random.randn(num_cell, n, m)
     return W
 
 # Error Calculation by Frosbian Norm
@@ -98,7 +97,7 @@ def error_calculation(img_arr, reconst):
     return error
 
 # Reconstruction (Current Methods: Fourier Base Transform, Wavelet Transform)
-def fourier_based(W, y, alpha, sample_sz, n, m, fit_intercept) :
+def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
     theta = fft.dctn(W.reshape(sample_sz, n, m), norm = 'ortho', axes = [1, 2])
     theta = theta.reshape(sample_sz, n * m)
 
@@ -111,7 +110,7 @@ def fourier_based(W, y, alpha, sample_sz, n, m, fit_intercept) :
     reconstruct = fft.idctn(s.reshape(n, m), norm='ortho', axes=[0,1])
     return theta, s, reconstruct
 
-def wavelet_based(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, lv) :
+def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, lv) :
     dwt_sample = wavedecn(W[0], wavelet = dwt_type, level = lv)
     coeff, coeff_slices, coeff_shapes = pywt.ravel_coeffs(dwt_sample)
     theta = np.zeros((len(W), len(coeff)))
@@ -132,7 +131,7 @@ def wavelet_based(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, lv) :
     
     return theta, s_unravel, reconstruct
 
-def reconstruct(W, y, alpha = None, fit_intercept = False, dct = False, dwt = False, dwt_type = None, lv = None):
+def reconstruct(W, y, alpha = None, fit_intercept = False, dct = False, method = 'dct', lv = 4):
     ''' Reconstruct gray-scaled image using sample data fitting into LASSO model
     
     Parameters
@@ -169,10 +168,10 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, dct = False, dwt = Fa
     if fit_intercept:
         raise Exception("fit_intercept = True not implemented")
     
-    if (dct) :
-        theta, s, reconstruct = fourier_based(W, y, sample_sz, n, m, fit_intercept)
-    elif (dwt) :
-        theta, s, reconstruct = wavelet_based(W, y , sample_sz, n, m, fit_intercept, dwt_type, lv)
+    if (method == 'dct) :
+        theta, s, reconstruct = fourier_reconstruct(W, y, sample_sz, n, m, fit_intercept)
+    elif (method == 'dwt') :
+        theta, s, reconstruct = wavelet_reconstruct(W, y , sample_sz, n, m, fit_intercept, dwt_type, lv)
 
         # Reform the image using sparse vector s with inverse descrete cosine
         
