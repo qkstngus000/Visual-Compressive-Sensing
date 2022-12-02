@@ -3,9 +3,14 @@ import sys
 sys.path.append("../")
 from structured_random_features.src.models.weights import V1_weights
 
-# Packages for fft and fitting data
+# Packages for dct, dwt and fitting data
 from scipy import fftpack as fft
+import pywt
+from pywt import wavedecn
 from sklearn.linear_model import Lasso
+
+# Packages for images
+from PIL import Image, ImageOps
 
 # Generate General Variables
 def generate_Y(W, img):
@@ -86,8 +91,7 @@ def generate_classical_variables(img_arr, sample_size) :
 # Generate Gaussian Weights
 def gaussian_W(num_cell, img_dim):
     n, m = img_dim
-    W = np.zeros((num_cell, n, m))
-    W[:, :, :] = np.random.randn(num_cell, n, m)
+    W = np.random.randn(num_cell, n, m)
     return W
 
 # Error Calculation by Frosbian Norm
@@ -131,7 +135,7 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, l
     
     return theta, s_unravel, reconstruct
 
-def reconstruct(W, y, alpha = None, fit_intercept = False, dct = False, method = 'dct', lv = 4):
+def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 4, dwt_type = 'db2'):
     ''' Reconstruct gray-scaled image using sample data fitting into LASSO model
     
     Parameters
@@ -168,7 +172,7 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, dct = False, method =
     if fit_intercept:
         raise Exception("fit_intercept = True not implemented")
     
-    if (method == 'dct) :
+    if (method == 'dct') :
         theta, s, reconstruct = fourier_reconstruct(W, y, sample_sz, n, m, fit_intercept)
     elif (method == 'dwt') :
         theta, s, reconstruct = wavelet_reconstruct(W, y , sample_sz, n, m, fit_intercept, dwt_type, lv)
