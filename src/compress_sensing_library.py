@@ -83,21 +83,22 @@ def generate_classical_variables(img_arr, sample_size) :
     rand_index = np.random.randint(0, n * m, sample)
     y = img_arr.flatten()[rand_index].reshape(sample, 1)
     
-    classical_y = classical_y * np.sqrt(cn * cm)
-    C = np.eye(cn * cm)[rand_index, :] * np.sqrt(cn * cm)
-    C3D = C.reshape(classical_samp, cn, cm)
+    y = y * np.sqrt(n * m)
+    C = np.eye(n * m)[rand_index, :] * np.sqrt(n * m)
+    C3D = C.reshape(sample, n, m)
     return C3D, y
 
 # Generate Gaussian Weights
-def gaussian_W(num_cell, img_dim):
-    n, m = img_dim
+def generate_gaussian_variables(img_arr, num_cell):
+    n, m = img_arr.shape
     W = np.random.randn(num_cell, n, m)
-    return W
+    y = generate_Y(W, img_arr)
+    return W, y
 
 # Error Calculation by Frosbian Norm
 def error_calculation(img_arr, reconst):
     n, m = img_arr.shape
-    error = np.linalg.norm(img_arr - reconst, 'fro') / np.sqrt(cm*cn)
+    error = np.linalg.norm(img_arr - reconst, 'fro') / np.sqrt(m * n)
     return error
 
 # Reconstruction (Current Methods: Fourier Base Transform, Wavelet Transform)
@@ -121,7 +122,7 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, l
     theta[0, :] = coeff 
 
     # Loop the wavedecn to fill theta
-    for i in range(samp):
+    for i in range(sample_sz):
         theta_i = wavedecn(W[i], wavelet= dwt_type, level = lv)
         theta[i, :] = pywt.ravel_coeffs(theta_i)[0]
 
@@ -131,7 +132,7 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, l
     s = mini.coef_
 
     s_unravel = pywt.unravel_coeffs(s, coeff_slices, coeff_shapes)
-    reconstruct = pywt.waverecn(s_unravel, w)
+    reconstruct = pywt.waverecn(s_unravel, dwt_type)
     
     return theta, s_unravel, reconstruct
 
@@ -175,7 +176,7 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
     if (method == 'dct') :
         theta, s, reconstruct = fourier_reconstruct(W, y, sample_sz, n, m, fit_intercept)
     elif (method == 'dwt') :
-        theta, s, reconstruct = wavelet_reconstruct(W, y , sample_sz, n, m, fit_intercept, dwt_type, lv)
+        theta, s, reconstruct = wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, lv)
 
         # Reform the image using sparse vector s with inverse descrete cosine
         
