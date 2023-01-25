@@ -56,12 +56,11 @@ def generate_V1_variables(num_cell, cell_size, sparse_freq, img):
     
     Returns
     ----------
-    y : vector
-        (num_V1_weights/sample_size, 1) shape. Dot product of W and image
-    
     W : array_like
         (num_V1_weights, n*m) shape array. Lists of weighted data
     
+    y : vector
+        (num_V1_weights/sample_size, 1) shape. Dot product of W and image
     '''
     # Get size of image
     dim = np.asanyarray(img).shape
@@ -78,6 +77,25 @@ def generate_V1_variables(num_cell, cell_size, sparse_freq, img):
 
 # Generate Classical Variables
 def generate_classical_variables(img_arr, sample_size) :
+    ''' Generate random pixel arrays with its indexes length of sample size.
+    
+    
+    Parameters
+    ----------
+    img_arr : array_like
+        (n, m) sized data array
+    
+    sample_size : int
+        Number of sample data to be collected
+    
+    Returns
+    ----------
+    C3D : array like
+        (sample_size, n, m) shape array that only has one index open that corresponds to y vector per each (n, m) shape array
+    
+    y : vector
+        Actual value of randomly selected indices
+    '''
     n, m = img_arr.shape
     sample = np.floor(n * m * sample_size).astype(int)
     rand_index = np.random.randint(0, n * m, sample)
@@ -90,6 +108,25 @@ def generate_classical_variables(img_arr, sample_size) :
 
 # Generate Gaussian Weights
 def generate_gaussian_variables(img_arr, num_cell):
+    ''' Generate 3 dimentional arrays. Creates arrays of randomly generated gaussian 2 dimentional arrays as a weight W
+    
+    Parameters
+    ----------
+    img_arr : array_like
+        (n, m) sized data array
+        
+    num_cell : int
+        Number of blobs that will be used to be determining which pixles to grab and use
+        
+    Returns
+    ----------
+    W : array_like
+        (num_V1_weights, n*m) shape array. Lists of gaussian weighted data
+    
+    y : vector
+        (num_V1_weights/sample_size, 1) shape. Dot product of W and image
+    '''
+    
     n, m = img_arr.shape
     W = np.random.randn(num_cell, n, m)
     y = generate_Y(W, img_arr)
@@ -97,12 +134,64 @@ def generate_gaussian_variables(img_arr, num_cell):
 
 # Error Calculation by Frosbian Norm
 def error_calculation(img_arr, reconst):
+    ''' Compute mean error per each data using frosbian norm
+        
+    Parameters
+    ----------
+    img_arr : array_like
+        (n, m) shape array of actual dataset
+    
+    
+    reconst : array_like
+        (n, m) shape array of reconstructed array
+    
+    Returns
+    ----------
+    error : float
+        Computed normalized error value per each pixel
+    '''
     n, m = img_arr.shape
     error = np.linalg.norm(img_arr - reconst, 'fro') / np.sqrt(m * n)
     return error
 
 # Reconstruction (Current Methods: Fourier Base Transform, Wavelet Transform)
 def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
+    ''' Reconstruct signals through cosine transform
+    
+    Parameters
+    ----------
+    W : array_like
+        (num_V1_weights, n*m) shape array. Lists of weighted data
+        
+    y : vector
+        (num_V1_weights/sample_size, 1) shape. Dot product of W and image
+        
+    alpha : float
+        Penalty for fitting data onto LASSO function to search for significant coefficents
+    
+    sample_sz : int
+        Number of sample collected
+    
+    n : int
+        Height of each data
+    
+    m : int
+        Width of each data
+    
+    fit_intercept : bool
+        default set to false to prevent LASSO function to calculate intercept for model
+        
+    Returns
+    ----------
+    theta : array_like
+        (num_V1_weights/sample_size, n * m) shape. Data after discrete fourier transform applied 
+    
+    reconstruct : array_like
+        (n, m) shape array. Reconstructed image pixel array
+        
+    s : vector
+        (num_V1_weights/sample_size, 1) shape. Coefficient value generated from fitting data to LASSO. Contains significant values with most of vector zeroed out.
+    '''
     theta = fft.dctn(W.reshape(sample_sz, n, m), norm = 'ortho', axes = [1, 2])
     theta = theta.reshape(sample_sz, n * m)
 
@@ -116,6 +205,50 @@ def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
     return theta, s, reconstruct
 
 def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, lv) :
+    ''' Reconstruct signals through wavelet transform
+    
+    Parameters
+    ----------
+    W : array_like
+        (num_V1_weights, n*m) shape array. Lists of weighted data
+        
+    y : vector
+        (num_V1_weights/sample_size, 1) shape. Dot product of W and image
+        
+    alpha : float
+        Penalty for fitting data onto LASSO function to search for significant coefficents
+    
+    sample_sz : int
+        Number of sample collected
+    
+    n : int
+        Height of each data
+    
+    m : int
+        Width of each data
+    
+    fit_intercept : bool
+        default set to false to prevent LASSO function to calculate intercept for model
+    
+    dwt_type : String
+        type of dwt method to be used
+        ex)'haar', 'db1', 'db2', ...
+        
+    lv : int
+        Generate level of signal frequencies when dwt is used
+        
+    Returns
+    ----------
+        theta : array_like
+        (num_V1_weights/sample_size, n * m) shape. Data after discrete fourier transform applied 
+    
+    reconstruct : array_like
+        (n, m) shape array. Reconstructed image pixel array
+        
+    s_unravel : vector
+        (num_V1_weights/sample_size, 1) shape. Coefficient value generated from fitting data to LASSO. Contains significant values with most of vector zeroed out.
+    '''
+    
     dwt_sample = wavedecn(W[0], wavelet = dwt_type, level = lv)
     coeff, coeff_slices, coeff_shapes = pywt.ravel_coeffs(dwt_sample)
     theta = np.zeros((len(W), len(coeff)))
@@ -134,7 +267,7 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, l
     s_unravel = pywt.unravel_coeffs(s, coeff_slices, coeff_shapes)
     reconstruct = pywt.waverecn(s_unravel, dwt_type)
     
-    return theta, s_unravel, reconstruct
+    return theta, reconstruct, s_unravel
 
 def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 4, dwt_type = 'db2'):
     ''' Reconstruct gray-scaled image using sample data fitting into LASSO model
@@ -153,12 +286,24 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
     fit_intercept : bool
         default set to false to prevent LASSO function to calculate intercept for model
     
+    method : String
+        Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+        Default set to dct
+        
+    lv : int
+        Generate level of signal frequencies when dwt is used
+        Default set to 4
+        
+    dwt_type : String
+        type of dwt method to be used
+        Default set to db2
+        
     Returns
     ----------
     theta : array_like
         (num_V1_weights/sample_size, n * m) shape. Data after discrete fourier transform applied 
     
-    reformed : array_like
+    reconstruct : array_like
         (n, m) shape array. Reconstructed image pixel array
         
     s : vector
@@ -185,3 +330,74 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
     
     #return theta, reformed img, sparse vectors
     return theta, reconstruct, s
+
+def filter_reconstruction(num_cell, img_arr, cell_size, sparse_freq, filter_dim = (30, 30), alpha = None, rand_weight = False) :
+    ''' 
+    Parameters
+    ----------
+    
+    
+    Returns
+    ----------
+    
+    '''
+    #alpha parameter is dependent on the number of cell if alpha is not specified
+    if (alpha == None) :
+        alpha = 1 * 50 / num_cell
+    
+    # Retrieve image dimension
+    n, m = img_arr.shape
+    
+    # Create Filter
+    filt = np.zeros(filter_dim)
+    filt_n, filt_m = filter_dim
+        
+    # Fix the V1 weights if the random_weight parameter is set to be true
+    if (rand_weight == True):
+        W = V1_weights(num_cell, filter_dim, cell_size, sparse_freq) 
+
+    # Preprocess image and add zeros so the cols and rows would fit to the filter for any size
+    if n % filt_n != 0 :
+        new_n = n + (filt_n - (n % filt_n))
+    else :
+        new_n = n
+    if m % filt_m != 0 :
+        new_m = m + (filt_m - (m % filt_m))
+    else :
+        new_m = m
+
+    img_arr_aug = np.zeros((new_n, new_m))
+    img_arr_aug[:n, :m] = img_arr
+
+    print(img_arr_aug.shape)
+    i = 1 # counter
+    result = np.zeros(img_arr.shape)
+    cur_n, cur_m = (0, 0)
+    num_work = (new_n * new_m) // (filt_n * filt_m)
+    
+    for pt in range(num_work):
+#         if (i % (num_work // 5) == 0) :
+#             print("iteration", i)
+        # Randomize V1 weights for each batch if random_weight param is set to false
+        if (rand_weight != True) :
+            W = V1_weights(num_cell, filter_dim, cell_size, sparse_freq) 
+
+        # keep track over height of the batches
+        if (cur_m >= new_m) :
+            cur_n += filt_n
+            cur_m = 0
+
+        nxt_m = cur_m + filt_m
+        pt = img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m]
+
+        y = generate_Y(W, pt)
+        W_model = W.reshape(num_cell, filt_n, filt_m)
+        theta, reform, s = reconstruct(W_model, y, alpha)
+
+        img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m] = reform
+        cur_m = nxt_m
+
+        i+=1
+
+    result = img_arr_aug[:n,:m]
+    return result
