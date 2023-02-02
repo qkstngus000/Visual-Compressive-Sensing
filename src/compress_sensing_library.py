@@ -313,7 +313,7 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
     sample_sz, n, m = W.shape
       
     if alpha == None :
-        alpha = 1 * 50 / num_cell
+        alpha = 1 * 50 / sample_sz
         
     if fit_intercept:
         raise Exception("fit_intercept = True not implemented")
@@ -321,7 +321,7 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
     if (method == 'dct') :
         theta, s, reconstruct = fourier_reconstruct(W, y, sample_sz, n, m, fit_intercept)
     elif (method == 'dwt') :
-        theta, s, reconstruct = wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, lv)
+        theta, reconstruct, s = wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, lv)
 
         # Reform the image using sparse vector s with inverse descrete cosine
         
