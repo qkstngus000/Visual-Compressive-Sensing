@@ -97,13 +97,13 @@ def generate_classical_variables(img_arr, sample_size) :
         Actual value of randomly selected indices
     '''
     n, m = img_arr.shape
-    sample = np.floor(n * m * sample_size).astype(int)
-    rand_index = np.random.randint(0, n * m, sample)
-    y = img_arr.flatten()[rand_index].reshape(sample, 1)
+#     sample = np.floor(n * m * sample_size).astype(int)
+    rand_index = np.random.randint(0, n * m, sample_size)
+    y = img_arr.flatten()[rand_index].reshape(sample_size, 1)
     
     y = y * np.sqrt(n * m)
     C = np.eye(n * m)[rand_index, :] * np.sqrt(n * m)
-    C3D = C.reshape(sample, n, m)
+    C3D = C.reshape(sample_size, n, m)
     return C3D, y
 
 # Generate Gaussian Weights
