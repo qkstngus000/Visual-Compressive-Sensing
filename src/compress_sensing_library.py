@@ -8,9 +8,22 @@ from scipy import fftpack as fft
 import pywt
 from pywt import wavedecn
 from sklearn.linear_model import Lasso
+from pathlib import Path
 
 # Packages for images
 from PIL import Image, ImageOps
+
+def fig_save_path(img_nm, method, observation, save_nm):
+    save_nm = save_nm.replace(" ", "_")
+    Path("../figures/{method}/{img_nm}/{observation}".format(
+        method = method, img_nm = img_nm, observation = observation)).mkdir(parents=True, exist_ok = True)
+    return "../figures/{method}/{img_nm}/{observation}/{save_nm}.png".format(
+        method = method, img_nm = img_nm, observation = observation, save_nm = save_nm)
+
+def data_save_path(img_nm, method, observation, save_nm): 
+    save_nm = save_nm.replace(" ", "_")
+    return "../result/{method}/{img_nm}/{observation}/{save_nm}.csv".format(
+        method = method, img_nm = img_nm, observation = observation, save_nm = save_nm)
 
 # Generate General Variables
 def generate_Y(W, img):
@@ -249,14 +262,14 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, l
         (num_V1_weights/sample_size, 1) shape. Coefficient value generated from fitting data to LASSO. Contains significant values with most of vector zeroed out.
     '''
     
-    dwt_sample = wavedecn(W[0], wavelet = dwt_type, level = lv)
+    dwt_sample = wavedecn(W[0], wavelet = dwt_type, level = lv, mode = 'zero')
     coeff, coeff_slices, coeff_shapes = pywt.ravel_coeffs(dwt_sample)
     theta = np.zeros((len(W), len(coeff)))
     theta[0, :] = coeff 
 
     # Loop the wavedecn to fill theta
     for i in range(sample_sz):
-        theta_i = wavedecn(W[i], wavelet= dwt_type, level = lv)
+        theta_i = wavedecn(W[i], wavelet= dwt_type, level = lv, mode = 'zero')
         theta[i, :] = pywt.ravel_coeffs(theta_i)[0]
 
     mini = Lasso(alpha = alpha, fit_intercept = False)
@@ -265,7 +278,7 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, l
     s = mini.coef_
 
     s_unravel = pywt.unravel_coeffs(s, coeff_slices, coeff_shapes)
-    reconstruct = pywt.waverecn(s_unravel, dwt_type)
+    reconstruct = pywt.waverecn(s_unravel, dwt_type, mode = 'zero')
     
     return theta, reconstruct, s_unravel
 
@@ -319,7 +332,7 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
         raise Exception("fit_intercept = True not implemented")
     
     if (method == 'dct') :
-        theta, s, reconstruct = fourier_reconstruct(W, y, sample_sz, n, m, fit_intercept)
+        theta, s, reconstruct = fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept)
     elif (method == 'dwt') :
         theta, reconstruct, s = wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, lv)
 
