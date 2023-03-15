@@ -1,13 +1,12 @@
 import numpy as np
-
-# Packages for fft and fitting data
-from scipy import fftpack as fft
-from sklearn.linear_model import Lasso
+import sys
+# sys.path.append("../")
+from pathlib import Path
 
 # Package for importing image representation
 from PIL import Image, ImageOps
 
-from V1_reconst import reconstruct
+from compress_sensing_library import reconstruct
 
 import pandas as pd
 import itertools
@@ -15,7 +14,6 @@ import dask
 from dask.distributed import Client, progress
 import time
 import os.path
-import sys
 
 
 def search(img_arr, repetition = 20, alpha = np.logspace(-3, 3, 7), classical_samp_list = [50, 100, 200, 500]):

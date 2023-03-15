@@ -4,13 +4,11 @@ import sys
 sys.path.append("../")
 import matplotlib.pyplot as plt
 
-from structured_random_features.src.models.weights import V1_weights
-
 
 # Package for importing image representation
 from PIL import Image, ImageOps
 
-from V1_reconst import generate_Y, reconstruct
+from compress_sensing_library import generate_Y, reconstruct
 import pandas as pd
 import itertools
 import dask
@@ -39,7 +37,7 @@ def run_sim(rep, alp, num, sz, freq, img_arr):
 def main() :
     # Set up hyperparameters that would affect results
     file = sys.argv[1]
-        
+    print(sys.argv[2] == None)
     image_path ='../image/{img}'.format(img = file)
     delay_list = []
     params = []
