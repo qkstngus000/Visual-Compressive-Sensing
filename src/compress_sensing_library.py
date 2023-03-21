@@ -22,6 +22,9 @@ def fig_save_path(img_nm, method, observation, save_nm):
 
 def data_save_path(img_nm, method, observation, save_nm): 
     save_nm = save_nm.replace(" ", "_")
+    Path("../result/{method}/{img_nm}/{observation}".format(
+        method = method, img_nm = img_nm, observation = observation)).mkdir(parents=True, exist_ok = True)
+         
     return "../result/{method}/{img_nm}/{observation}/{save_nm}.csv".format(
         method = method, img_nm = img_nm, observation = observation, save_nm = save_nm)
 
@@ -50,11 +53,14 @@ def generate_Y(W, img):
     y = W @ img.reshape(n * m, 1)
     return y
 
-def generate_V1_variables(num_cell, cell_size, sparse_freq, img):
+def generate_V1_variables(img_arr, num_cell, cell_size, sparse_freq):
     ''' Automatically generates variables needed for data reconstruction using V1 weights.
     
     Parameters
-    ----------
+    ----------    
+    img_arr : array_like
+          (n, m) shape image containing array of pixels
+          
     num_cell : int
         Number of blobs that will be used to be determining which pixles to grab and use
     
@@ -63,9 +69,7 @@ def generate_V1_variables(num_cell, cell_size, sparse_freq, img):
         
     sparse_freq : int
         Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
-    
-    img : array_like
-          (n, m) shape image containing array of pixels
+
     
     Returns
     ----------
@@ -76,13 +80,13 @@ def generate_V1_variables(num_cell, cell_size, sparse_freq, img):
         (num_V1_weights/sample_size, 1) shape. Dot product of W and image
     '''
     # Get size of image
-    dim = np.asanyarray(img).shape
+    dim = np.asanyarray(img_arr).shape
     n, m = dim
     # Store generated V1 cells in W
     W = V1_weights(num_cell, dim, cell_size, sparse_freq) 
     
     # Retrieve y from W @ imgArr
-    y = W @ img.reshape(n*m, 1)
+    y = W @ img_arr.reshape(n*m, 1)
 
     # Resize W to shape (num_cell, height of image, width of image) for fetching into function
     W = W.reshape(num_cell, dim[0], dim[1])
