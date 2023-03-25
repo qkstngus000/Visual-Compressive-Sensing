@@ -16,6 +16,51 @@ import time
 import os.path
 
 def process_input(argv) :
+    param_dict = {}
+    
+    if (len(sys.argv) != 10):
+        print("All input required. If you want it as basic, put 'n'")
+        sys.exit(0)
+    else :
+        if (sys.argv[1] == "help" or sys.argv[1] == "-h"):
+            print(
+                '''Usage
+                arg[1] = img_name ex)tree_part1.jpg
+                arg[2] = method ex) dct, dwt
+                arg[3] = dwt_type ex) n (none for dct), harr, db1, db2, etc
+                arg[4] = lv ex) n (none for dct), [1, 2, 3, 4, 5]
+                arg[5] = observation_type ex)classical, V1, gaussian
+                arg[6] = alpha_list ex) [0.001, 0.01, 0.1]
+                arg[7] = num_cell list ex) [50, 100, 200, 500]
+                arg[8] = cell_size list ex) [1, 2, 4, 8, 10]
+                arg[9] = sparse_freq ex) [1, 2, 4, 8, 10]
+                '''
+                )
+                  
+            sys.exit(0)
+    
+    param_dict[1] = sys.argv[1]
+    
+    # Transform String list argument into readable int list
+    process_input(sys.argv)
+    if (len(sys.argv) >= 4):
+        for i in range(4, len(sys.argv)):
+            lst = list(argv[1].strip('[]').replace(" ", "").split(','))
+            lst = list(map(lambda x: int(x) , lst))
+            param_dict[i] = lst
+    
+    file, method, observation, alpha, num_cell, cell_sz, sparse_freq = param_dict.values()
+    
+    #Make sure the data type input is in correct format
+    assert type(file) == str
+    assert type(method) == str
+    assert type(observation) == str
+    #assert type(alpha) == list
+    assert type(num_cell) == list
+    assert type(cell_sz) == list
+    assert type(sparse_freq) == list
+    
+    return
     
 def run_sim(method, observation, rep, alpha, num_cell, lv =  img_arr):
     dim = img_arr.shape
@@ -47,57 +92,25 @@ def run_sim(method, observation, rep, alpha, num_cell, lv =  img_arr):
 def main() :
     '''
     arg[1] = img_name ex)tree_part1.jpg
-    arg[2] = method ex)dct, dwt
-    arg[3] = observation_type ex)classical, V1, gaussian
-    arg[4] = alpha_list ex) [0.001, 0.01, 0.1]
-    arg[5] = num_cell list ex) [50, 100, 200, 500]
-    arg[6] = cell_size list ex) [1, 2, 4, 8, 10]
-    arg[7] = sparse_freq ex) [1, 2, 4, 8, 10]
+    arg[2] = method ex) dct, dwt
+    arg[3] = dwt_type ex) n (none for dct), harr, db1, db2, etc
+    arg[4] = lv ex) n (none for dct), [1, 2, 3, 4, 5]
+    arg[5] = observation_type ex)classical, V1, gaussian
+    arg[6] = alpha_list ex) [0.001, 0.01, 0.1]
+    arg[7] = num_cell list ex) [50, 100, 200, 500]
+    arg[8] = cell_size list ex) [1, 2, 4, 8, 10]
+    arg[9] = sparse_freq ex) [1, 2, 4, 8, 10]
     '''
     # Set up hyperparameters that would affect results
     param_dict = {
-        1 : None, 
-        2 : 'dct',
-        3 : 'classical', 
-        4 : np.logspace(-3, 3, 7),
-        5 : [50, 100, 200, 500], 
-        6 : [2, 5, 7],
-        7 : [1, 2, 5]
+        #1 : None, 
+        #2 : 'dct',
+        #3 : 'classical', 
+        #4 : np.logspace(-3, 3, 7),
+        #5 : [50, 100, 200, 500], 
+        #6 : [2, 5, 7],
+        #7 : [1, 2, 5]
     }
-    if (len(sys.argv) < 1):
-        print("File Name at least required");
-    else :
-        if (sys.argv[1] == "help" or sys.argv[1] == "-h"):
-            print("Usage \n \
-                 arg[1] = img_name ex)tree_part1.jpg \n \
-                 arg[2] = method ex)dct, dwt\n \
-                 arg[3] = observation_type ex)classical, V1, gaussian\n \
-                 arg[4] = alpha_list ex) [0.001, 0.01, 0.1]\n \
-                 arg[5] = num_cell list ex) [50, 100, 200, 500]\n \
-                 arg[6] = cell_size list ex) [1, 2, 4, 8, 10]\n \
-                 arg[7] = sparse_freq ex) [1, 2, 4, 8, 10]")
-                  
-            sys.exit(0)
-    
-    param_dict[1] = sys.argv[1]
-    
-    # Transform String list argument into readable int list
-    if (len(sys.argv) >= 4):
-        for i in range(4, len(sys.argv)):
-            lst = list(argv[1].strip('[]').replace(" ", "").split(','))
-            lst = list(map(lambda x: int(x) , lst))
-            param_dict[i] = lst
-    
-    file, method, observation, alpha, num_cell, cell_sz, sparse_freq = param_dict.values()
-    
-    #Make sure the data type input is in correct format
-    assert type(file) == str
-    assert type(method) == str
-    assert type(observation) == str
-    #assert type(alpha) == list
-    assert type(num_cell) == list
-    assert type(cell_sz) == list
-    assert type(sparse_freq) == list
     
     
     image_path ='../image/{img}'.format(img = file)
