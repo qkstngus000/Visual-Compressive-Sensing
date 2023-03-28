@@ -90,16 +90,8 @@ def main() :
     
     file, method, observation, alpha, num_cell, cell_sz, sparse_freq = param_dict.values()
     
-    #Make sure the data type input is in correct format
-    assert type(file) == str
-    assert type(method) == str
-    assert type(observation) == str
-    #assert type(alpha) == list
-    assert type(num_cell) == list
-    assert type(cell_sz) == list
-    assert type(sparse_freq) == list
-    
-    
+
+
     image_path ='../image/{img}'.format(img = file)
     delay_list = []
     params = []
@@ -119,18 +111,19 @@ def main() :
     
     if (observation.lower() == 'classical' or observation.lower() == 'gaussian') :
         search_list = [rep, alpha, num_cell]
+        col_list = ['rep', 'alp', 'num_cell']
 
         # All combinations of hyperparameter to try 
         search = list(itertools.product(*search_list))             
-        search_df = pd.DataFrame(search, columns= [ 'rep', 'alp', 'num_cell'])
+        search_df = pd.DataFrame(search, columns= col_list)
         print(search_df.head())
     
     elif (observation.upper() == 'V1'):
         search_list = [rep, alpha, num_cell, cell_sz, sparse_freq]
-
+        col_list = ['rep', 'alp', 'num_cell', 'cell_sz', 'sparse_freq']
         # All combinations of hyperparameter to try 
         search = list(itertools.product(*search_list))             
-        search_df = pd.DataFrame(search, columns= [ 'rep', 'alp', 'num_cell', 'cell_sz', 'sparse_freq'])
+        search_df = pd.DataFrame(search, columns= col_list)
         print(search_df.head())
     else :
         print("The observation {observation} is currently not supported. Please try valid observation type.".format(
