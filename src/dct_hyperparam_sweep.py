@@ -15,7 +15,87 @@ from dask.distributed import Client, progress
 import time
 import os.path
 
+def usage():
+    print(
+        '''Usage
+        arg[1] = img_name ex)tree_part1.jpg
+        arg[2] = method ex) dct, dwt
+        arg[3] = dwt_type ex) n (none for dct), harr, db1, db2, etc
+        arg[4] = lv ex) n (none for dct), [1, 2, 3, 4, 5]
+        arg[5] = observation_type ex)classical, V1, gaussian
+        arg[6] = alpha_list ex) [0.001, 0.01, 0.1]
+        arg[7] = num_cell list ex) [50, 100, 200, 500]
+        arg[8] = cell_size list ex) [1, 2, 4, 8, 10]
+        arg[9] = sparse_freq ex) [1, 2, 4, 8, 10]
+        '''
+    )
+    sys.exit(0)
+
+def parse_input(i, argv):
+    default = {
+        2 : 'dct',
+        3 : 'db2',
+        4 : 4,
+        5 : 'classical',
+        6 : [0.001, 0.01, 0.1],
+        7 : [50, 100, 200, 500],
+        8 : np.arange(1, 10, 1),
+        9 : np.arange(1, 10, 1)
+        }
+    if (i != 1 and argv[i] == 'n'):
+        return default[i]
+    
+    if (i == 1):
+        assert argv[i] != 'n'
+        return argv[i]
+    elif (i == 2):
+        return argv[i]
+    elif (i == 3) :
+        lst = list(argv[i].strip('[]').replace(" ", "").split(','))
+        
+    elif (i == 5):
+        return argv[i]
+    
+    elif (i == 6):
+        lst = list(argv[i].strip('[]').replace(" ", "").split(','))
+        lst = list(map(lambda x: float(x) , lst))
+        
+    else:
+        lst = list(argv[i].strip('[]').replace(" ", "").split(','))
+        lst = list(map(lambda x: int(x) , lst))
+        
+    if ((type(lst) == list or type(lst).__module__ == np.__name__) and len(lst) == 1):
+        return lst[0]
+    else:
+        return lst
+    
 def process_input(argv) :
+    param_dict = {}
+        param_dict = {
+        1 : None, 
+        2 : 'dct',
+        3 : 'classical', 
+        4 : np.logspace(-3, 3, 7),
+        5 : [50, 100, 200, 500], 
+        6 : [2, 5, 7],
+        7 : [1, 2, 5]
+    }
+    if (argv[1] == "help" or argv[1] == "-h"):
+        usage()
+        
+    elif (len(sys.argv) != 10):
+        print("All input required. If you want it as basic, put 'n'")
+        usage()    
+    
+    # Transform String list argument into readable int list
+    for i in range(1, len(argv)):
+        param_dict[i] = parse_input(i, argv)
+    print(param_dict)
+    
+    file, method, dwt_type, lv, observation, alpha, num_cell, cell_sz, sparse_freq = param_dict.values()
+    
+
+    return param_dict.values()
     
 def run_sim(method, observation, rep, alpha, num_cell, lv =  img_arr):
     dim = img_arr.shape
@@ -45,57 +125,26 @@ def run_sim(method, observation, rep, alpha, num_cell, lv =  img_arr):
     return error, theta, reconst, s
 
 def main() :
-    '''
-    arg[1] = img_name ex)tree_part1.jpg
-    arg[2] = method ex)dct, dwt
-    arg[3] = observation_type ex)classical, V1, gaussian
-    arg[4] = alpha_list ex) [0.001, 0.01, 0.1]
-    arg[5] = num_cell list ex) [50, 100, 200, 500]
-    arg[6] = cell_size list ex) [1, 2, 4, 8, 10]
-    arg[7] = sparse_freq ex) [1, 2, 4, 8, 10]
+    '''Usage
+        arg[1] = img_name ex)tree_part1.jpg
+        arg[2] = method ex) dct, dwt
+        arg[3] = dwt_type ex) n (none for dct), harr, db1, db2, etc
+        arg[4] = lv ex) n (none for dct), [1, 2, 3, 4, 5]
+        arg[5] = observation_type ex)classical, V1, gaussian
+        arg[6] = alpha_list ex) [0.001, 0.01, 0.1]
+        arg[7] = num_cell list ex) [50, 100, 200, 500]
+        arg[8] = cell_size list ex) [1, 2, 4, 8, 10]
+        arg[9] = sparse_freq ex) [1, 2, 4, 8, 10]
     '''
     # Set up hyperparameters that would affect results
-    param_dict = {
-        1 : None, 
-        2 : 'dct',
-        3 : 'classical', 
-        4 : np.logspace(-3, 3, 7),
-        5 : [50, 100, 200, 500], 
-        6 : [2, 5, 7],
-        7 : [1, 2, 5]
-    }
-    if (len(sys.argv) < 1):
-        print("File Name at least required");
-    else :
-        if (sys.argv[1] == "help" or sys.argv[1] == "-h"):
-            print("Usage \n \
-                 arg[1] = img_name ex)tree_part1.jpg \n \
-                 arg[2] = method ex)dct, dwt\n \
-                 arg[3] = observation_type ex)classical, V1, gaussian\n \
-                 arg[4] = alpha_list ex) [0.001, 0.01, 0.1]\n \
-                 arg[5] = num_cell list ex) [50, 100, 200, 500]\n \
-                 arg[6] = cell_size list ex) [1, 2, 4, 8, 10]\n \
-                 arg[7] = sparse_freq ex) [1, 2, 4, 8, 10]")
-                  
-            sys.exit(0)
-    
-    param_dict[1] = sys.argv[1]
-    
-    # Transform String list argument into readable int list
-    if (len(sys.argv) >= 4):
-        for i in range(4, len(sys.argv)):
-            lst = list(argv[1].strip('[]').replace(" ", "").split(','))
-            lst = list(map(lambda x: int(x) , lst))
-            param_dict[i] = lst
-    
-    file, method, observation, alpha, num_cell, cell_sz, sparse_freq = param_dict.values()
+    file, method, dwt_type, lv, observation, alpha, num_cell, cell_sz, sparse_freq = process_input(argv)
     
 
 
     image_path ='../image/{img}'.format(img = file)
     delay_list = []
     params = []
-    alpha = np.logspace(-3, 3, 7)
+    #alpha = np.logspace(-3, 3, 7)
     rep = np.arange(20)
 
 
