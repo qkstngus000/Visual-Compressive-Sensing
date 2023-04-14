@@ -32,6 +32,9 @@ def usage():
     sys.exit(0)
 
 def parse_input(i, argv):
+    ''' Parse the input given from the argument and convert them into correct data type
+    
+    '''
     default = {
         2 : 'dct',
         3 : 'db2',
