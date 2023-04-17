@@ -30,13 +30,14 @@ def usage():
 
 def parse_input(i, argv):
     default = {
-        1 : 'tree_part1.jpg'
+        1 : 'tree_part1.jpg',
         2 : 'classical',
-        3 : [0.001, 0.01, 0.1],
+        3 : np.logspace(-3, 3, 7),
         4 : [50, 100, 200, 500],
-        5 : np.arange(1, 10, 1),
-        6 : np.arange(1, 10, 1)
+        5 : np.arange(1, 11, 1),
+        6 : np.arange(1, 11, 1)
         }
+    print("In parse_input, 5 and 6 is " + default[5])
     if (i != 1 and argv[i] == 'n'):
         return default[i]
     
@@ -64,7 +65,7 @@ def process_input(argv) :
         usage()
         sys.exit(0)
         
-    elif (len(sys.argv) != 10):
+    elif (len(sys.argv) != 7):
         print("All input required. If you want it as basic, put 'n'")
         usage()    
     
@@ -72,20 +73,20 @@ def process_input(argv) :
     for i in range(1, len(argv)):
         param_dict[i] = parse_input(i, argv)
     print(param_dict)
-    file, method, observation, alpha, num_cell, cell_sz, sparse_freq = param_dict.values()
-    
+    img, observation, alpha, num_cell, cell_sz, sparse_freq = param_dict.values()
+    print()
     #Make sure the data type input is in correct format
-#     assert type(file) == str
-#     assert type(method) == str
-#     assert type(observation) == str
-#     #assert type(alpha) == list
-#     assert type(num_cell) == list
-#     assert type(cell_sz) == list
-#     assert type(sparse_freq) == list
+    assert type(img) == str
+    assert type(observation) == str
+    assert (type(alpha) == list or type(alpha) == int or type(alpha) == float)
+    assert (type(num_cell) == list or type(num_cell) == int)
+    assert (type(cell_sz) == list or type(cell_sz) == int)
+    assert (type(sparse_freq) == list or type(sparse_freq) == float)
     
-    return
+    return img, observation, alpha, num_cell, cell_sz, sparse_freq
     
-def run_sim(method, observation, rep, alpha, num_cell, lv =  img_arr):
+def run_sim(method, observation, rep, alpha, num_cell, img_arr):
+    print("Validating input in run_sim. method = " + method + ", observation = " + observation + ", alpha = " + alpha + ", num_cell = " + num_cell + ", img_arr size" + img_arr.shape)
     dim = img_arr.shape
     n, m = dim
     # Deal with fraction num_cell amount
@@ -135,11 +136,12 @@ def main() :
         #7 : [1, 2, 5]
     }
     
-    
-    image_path ='../image/{img}'.format(img = file)
+    img, observation, alpha_list, num_cell, cell_size, sparse_freq = process_input(sys.argv)
+    sys.exit(0)
+    image_path ='../image/{img}'.format(img = img)
     delay_list = []
     params = []
-    alpha = np.logspace(-3, 3, 7)
+#     alpha = np.logspace(-3, 3, 7)
     rep = np.arange(20)
 
 
