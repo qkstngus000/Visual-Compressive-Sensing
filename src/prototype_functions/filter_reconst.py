@@ -1,13 +1,12 @@
 
 import numpy as np
 import sys
-sys.path.append("../")
-from structured_random_features.src.models.weights import V1_weights
-from src.V1_reconst import generate_Y, reconstruct
+#sys.path.append("../")
+from src.compress_sensing_library import generate_Y, reconstruct
 import os.path
 
 
-def filter_reconstruction(num_cell, img_arr, cell_size, sparse_freq, filter_dim = (30, 30), alpha = None, rand_weight = False) :
+def filter_reconstruct(num_cell, img_arr, cell_size, sparse_freq, filter_dim = (30, 30), alpha = None, rand_weight = False) :
     
     #alpha parameter is dependent on the number of cell if alpha is not specified
     if (alpha == None) :

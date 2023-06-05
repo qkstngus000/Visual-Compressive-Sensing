@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 
+
+# python command : python3 input_process_exp.py tree_part1.jpg dct db1 4 classical "[0.001, 0.01, 0.1, 1, 10]" "[50, 100, 150, 200, 300, 500]" "[1, 2, 4, 8, 10]" "[1, 2, 4, 8, 10]"
 def usage():
     print(
         '''Usage
@@ -60,6 +62,7 @@ def process_input(argv) :
     
     if (argv[1] == "help" or argv[1] == "-h"):
         usage()
+        sys.exit(0)
         
     elif (len(sys.argv) != 10):
         print("All input required. If you want it as basic, put 'n'")
@@ -90,7 +93,7 @@ def main():
     if (True):
         lst = 1
     print(lst)
-#     process_input(sys.argv)
+    process_input(sys.argv)
     
     return 0;
 if __name__ == "__main__":

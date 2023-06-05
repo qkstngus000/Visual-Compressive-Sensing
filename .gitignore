@@ -1,1 +1,5 @@
+/result
 result_*
+/dask-worker-space
+src/dask-worker-space/
+experiment/dask-worker-space

@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+import os
 sys.path.append("../")
 from structured_random_features.src.models.weights import V1_weights
 
@@ -13,20 +14,53 @@ from pathlib import Path
 # Packages for images
 from PIL import Image, ImageOps
 
+def search_root():
+    back_path = './'
+    root = Path(os.path.abspath('./'))
+    while not root.match('*/research'):
+        back_path += '../'
+        root = Path(os.path.abspath(back_path))
+    return root
+
 def fig_save_path(img_nm, method, observation, save_nm):
     save_nm = save_nm.replace(" ", "_")
-    Path("../figures/{method}/{img_nm}/{observation}".format(
-        method = method, img_nm = img_nm, observation = observation)).mkdir(parents=True, exist_ok = True)
-    return "../figures/{method}/{img_nm}/{observation}/{save_nm}.png".format(
-        method = method, img_nm = img_nm, observation = observation, save_nm = save_nm)
+    method = method.lower()
+    
+    # Search for the root path
+    root = search_root()
+        
+    if (observation.split('/')[0] != 'v1' or observation.split('/')[0] != 'V1') :
+        observation = observation.lower()
+    else :
+        observation = observation.upper()
+        
+    fig_path = os.path.join(root, "figures/{method}/{img_nm}/{observation}".format(
+        method = method, img_nm = img_nm, observation = observation))
+    Path(fig_path).mkdir(parents=True, exist_ok = True)
+    
+    return os.path.join(fig_path, "{save_nm}.png".format(save_nm = save_nm))
 
 def data_save_path(img_nm, method, observation, save_nm): 
     save_nm = save_nm.replace(" ", "_")
-    Path("../result/{method}/{img_nm}/{observation}".format(
-        method = method, img_nm = img_nm, observation = observation)).mkdir(parents=True, exist_ok = True)
-         
-    return "../result/{method}/{img_nm}/{observation}/{save_nm}.csv".format(
-        method = method, img_nm = img_nm, observation = observation, save_nm = save_nm)
+    method = method.lower()
+    
+    # Search for the root path
+    root = search_root()
+    
+    if (observation.split('/')[0] == 'v1' or observation.split('/')[0] == 'V1') :
+        print("upper triggered: " + observation.split('/')[0])
+        observation = observation.upper()
+        
+    else :
+        print("lower triggered: " + observation)
+        observation = observation.lower()
+        
+        
+    result_path = os.path.join(root, "result/{method}/{img_nm}/{observation}".format(
+        method = method, img_nm = img_nm, observation = observation))
+    Path(result_path).mkdir(parents=True, exist_ok = True)
+    
+    return os.path.join(result_path, "{save_nm}.csv".format(save_nm = save_nm))
 
 # Generate General Variables
 def generate_Y(W, img):
@@ -92,8 +126,8 @@ def generate_V1_variables(img_arr, num_cell, cell_size, sparse_freq):
     W = W.reshape(num_cell, dim[0], dim[1])
     return W, y
 
-# Generate Classical Variables
-def generate_classical_variables(img_arr, sample_size) :
+# Generate pixel Variables
+def generate_pixel_variables(img_arr, num_cell) :
     ''' Generate random pixel arrays with its indexes length of sample size.
     
     
@@ -102,7 +136,7 @@ def generate_classical_variables(img_arr, sample_size) :
     img_arr : array_like
         (n, m) sized data array
     
-    sample_size : int
+    num_cell : int
         Number of sample data to be collected
     
     Returns
@@ -114,14 +148,13 @@ def generate_classical_variables(img_arr, sample_size) :
         Actual value of randomly selected indices
     '''
     n, m = img_arr.shape
-#     sample = np.floor(n * m * sample_size).astype(int)
-    rand_index = np.random.randint(0, n * m, sample_size)
-    y = img_arr.flatten()[rand_index].reshape(sample_size, 1)
+    rand_index = np.random.randint(0, n * m, num_cell)
+    y = img_arr.flatten()[rand_index].reshape(num_cell, 1)
     
     y = y * np.sqrt(n * m)
-    C = np.eye(n * m)[rand_index, :] * np.sqrt(n * m)
-    C3D = C.reshape(sample_size, n, m)
-    return C3D, y
+    W = np.eye(n * m)[rand_index, :] * np.sqrt(n * m)
+    W = W.reshape(num_cell, n, m)
+    return W, y
 
 # Generate Gaussian Weights
 def generate_gaussian_variables(img_arr, num_cell):
@@ -143,7 +176,6 @@ def generate_gaussian_variables(img_arr, num_cell):
     y : vector
         (num_V1_weights/sample_size, 1) shape. Dot product of W and image
     '''
-    
     n, m = img_arr.shape
     W = np.random.randn(num_cell, n, m)
     y = generate_Y(W, img_arr)
@@ -167,8 +199,12 @@ def error_calculation(img_arr, reconst):
     error : float
         Computed normalized error value per each pixel
     '''
-    n, m = img_arr.shape
-    error = np.linalg.norm(img_arr - reconst, 'fro') / np.sqrt(m * n)
+    if (len(img_arr.shape) == 3):
+        n, m, rgb = img_arr.shape
+    else: 
+        n, m = img_arr.shape
+
+    error = np.linalg.norm(img_arr - reconst) / np.sqrt(m * n)
     return error
 
 # Reconstruction (Current Methods: Fourier Base Transform, Wavelet Transform)
@@ -286,6 +322,25 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, l
     
     return theta, reconstruct, s_unravel
 
+def select_observation_model(img_arr, num_cell, observation, cell_size = None, sparse_freq = None):
+    # Check if the cell_size and sparse_freq is none while it is conduction V1 observation
+    if (observation.lower() == "v1" and (cell_size == None or sparse_freq == None)) :
+        print("For {observation} observation, both cell_size and sparse_freq parameters are required".format(observation = observation))
+        sys.exit(0)
+    if (type(num_cell) == str):
+        print(num_cell)
+        print(type(num_cell))
+        sys.exit(0)
+    if (observation.lower() == "v1"):
+        W, y = generate_V1_variables(img_arr, num_cell, cell_size, sparse_freq)
+    elif (observation.lower() == "gaussian"):
+        W, y = generate_gaussian_variables(img_arr, num_cell)
+    elif (observation.lower() == "pixel"):
+        W, y = generate_pixel_variables(img_arr, num_cell)
+    else:
+        print("This obervation technique is currently not supported\n Please use valid observation: ['pixel', 'gaussian', 'V1']")
+    return W, y
+
 def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 4, dwt_type = 'db2'):
     ''' Reconstruct gray-scaled image using sample data fitting into LASSO model
     
@@ -327,18 +382,18 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
         (num_V1_weights/sample_size, 1) shape. Coefficient value generated from fitting data to LASSO. Contains significant values with most of vector zeroed out.
     '''
     
-    sample_sz, n, m = W.shape
+    num_cell, n, m = W.shape
       
     if alpha == None :
-        alpha = 1 * 50 / sample_sz
+        alpha = 1 * 50 / num_cell
         
     if fit_intercept:
         raise Exception("fit_intercept = True not implemented")
     
     if (method == 'dct') :
-        theta, s, reconstruct = fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept)
+        theta, s, reconstruct = fourier_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept)
     elif (method == 'dwt') :
-        theta, reconstruct, s = wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, lv)
+        theta, reconstruct, s = wavelet_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept, dwt_type, lv)
 
         # Reform the image using sparse vector s with inverse descrete cosine
         
@@ -348,9 +403,129 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
     #return theta, reformed img, sparse vectors
     return theta, reconstruct, s
 
-def filter_reconstruction(num_cell, img_arr, cell_size, sparse_freq, filter_dim = (30, 30), alpha = None, rand_weight = False) :
-    ''' 
+# def color_reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 4, dwt_type = 'db2') :
+#     ''' Reconstruct colored (RGB) image with sample data
+    
+#     Parameters
+#     ----------
+#     img_arr : numpy_array
+#           (n, m) shape image containing array of pixels
+          
+#     num_cell : int
+#         Number of blobs that will be used to be determining which pixles to grab and use
+    
+#     cell_size : int
+#         Determines field size of opened and closed blob of data. Affect the data training
+        
+#     sparse_freq : int
+#         Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
+      
+#     alpha : float
+#         Penalty for fitting data onto LASSO function to search for significant coefficents
+
+#     Returns
+#     ----------
+#     final : numpy_array
+#         (n * m) shape array containing reconstructed RGB image array pixels.
+    
+#     '''
+#     num_cell, n, m = W.shape
+    
+#     if alpha == None :
+#         alpha = 1 * 50 / num_cell
+        
+#     if fit_intercept:
+#         raise Exception("fit_intercept = True not implemented")
+        
+#     i = 0
+# #     dim = img_arr[:,:,i].shape
+ 
+#     final = np.zeros((n, m, 3))
+    
+#     # sample_sz, n, m = W.shape
+
+#     # with same V1 cells generated, reconstruct images for each of 3 rgb arrays and append to final
+#     while (i < 3):
+#         if (method == 'dct') :
+#             theta, s, reconstruct = fourier_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept)
+#         elif (method == 'dwt') :
+#             theta, reconstruct, s = wavelet_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept, dwt_type, lv)
+        
+#         final[:,:,i] = reconstruct
+#         i+=1
+        
+#     final = np.round(final).astype(int)
+#     final[final < 0] = 0
+#     final[final > 255] = 255
+#     final = final.astype(int)
+#     return theta, final, s
+
+def color_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, alpha = None, fit_intercept = False, method = 'dct', observation = 'pixel', lv = 4, dwt_type = 'db2') :
+    ''' Reconstruct colored (RGB) image with sample data
+    
     Parameters
+    ----------
+    img_arr : numpy_array
+          (n, m) shape image containing array of pixels
+          
+    num_cell : int
+        Number of blobs that will be used to be determining which pixles to grab and use
+    
+    cell_size : int
+        Determines field size of opened and closed blob of data. Affect the data training
+        
+    sparse_freq : int
+        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
+      
+    alpha : float
+        Penalty for fitting data onto LASSO function to search for significant coefficents
+
+    Returns
+    ----------
+    final : numpy_array
+        (n * m) shape array containing reconstructed RGB image array pixels.
+    
+    '''
+    
+    
+    i = 0
+    dim = img_arr[:,:,i].shape
+    n, m = dim
+    
+    if (num_cell < 1):
+        num_cell = int(round(num_cell * filt_n * filt_m))
+        
+    if alpha == None :
+        alpha = 1 * 50 / num_cell
+    
+#     W = V1_weights(num_cell, dim, cell_size, sparse_freq) 
+    final = np.zeros(img_arr.shape)
+
+    # with same V1 cells generated, reconstruct images for each of 3 rgb arrays and append to final
+    while (i < 3):
+        img_arr_pt = img_arr[:,:,i]
+        img_arr_pt_dim = img_arr_pt.shape
+        n_pt, m_pt = img_arr_pt_dim
+        
+        W, y = select_observation_model(img_arr_pt, num_cell, observation, cell_size, sparse_freq)
+            
+        if (method == 'dct'):
+            theta, reconst, s = reconstruct(W, y, alpha, method = method)
+        else :
+            theta, reconst, s = reconstruct(W, y, alpha, method = method, lv = lv, dwt_type = dwt_type)
+        final[:,:,i] = reconst
+        i+=1
+        
+    final = np.round(final).astype(int)
+    final[final < 0] = 0
+    final[final > 255] = 255
+    final = final.astype(int)
+    return final
+
+
+def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, filter_dim = (30, 30), alpha = None, method = 'dct', observation = 'pixel', lv = 4, dwt_type = 'db2', rand_weight = False, mode = 'black') :
+    ''' 
+    Parametersw
     ----------
     
     
@@ -358,20 +533,30 @@ def filter_reconstruction(num_cell, img_arr, cell_size, sparse_freq, filter_dim 
     ----------
     
     '''
+    # Create Filter
+    filt = np.zeros(filter_dim)
+    filt_n, filt_m = filter_dim
+    
+    if (num_cell < 1):
+        num_cell = int(round(num_cell * filt_n * filt_m))
+    
+    if (mode != 'color' and len(img_arr.shape) == 3):
+        img_arr = np.asarray(ImageOps.grayscale(Image.fromarray(img_arr)))
     #alpha parameter is dependent on the number of cell if alpha is not specified
     if (alpha == None) :
         alpha = 1 * 50 / num_cell
     
     # Retrieve image dimension
-    n, m = img_arr.shape
+    if (mode == 'color'):
+        n, m, rgb = img_arr.shape
+    else:
+        n, m = dim = img_arr.shape
     
-    # Create Filter
-    filt = np.zeros(filter_dim)
-    filt_n, filt_m = filter_dim
+    
         
     # Fix the V1 weights if the random_weight parameter is set to be true
-    if (rand_weight == True):
-        W = V1_weights(num_cell, filter_dim, cell_size, sparse_freq) 
+#     if (rand_weight):
+#         W = V1_weights(num_cell, filter_dim, cell_size, sparse_freq) 
 
     # Preprocess image and add zeros so the cols and rows would fit to the filter for any size
     if n % filt_n != 0 :
@@ -382,39 +567,72 @@ def filter_reconstruction(num_cell, img_arr, cell_size, sparse_freq, filter_dim 
         new_m = m + (filt_m - (m % filt_m))
     else :
         new_m = m
+    if (mode == 'color'):
+        img_arr_aug = np.zeros((new_n, new_m, rgb))
+    else:
+        img_arr_aug = np.zeros((new_n, new_m))
+    
+    if (mode == 'color'):
+        img_arr_aug[:n, :m, :] = img_arr
+    else:
+        img_arr_aug[:n, :m] = img_arr
 
-    img_arr_aug = np.zeros((new_n, new_m))
-    img_arr_aug[:n, :m] = img_arr
-
-    print(img_arr_aug.shape)
+    print("Process Reconstruction on {shape} image".format(shape = img_arr_aug.shape))
     i = 1 # counter
     result = np.zeros(img_arr.shape)
     cur_n, cur_m = (0, 0)
     num_work = (new_n * new_m) // (filt_n * filt_m)
     
     for pt in range(num_work):
-#         if (i % (num_work // 5) == 0) :
-#             print("iteration", i)
-        # Randomize V1 weights for each batch if random_weight param is set to false
-        if (rand_weight != True) :
-            W = V1_weights(num_cell, filter_dim, cell_size, sparse_freq) 
-
         # keep track over height of the batches
         if (cur_m >= new_m) :
             cur_n += filt_n
             cur_m = 0
 
         nxt_m = cur_m + filt_m
-        pt = img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m]
+        if (mode == 'color'):
+            img_arr_pt = img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m, :]
+        else:    
+            img_arr_pt = img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m]
+        
+        # Randomize V1 weights for each batch if random_weight param is set to false
+#         if (rand_weight) :
+#         W, y = V1_weights(num_cell, filter_dim, cell_size, sparse_freq)
 
-        y = generate_Y(W, pt)
-        W_model = W.reshape(num_cell, filt_n, filt_m)
-        theta, reform, s = reconstruct(W_model, y, alpha)
+        if (mode == "color"): 
+            reconst = color_reconstruct(
+                img_arr_pt,  
+                num_cell, 
+                cell_size, 
+                sparse_freq, 
+                alpha = alpha, 
+                method = method, 
+                observation = observation,
+                lv = lv, 
+                dwt_type = dwt_type)
+        else:
+            W, y = select_observation_model(img_arr_pt, num_cell, observation, cell_size, sparse_freq)
+            W_model = W.reshape(num_cell, filt_n, filt_m)    
 
-        img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m] = reform
+            if (method == 'dct'):
+                theta, reconst, s = reconstruct(W, y, alpha, method = method)
+            else :
+                theta, reconst, s = reconstruct(W, y, alpha, method = method, lv = lv, dwt_type = dwt_type)
+        
+        if (mode == 'color'):
+            img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m, :] = reconst
+        else:    
+            img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m] = reconst
         cur_m = nxt_m
 
         i+=1
-
-    result = img_arr_aug[:n,:m]
-    return result
+    if (mode == 'color'):
+        result = img_arr_aug[:n, :m, :rgb]
+    else :    
+        result = img_arr_aug[:n,:m]
+    result = np.round(result).astype(int)
+    result[result < 0] = 0
+    result[result > 255] = 255
+    result = result.astype(int)
+    
+    return result.astype(int)
