@@ -70,10 +70,10 @@ def parse_input(i, argv):
         lst = list(argv[i].strip('[]').replace(" ", "").split(','))
         lst = list(map(lambda x: int(x) , lst))
         
-    if ((type(lst) == list or type(lst).__module__ == np.__name__) and len(lst) == 1):
-        return lst[0]
-    else:
-        return lst
+#     if ((type(lst) == list or type(lst).__module__ == np.__name__) and len(lst) == 1):
+#         return lst[0]
+#     else:
+    return lst
     
 def process_input(argv) :
     param_dict = {}
@@ -138,10 +138,10 @@ def run_sim_V1(method, observation, mode, rep, alpha, num_cell, cell_size, spars
         num_cell = round(n * m * num_cell)
     num_cell = int(num_cell)
     img_arr = np.array([img_arr]).squeeze()
-    print("Variable Received:\nobservation={obs}\nmode={mode}\nalpha={alp}\nnum_cell={num}\ncell_sz={sz}\nsparse_freq={freq}".format(obs = observation, mode = mode, alp = alpha, num = num_cell, sz=cell_size, freq=sparse_freq))
+    #print("Variable Received:\nobservation={obs}\nmode={mode}\nalpha={alp}\nnum_cell={num}\ncell_sz={sz}\nsparse_freq={freq}".format(obs = observation, mode = mode, alp = alpha, num = num_cell, sz=cell_size, freq=sparse_freq))
     reconst = filter_reconstruct(img_arr, num_cell = num_cell, cell_size=cell_size, sparse_freq=sparse_freq, alpha = alpha, method = method, observation = observation, mode = mode)
     error = error_calculation(img_arr, reconst)
-
+    print("Variable Received:\nrep={rep}\nobservation={obs}\nmode={mode}\nalpha={alp}\nnum_cell={num}\ncell_sz={sz}\nsparse_freq={freq}\n\nERROR={error}\n".format(rep = rep, obs = observation, mode = mode, alp = alpha, num = num_cell, sz=cell_size, freq=sparse_freq, error = error))
     result = [rep, alpha, num_cell, cell_size, sparse_freq, error]
     return result
 
@@ -206,10 +206,11 @@ def main() :
         else :
             print("The observation {observation} is currently not supported. Please try valid observation type.".format(
                 observation = observation))
-color_param_Wed_Jun_28_16_01_23_2023
+            
         print('running dask completed')
 
         futures = dask.persist(*delay_list)
+        delay.visualize()
         print('futures completed')
         progress(futures)
         print('progressing futures')
