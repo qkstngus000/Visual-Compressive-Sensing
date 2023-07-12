@@ -187,9 +187,13 @@ def main() :
             search = list(itertools.product(*search_list))             
             search_df = pd.DataFrame(search, columns= [ 'rep', 'alp', 'num_cell'])
             print(search_df.head())
+            
+            
+            sim_wrapper = lambda rep, alp, num_cell: run_sum(method, observation, rep, alp, num_cell, img_arr)
 
             for p in search_df.values:
-                delay = dask.delayed(run_sim)(method, observation, mode, *p, img_arr)
+                delay = dask.delayed(sim_wrapper)(*p)
+                # delay = dask.delayed(run_sim)(method, observation, mode, *p, img_arr)
                 delay_list.append(delay)
 
         elif (observation.upper() == 'V1'):
