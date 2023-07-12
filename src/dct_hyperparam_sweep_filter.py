@@ -50,8 +50,7 @@ def parse_input(i, argv):
         assert argv[i] != 'n'
         return argv[i]
     elif (i == 2):
-        lst = list(argv[i].strip('[]').replace(" ", "").split(','))
-        return lst
+        return argv[i]
     elif (i == 3):
         if argv[i].lower() in ['-c', 'color']:
             return "color"
@@ -69,11 +68,8 @@ def parse_input(i, argv):
     else:
         lst = list(argv[i].strip('[]').replace(" ", "").split(','))
         lst = list(map(lambda x: int(x) , lst))
-        
-    if ((type(lst) == list or type(lst).__module__ == np.__name__) and len(lst) == 1):
-        return lst[0]
-    else:
-        return lst
+
+    return lst
     
 def process_input(argv) :
     param_dict = {}
@@ -122,10 +118,9 @@ def run_sim(method, observation, mode, rep, alpha, num_cell, img_arr):
     print(mode)
     
     reconst = filter_reconstruct(img_arr, num_cell = num_cell, alpha = alpha, method = method, observation = observation, mode = mode)
+    
     # Call function and calculate error
     error = error_calculation(img_arr, reconst)
-    
-#     return error, theta, reconst, s
     return error
 
 def run_sim_V1(method, observation, mode, rep, alpha, num_cell, cell_size, sparse_freq, img_arr):
@@ -139,11 +134,9 @@ def run_sim_V1(method, observation, mode, rep, alpha, num_cell, cell_size, spars
         num_cell = round(n * m * num_cell)
     num_cell = int(num_cell)
     img_arr = np.array([img_arr]).squeeze()
-    print("Variable Received:\nobservation={obs}\nmode={mode}\nalpha={alp}\nnum_cell={num}\ncell_sz={sz}\nsparse_freq={freq}".format(obs = observation, mode = mode, alp = alpha, num = num_cell, sz=cell_size, freq=sparse_freq))
     reconst = filter_reconstruct(img_arr, num_cell = num_cell, cell_size=cell_size, sparse_freq=sparse_freq, alpha = alpha, method = method, observation = observation, mode = mode)
     error = error_calculation(img_arr, reconst)
-        
-#     return error, theta, reconst, s
+    print("Variable Received:\nrep={rep}\nobservation={obs}\nmode={mode}\nalpha={alp}\nnum_cell={num}\ncell_sz={sz}\nsparse_freq={freq}\n\nERROR={error}\n".format(rep = rep, obs = observation, mode = mode, alp = alpha, num = num_cell, sz=cell_size, freq=sparse_freq, error = error))
     return error
 
 def main() :
@@ -159,7 +152,7 @@ def main() :
     # Set up hyperparameters that would affect results
     param_dict = {}
     
-    img, observation_lst, mode, alpha_list, num_cell, cell_size, sparse_freq = process_input(sys.argv)
+    img, observation, mode, alpha_list, num_cell, cell_size, sparse_freq = process_input(sys.argv)
     root = search_root()
     image_path = os.path.join(root, 'image/{img}'.format(img = img))
     delay_list = []
@@ -173,77 +166,74 @@ def main() :
     if (mode != 'color'):
         img = ImageOps.grayscale(img)
     img_arr = np.asarray(img)
-
-    # TODO: if pixel, change search_list only to use rep, alpha, num_cell
     
-    
-    for observation in observation_lst :
-        # Call dask
-        client = Client()
-        if (observation.upper() != 'V1') :
-            search_list = [rep, alpha_list, num_cell]
+    # Call dask
+    client = Client()
+    if (observation.upper() != 'V1') :
+        search_list = [rep, alpha_list, num_cell]
 
-            # All combinations of hyperparameter to try 
-            search = list(itertools.product(*search_list))             
-            search_df = pd.DataFrame(search, columns= [ 'rep', 'alp', 'num_cell'])
-            print(search_df.head())
-            
-            
-            sim_wrapper = lambda rep, alp, num_cell: run_sum(method, observation, rep, alp, num_cell, img_arr)
+        # All combinations of hyperparameter to try
+        search = list(itertools.product(*search_list))
+        search_df = pd.DataFrame(search, columns= [ 'rep', 'alp', 'num_cell'])
+        print(search_df.head())
 
-            for p in search_df.values:
-                delay = dask.delayed(sim_wrapper)(*p)
-                # delay = dask.delayed(run_sim)(method, observation, mode, *p, img_arr)
-                delay_list.append(delay)
+        sim_wrapper = lambda rep, alp, num_cell: run_sim(method, observation, mode, rep, alp, num_cell, img_arr)
 
-        elif (observation.upper() == 'V1'):
-            search_list = [rep, alpha_list, num_cell, cell_size, sparse_freq]
+        for p in search_df.values:
+            delay = dask.delayed(sim_wrapper)(*p)
+            delay_list.append(delay)
 
-            # All combinations of hyperparameter to try 
-            search = list(itertools.product(*search_list))             
-            search_df = pd.DataFrame(search, columns= ['rep', 'alp', 'num_cell', 'cell_size', 'sparse_freq'])
-            print(search_df.head())
+    elif (observation.upper() == 'V1'):
+        search_list = [rep, alpha_list, num_cell, cell_size, sparse_freq]
 
-            for p in search_df.values:
-                delay = dask.delayed(run_sim_V1)(method, observation, mode, *p, img_arr)
-                delay_list.append(delay)
+        # All combinations of hyperparameter to try
+        search = list(itertools.product(*search_list))
+        search_df = pd.DataFrame(search, columns= ['rep', 'alp', 'num_cell', 'cell_size', 'sparse_freq'])
+        print(search_df.head())
+        sim_wrapper = lambda rep, alp, num_cell, cell_size, sparse_freq: run_sim_V1(method, observation, mode, rep, alp, num_cell, cell_size, sparse_freq, img_arr)
 
-        else :
-            print("The observation {observation} is currently not supported. Please try valid observation type.".format(
-                observation = observation))
+        for p in search_df.values:
+            delay = dask.delayed(sim_wrapper)(*p)
+            delay_list.append(delay)
 
-        print('running dask completed')
+    else :
+        print("The observation {observation} is currently not supported. Please try valid observation type.".format(
+            observation = observation))
 
-        futures = dask.persist(*delay_list)
-        print('futures completed')
-        progress(futures)
-        print('progressing futures')
+    print('running dask completed')
 
-        # Compute the result
-        results = dask.compute(*futures)
-        print('result computed')
-        results_df = pd.DataFrame(results, columns=['error'])#, 'theta', 'reform', 's'])
-        param_csv_nm = "param_" + "_".join(str.split(time.ctime().replace(":", "_")))
-        param_path = data_save_path(image_nm, method, observation, '{mode}_{param_csv_nm}'.format(mode = mode, param_csv_nm = param_csv_nm))
+    print('running dask completed')
 
-        # Add error onto parameter
-        params_result_df = search_df.join(results_df['error'])
+    futures = dask.persist(*delay_list)
+    print('futures completed')
+    progress(futures)
+    print('progressing futures')
 
-        # save parameter_error data with error_results data
-        params_result_df.to_csv(param_path)
+    # Compute the result
+    results = dask.compute(*futures)
+    print('result computed')
+    results_df = pd.DataFrame(results, columns=['error'])#, 'theta', 'reform', 's'])
+    param_csv_nm = "param_" + "_".join(str.split(time.ctime().replace(":", "_")))
+    param_path = data_save_path(image_nm, method, observation, '{mode}_{param_csv_nm}'.format(mode = mode, param_csv_nm = param_csv_nm))
 
-        print("Execution Completed and file saved")
+    # Add error onto parameter
+    params_result_df = search_df.join(results_df['error'])
 
-        hyperparam_track = data_save_path(image_nm, method, observation, '{mode}_hyperparam'.format(mode = mode))
-        hyperparam_track = hyperparam_track.split('.')[0] + '.txt'
-        f = open(hyperparam_track, 'a+')
-        hyperparam_list = list(zip(search_df.columns, search_list))
-        f.write(f"{param_csv_nm}\n")
-        for hyperparam in hyperparam_list :
-            f.write(f"   {hyperparam[0]}: {hyperparam[1]}\n")
-        f.write("\n\n")
-        f.close()
-        print("Saved hyperparameter to the txt")
+    # save parameter_error data with error_results data
+    params_result_df.to_csv(param_path)
+
+    print("Execution Completed and file saved")
+
+    hyperparam_track = data_save_path(image_nm, method, observation, '{mode}_hyperparam'.format(mode = mode))
+    hyperparam_track = hyperparam_track.split('.')[0] + '.txt'
+    f = open(hyperparam_track, 'a+')
+    hyperparam_list = list(zip(search_df.columns, search_list))
+    f.write(f"{param_csv_nm}\n")
+    for hyperparam in hyperparam_list :
+        f.write(f"   {hyperparam[0]}: {hyperparam[1]}\n")
+    f.write("\n\n")
+    f.close()
+    print("Saved hyperparameter to the txt")
 
 
 if __name__ == "__main__":
