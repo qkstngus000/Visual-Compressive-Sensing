@@ -14,13 +14,17 @@ Assuming you have python environment, fork this project into desired directory.
 ## Main Functions
 
 ### src
-This is where all source codes are stored. Source code mainly separated into three different file. 
+This is where all source codes are stored. Source code mainly separated into 5 different files. 
     
-&ensp; * Compress Sensing Library: Contains all codes that deals with computations of signal data with its observation method. 
+&ensp; * Compress Sensing Library (1): Contains all codes that deals with computations of signal data with its observation method. 
 
-&ensp; * (hyperparam sweep file): Calls Signal reconstruction method defined in Compress Sensing Library and call dask (parallel computation library) to compute hyperparameters that user wants to test. There are total two hyperparameter sweep files, which one deals with descrete cosine transform ([DCT](https://en.wikipedia.org/wiki/Dual-clutch_transmission)) and the other deals with descrete wavelet transform ([DWT](https://en.wikipedia.org/wiki/Discrete_wavelet_transform)). 
+&ensp; * (hyperparam sweep file) (2): Calls Signal reconstruction method defined in Compress Sensing Library and call dask (parallel computation library) to compute hyperparameters that user wants to test. There are total two hyperparameter sweep files, which one deals with descrete cosine transform ([DCT](https://en.wikipedia.org/wiki/Dual-clutch_transmission)) and the other deals with descrete wavelet transform ([DWT](https://en.wikipedia.org/wiki/Discrete_wavelet_transform)). 
 
-&ensp; * 
+&ensp; * Utility Library (1): Contains all methods that are not directly related to signal computation nor observation method, but used to approach desired goal such as saving function, connecting functions and others.
+
+&ensp; * Figure Library (1): Once there is data, this figure library would grab the resultant data file and change data to figures for visualization
+
+
 
 ### result
 This is where all hyperparameter sweeped data is getting stored. Once hyperparameter sweep function is run, the source code will find the result directory with its save path and save it into correspondent path.
