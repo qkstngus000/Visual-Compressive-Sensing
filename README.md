@@ -14,7 +14,9 @@ Assuming you have python environment, fork this project into desired directory.
 ## Main Functions
 
 ### src
-This is where all source codes are stored
+This is where all source codes are stored. Source code mainly separated into three different file. 
+    * Compress Sensing Library: Contains all codes that deals with computations of signal data with its observation method. 
+    * (hyperparam sweep file): Calls Signal reconstruction method defined in Compress Sensing Library and call dask (parallel computation library) to compute hyperparameters that user wants to test. There are total two hyperparameter sweep files, which one deals with descrete cosine transform ([DCT](https://en.wikipedia.org/wiki/Dual-clutch_transmission)) and the other deals with descrete wavelet transform ([DWT](https://en.wikipedia.org/wiki/Discrete_wavelet_transform)). 
 
 ### result
 This is where all hyperparameter sweeped data is getting stored. Once hyperparameter sweep function is run, the source code will find the result directory with its save path and save it into correspondent path.
