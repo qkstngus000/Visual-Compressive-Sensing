@@ -2,11 +2,11 @@
 Description: Compressed sensing (CS) is a widely accepted theory for signal-based data recovery using trained samples, which enables the reconstruction of a full signal at a low cost. Typically, pixel-based sampling techniques are utilized, but in this study, we propose a new observation technique using a biological model, the Visual Cortex (V1), to acquire more robust and improved signal reconstruction. The V1 is a biological model that has been shown to be effective in processing visual information in the brain. We hypothesize that this biological approach to observation combined with LASSO sparse coding prediction could lead to a better minimization of reconstruction errors compared to the traditional mathematical approach. Thus, we compare the effectiveness of the signal reconstruction between the V1 model and two classical models, namely pixel selection and Gaussian, to determine which method performs best. This study aims to highlight the potential of utilizing biological models in CS and to provide a better understanding of the performance of different observation techniques.
 
 ## Table of Contents
-    * [Installation](#installation)
-    * [Main Functions](#main-functions)
-    *
-    *
-    *
+1. [Installation](#installation)
+2. [Main Functions](#main-functions)
+3.
+4.
+5.
 
 ## Installation
 Assuming you have python environment, fork this project into desired directory.
