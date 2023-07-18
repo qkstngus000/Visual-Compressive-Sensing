@@ -4,7 +4,7 @@ Description: Compressed sensing (CS) is a widely accepted theory for signal-base
 ## Table of Contents
 1. [Installation](#installation)
 2. [Main Functions](#main-functions)
-3.
+3. [Function Usage](#function-usage)
 4.
 5.
 
@@ -28,11 +28,16 @@ This is where all source codes are stored. Source code mainly separated into 5 d
 
 ### result
 This is where all hyperparameter sweeped data is getting stored. Once hyperparameter sweep function is run, the source code will find the result directory with its save path and save it into correspondent path.
+File saving path is determined by root -> result -> method -> image_name -> observation -> color/black_and_white.csv
 
 ### figures
 This is where figures generated from result data is getting stored
+File saving path is determined by root -> figure -> method -> image_name -> observation -> color/black_and_white.csv
 
 ### structured_random_features
-This is the base of our project where folder contains neural-network V1 model the generate V1 observation
+This is the base of our project where folder contains neural-network V1 model that allows to generate reconstruction using V1 observation.
 
-### 
+## Function Usage
+
+### compress_sensing_library
+    from compress_sensing library import 
