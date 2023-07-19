@@ -14,53 +14,6 @@ from pathlib import Path
 # Packages for images
 from PIL import Image, ImageOps
 
-def search_root():
-    back_path = './'
-    root = Path(os.path.abspath('./'))
-    while not root.match('*/research'):
-        back_path += '../'
-        root = Path(os.path.abspath(back_path))
-    return root
-
-def fig_save_path(img_nm, method, observation, save_nm):
-    save_nm = save_nm.replace(" ", "_")
-    method = method.lower()
-    
-    # Search for the root path
-    root = search_root()
-        
-    if (observation.split('/')[0] != 'v1' or observation.split('/')[0] != 'V1') :
-        observation = observation.lower()
-    else :
-        observation = observation.upper()
-        
-    fig_path = os.path.join(root, "figures/{method}/{img_nm}/{observation}".format(
-        method = method, img_nm = img_nm, observation = observation))
-    Path(fig_path).mkdir(parents=True, exist_ok = True)
-    
-    return os.path.join(fig_path, "{save_nm}.png".format(save_nm = save_nm))
-
-def data_save_path(img_nm, method, observation, save_nm): 
-    save_nm = save_nm.replace(" ", "_")
-    method = method.lower()
-    
-    # Search for the root path
-    root = search_root()
-    
-    if (observation.split('/')[0] == 'v1' or observation.split('/')[0] == 'V1') :
-        print("upper triggered: " + observation.split('/')[0])
-        observation = observation.upper()
-        
-    else :
-        print("lower triggered: " + observation)
-        observation = observation.lower()
-        
-        
-    result_path = os.path.join(root, "result/{method}/{img_nm}/{observation}".format(
-        method = method, img_nm = img_nm, observation = observation))
-    Path(result_path).mkdir(parents=True, exist_ok = True)
-    
-    return os.path.join(result_path, "{save_nm}.csv".format(save_nm = save_nm))
 
 # Generate General Variables
 def generate_Y(W, img):

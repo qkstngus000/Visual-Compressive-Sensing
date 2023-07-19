@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from PIL import Image, ImageOps
 
 from src.compress_sensing_library import *
+from src.utility_library import *
 import pandas as pd
 import itertools
 import dask
@@ -178,8 +179,6 @@ def main() :
     '''
     # Parse given hyperparameters that would affect results
     img, observation_lst, mode, dwt_type, lv, alpha_list, num_cell, cell_size, sparse_freq = process_input(sys.argv)
-    root = search_root()
-    image_path = os.path.join(root, 'image/{img}'.format(img = img))
     delay_list = []
     params = []
     method = 'dwt'
@@ -187,10 +186,7 @@ def main() :
 
 
     image_nm = img.split('.')[0]
-    img = Image.open(image_path)
-    if (mode != 'color'):
-        img = ImageOps.grayscale(img)
-    img_arr = np.asarray(img)
+    img_arr = process_image(img, mode)
     
     for observation in observation_lst:
         # Call dask
