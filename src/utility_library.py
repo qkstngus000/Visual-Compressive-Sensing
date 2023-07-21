@@ -67,9 +67,12 @@ def process_image(img, mode = 'black', visibility = False):
     if visibility:
         if mode.lower() not in color:
             plt.imshow(img_path, 'gray')
+            plt.title("grayscaled_{img}".format(img = img.split(".")[0]))
         else:
             plt.imshow(img_path)
+            plt.title(img.split(".")[0])
         plt.axis('off')
+        plt.show()
     img_arr = np.asarray(img_path)
     
     return img_arr

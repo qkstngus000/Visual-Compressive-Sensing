@@ -67,7 +67,7 @@ def generate_V1_variables(img_arr, num_cell, cell_size, sparse_freq):
         (num_V1_weights/sample_size, 1) shape. Dot product of W and image
     '''
     # Get size of image
-    dim = np.asanyarray(img_arr).shape
+    dim = np.asanyarray(img_arr).shape[:2]
     n, m = dim
     # Store generated V1 cells in W
     W = V1_weights(num_cell, dim, cell_size, sparse_freq) 
@@ -100,7 +100,7 @@ def generate_pixel_variables(img_arr, num_cell) :
     y : vector
         Actual value of randomly selected indices
     '''
-    n, m = img_arr.shape
+    n, m = img_arr.shape[:2]
     rand_index = np.random.randint(0, n * m, num_cell)
     y = img_arr.flatten()[rand_index].reshape(num_cell, 1)
     
@@ -129,7 +129,7 @@ def generate_gaussian_variables(img_arr, num_cell):
     y : vector
         (num_V1_weights/sample_size, 1) shape. Dot product of W and image
     '''
-    n, m = img_arr.shape
+    n, m = img_arr.shape[:2]
     W = np.random.randn(num_cell, n, m)
     y = generate_Y(W, img_arr)
     return W, y
