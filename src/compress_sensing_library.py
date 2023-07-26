@@ -10,6 +10,8 @@ import pywt
 from pywt import wavedecn
 from sklearn.linear_model import Lasso
 from pathlib import Path
+import warnings
+from sklearn.exceptions import ConvergenceWarning
 
 # Packages for images
 from PIL import Image, ImageOps
@@ -198,6 +200,10 @@ def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
     s : vector
         (num_V1_weights/sample_size, 1) shape. Coefficient value generated from fitting data to LASSO. Contains significant values with most of vector zeroed out.
     '''
+    
+    # Ignore convergence warning to allow convergence warning not filling up all spaces when testing
+    warnings.filterwarnings('ignore', category=ConvergenceWarning)
+    
     theta = fft.dctn(W.reshape(sample_sz, n, m), norm = 'ortho', axes = [1, 2])
     theta = theta.reshape(sample_sz, n * m)
 
@@ -255,6 +261,8 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, l
         (num_V1_weights/sample_size, 1) shape. Coefficient value generated from fitting data to LASSO. Contains significant values with most of vector zeroed out.
     '''
     
+    # Ignore convergence warning to allow convergence warning not filling up all spaces when testing
+    warnings.filterwarnings('ignore', category=ConvergenceWarning)
     dwt_sample = wavedecn(W[0], wavelet = dwt_type, level = lv, mode = 'zero')
     coeff, coeff_slices, coeff_shapes = pywt.ravel_coeffs(dwt_sample)
     theta = np.zeros((len(W), len(coeff)))
@@ -492,8 +500,8 @@ def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, 
     
     if (num_cell < 1):
         num_cell = int(round(num_cell * filt_n * filt_m))
-    
-    if (mode != 'color' and len(img_arr.shape) == 3):
+    color = ['-c', 'color']
+    if (mode.lower() not in color and len(img_arr.shape) == 3):
         img_arr = np.asarray(ImageOps.grayscale(Image.fromarray(img_arr)))
     #alpha parameter is dependent on the number of cell if alpha is not specified
     if (alpha == None) :

@@ -62,13 +62,14 @@ def process_image(img, mode = 'black', visibility = False):
     img_path = Image.open(os.path.join(root, 'image/{img}'.format(img=img)))
     color = ['-c', 'color']
     if mode.lower() not in color:
-        print('black')
         img_path = ImageOps.grayscale(img_path)
     if visibility:
         if mode.lower() not in color:
+            print("Processing grayscale image")
             plt.imshow(img_path, 'gray')
             plt.title("grayscaled_{img}".format(img = img.split(".")[0]))
         else:
+            print("Processing color image")
             plt.imshow(img_path)
             plt.title(img.split(".")[0])
         plt.axis('off')

@@ -5,7 +5,7 @@ Description: Compressed sensing (CS) is a widely accepted theory for signal-base
 1. [Installation](#installation)
 2. [Main Functions](#main-functions)
 3. [Function Usage](#function-usage)
-4.
+4. 
 5.
 
 ## Installation
@@ -37,7 +37,7 @@ File saving path is determined by root -> figure -> method -> image_name -> obse
 ### structured_random_features
 This is the base of our project where folder contains neural-network V1 model that allows to generate reconstruction using V1 observation.
 
-## Function Usage
+## Function Example
+For examples, please look at this [example link](./src/compress_sensing_library_example.md) to see how to apply functions listed in compressed_sensing_library.
+    
 
-### compress_sensing_library
-    from compress_sensing library import 
