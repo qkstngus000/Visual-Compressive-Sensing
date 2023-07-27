@@ -321,14 +321,9 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
         
     Returns
     ----------
-    theta : array_like
-        (num_V1_weights/sample_size, n * m) shape. Data after discrete fourier transform applied 
-    
     reconstruct : array_like
         (n, m) shape array. Reconstructed image pixel array
         
-    s : vector
-        (num_V1_weights/sample_size, 1) shape. Coefficient value generated from fitting data to LASSO. Contains significant values with most of vector zeroed out.
     '''
     
     num_cell, n, m = W.shape
@@ -349,7 +344,7 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
     if fit_intercept:
         reform += mini.intercept_ # not sure this is right
     
-    #return theta, reformed img, sparse vectors
+    #return reformed img
     return reconstruct
 
 def color_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, alpha = None, fit_intercept = False, method = 'dct', observation = 'pixel', lv = 4, dwt_type = 'db2') :
@@ -418,9 +413,9 @@ def color_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, a
         W, y = select_observation_model(img_arr_pt, num_cell, observation, cell_size, sparse_freq)
             
         if (method == 'dct'):
-            theta, reconst, s = reconstruct(W, y, alpha, method = method)
+            reconst = reconstruct(W, y, alpha, method = method)
         else :
-            theta, reconst, s = reconstruct(W, y, alpha, method = method, lv = lv, dwt_type = dwt_type)
+            reconst = reconstruct(W, y, alpha, method = method, lv = lv, dwt_type = dwt_type)
         final[:,:,i] = reconst
         i+=1
         
@@ -488,7 +483,7 @@ def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, 
     
     if (num_cell < 1):
         num_cell = int(round(num_cell * filt_n * filt_m))
-    color = ['-c', 'color']
+    color = ['c', '-c', 'color']
     if (mode.lower() not in color and len(img_arr.shape) == 3):
         img_arr = np.asarray(ImageOps.grayscale(Image.fromarray(img_arr)))
     #alpha parameter is dependent on the number of cell if alpha is not specified
@@ -496,17 +491,11 @@ def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, 
         alpha = 1 * 50 / num_cell
     
     # Retrieve image dimension
-    if (mode == 'color'):
+    if (mode in color):
         n, m, rgb = img_arr.shape
     else:
         n, m = dim = img_arr.shape
     
-    
-        
-    # Fix the V1 weights if the random_weight parameter is set to be true
-#     if (rand_weight):
-#         W = V1_weights(num_cell, filter_dim, cell_size, sparse_freq) 
-
     # Preprocess image and add zeros so the cols and rows would fit to the filter for any size
     if n % filt_n != 0 :
         new_n = n + (filt_n - (n % filt_n))
@@ -516,12 +505,12 @@ def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, 
         new_m = m + (filt_m - (m % filt_m))
     else :
         new_m = m
-    if (mode == 'color'):
+    if (mode in color):
         img_arr_aug = np.zeros((new_n, new_m, rgb))
     else:
         img_arr_aug = np.zeros((new_n, new_m))
     
-    if (mode == 'color'):
+    if (mode in color):
         img_arr_aug[:n, :m, :] = img_arr
     else:
         img_arr_aug[:n, :m] = img_arr
@@ -539,16 +528,12 @@ def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, 
             cur_m = 0
 
         nxt_m = cur_m + filt_m
-        if (mode == 'color'):
+        if (mode in color):
             img_arr_pt = img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m, :]
         else:    
             img_arr_pt = img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m]
-        
-        # Randomize V1 weights for each batch if random_weight param is set to false
-#         if (rand_weight) :
-#         W, y = V1_weights(num_cell, filter_dim, cell_size, sparse_freq)
 
-        if (mode == "color"): 
+        if (mode in color): 
             reconst = color_reconstruct(
                 img_arr_pt,  
                 num_cell, 
@@ -564,18 +549,18 @@ def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, 
             W_model = W.reshape(num_cell, filt_n, filt_m)    
 
             if (method == 'dct'):
-                theta, reconst, s = reconstruct(W, y, alpha, method = method)
+                reconst = reconstruct(W, y, alpha, method = method)
             else :
-                theta, reconst, s = reconstruct(W, y, alpha, method = method, lv = lv, dwt_type = dwt_type)
+                reconst = reconstruct(W, y, alpha, method = method, lv = lv, dwt_type = dwt_type)
         
-        if (mode == 'color'):
+        if (mode in color):
             img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m, :] = reconst
         else:    
             img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m] = reconst
         cur_m = nxt_m
 
         i+=1
-    if (mode == 'color'):
+    if (mode in color):
         result = img_arr_aug[:n, :m, :rgb]
     else :    
         result = img_arr_aug[:n,:m]

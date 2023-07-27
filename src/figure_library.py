@@ -18,11 +18,11 @@ def remove_unnamed_data(data):
             data.drop('Unnamed: 0', axis = 1, inplace=True)
     return data
 
-def generate_image():
+#def generate_image():
     
 
 
-def error_colorbar(observation, img_arr, reconst): 
+def error_colorbar(img_arr, reconst, observation, num_cell): 
     if (len(img_arr.shape) == 3):
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (8, 8))
         plt.tight_layout()
@@ -84,44 +84,44 @@ def get_min_error_V1(img_nm, method, observation, data):
     V1_plotting_data = V1_merged_df.loc[V1_merged_df['mean_err'].notnull()]
     print(V1_param_min_df)
     
-def error_colorbar(observation, img_arr, reconst): 
-    if (len(img_arr.shape) == 3):
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (8, 8))
-        plt.tight_layout()
-        ax1.imshow(reconst, cmap='gray', vmin = 0, vmax = 255)
-        ax1.set_title("{observation} Reconst: {num_cell} cell".format(observation=observation, num_cell = num_cell))
-        ax1.axis('off')
+# def error_colorbar(observation, img_arr, reconst): 
+#     if (len(img_arr.shape) == 3):
+#         fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (8, 8))
+#         plt.tight_layout()
+#         ax1.imshow(reconst, cmap='gray', vmin = 0, vmax = 255)
+#         ax1.set_title("{observation} Reconst: {num_cell} cell".format(observation=observation, num_cell = num_cell))
+#         ax1.axis('off')
 
-        err = ax2.imshow(((img_arr - reconst)**2).mean(axis = 2), 'Reds', vmin = 0, vmax = 255)
-        ax2.set_title("{observation}Error: {num_cell} cells".format(observation = observation, num_cell = num_cell))
-        ax2.axis('off')
+#         err = ax2.imshow(((img_arr - reconst)**2).mean(axis = 2), 'Reds', vmin = 0, vmax = 255)
+#         ax2.set_title("{observation}Error: {num_cell} cells".format(observation = observation, num_cell = num_cell))
+#         ax2.axis('off')
 
-        divider2 = make_axes_locatable(ax2)
-        cax2 = divider2.append_axes("right", size="3%", pad=0.05)
-        plt.colorbar(err, cax = cax2)
-        # ax2.set_aspect('equal')
-        # save_path = fig_save_path('peppers', 'dct', 'gaussian/filter_Reconst', "{f_n}X{f_m}_filter_{num_cell}_cell".
-        #             format(f_n = filt_dim[0], f_m = filt_dim[1], num_cell = num_cell))
-        # fig.savefig(save_path, dpi = 300,  bbox_inches="tight")
-#         plt.show()
-    else :
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (8, 8))
-        plt.tight_layout()
+#         divider2 = make_axes_locatable(ax2)
+#         cax2 = divider2.append_axes("right", size="3%", pad=0.05)
+#         plt.colorbar(err, cax = cax2)
+#         # ax2.set_aspect('equal')
+#         # save_path = fig_save_path('peppers', 'dct', 'gaussian/filter_Reconst', "{f_n}X{f_m}_filter_{num_cell}_cell".
+#         #             format(f_n = filt_dim[0], f_m = filt_dim[1], num_cell = num_cell))
+#         # fig.savefig(save_path, dpi = 300,  bbox_inches="tight")
+# #         plt.show()
+#     else :
+#         fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (8, 8))
+#         plt.tight_layout()
 
-        ax1.imshow(reconst, vmin = 0, vmax = 255)
-        ax1.set_title("{observation} Reconst: {num_cell} cell".format(observation=observation, num_cell = num_cell))
-        ax1.axis('off')
+#         ax1.imshow(reconst, vmin = 0, vmax = 255)
+#         ax1.set_title("{observation} Reconst: {num_cell} cell".format(observation=observation, num_cell = num_cell))
+#         ax1.axis('off')
 
-        err = ax2.imshow((img_arr - reconst), 'Reds', vmin = 0, vmax = 255)
-        ax2.set_title("{observation} Reconst: {num_cell} cell".format(observation=observation, num_cell = num_cell))
-        ax2.axis('off')
+#         err = ax2.imshow((img_arr - reconst), 'Reds', vmin = 0, vmax = 255)
+#         ax2.set_title("{observation} Reconst: {num_cell} cell".format(observation=observation, num_cell = num_cell))
+#         ax2.axis('off')
 
-        divider2 = make_axes_locatable(ax2)
-        cax2 = divider2.append_axes("right", size="3%", pad=0.05)
-        plt.colorbar(err, cax = cax2)
-        ax2.set_aspect('equal')
-    return fig, ax1, ax2
-    image = 'image/{img_nm}
+#         divider2 = make_axes_locatable(ax2)
+#         cax2 = divider2.append_axes("right", size="3%", pad=0.05)
+#         plt.colorbar(err, cax = cax2)
+#         ax2.set_aspect('equal')
+#     return fig, ax1, ax2
+    #image = 'image/{img_nm}
     
     
     
