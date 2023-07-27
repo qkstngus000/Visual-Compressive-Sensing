@@ -10,6 +10,7 @@ import seaborn as sns
 import time
 import os.path
 from src.compress_sensing_library import *
+from src.utility_library import *
 
 def remove_unnamed_data(data):
     for index in data:
@@ -83,7 +84,7 @@ def get_min_error_V1(img_nm, method, observation, data):
     V1_plotting_data = V1_merged_df.loc[V1_merged_df['mean_err'].notnull()]
     print(V1_param_min_df)
     
-    def error_colorbar(observation, img_arr, reconst): 
+def error_colorbar(observation, img_arr, reconst): 
     if (len(img_arr.shape) == 3):
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (8, 8))
         plt.tight_layout()

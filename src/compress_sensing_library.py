@@ -19,7 +19,7 @@ from PIL import Image, ImageOps
 
 # Generate General Variables
 def generate_Y(W, img):
-    ''' Generate sample y vector variable for data reconstruction using constant matrix W (containing open indices). Function does inner product W matrix with image array to find sample y vector, 
+    ''' Generate sample y vector variable for data reconstruction using constant matrix W (containing open indices). Function does inner product W matrix with image array to find sample y vector
     
     Parameters
     ----------
@@ -138,7 +138,7 @@ def generate_gaussian_variables(img_arr, num_cell):
 
 # Error Calculation by Frosbian Norm
 def error_calculation(img_arr, reconst):
-    ''' Compute mean error per each data using frosbian norm
+    ''' Compute mean error per each data using frosbian normalization technique
         
     Parameters
     ----------
@@ -191,14 +191,8 @@ def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
         
     Returns
     ----------
-    theta : array_like
-        (num_V1_weights/sample_size, n * m) shape. Data after discrete fourier transform applied 
-    
     reconstruct : array_like
         (n, m) shape array. Reconstructed image pixel array
-        
-    s : vector
-        (num_V1_weights/sample_size, 1) shape. Coefficient value generated from fitting data to LASSO. Contains significant values with most of vector zeroed out.
     '''
     
     # Ignore convergence warning to allow convergence warning not filling up all spaces when testing
@@ -214,7 +208,7 @@ def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
     ## Retrieve sparse vector s
     s = mini.coef_
     reconstruct = fft.idctn(s.reshape(n, m), norm='ortho', axes=[0,1])
-    return theta, s, reconstruct
+    return reconstruct
 
 def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, lv) :
     ''' Reconstruct signals through wavelet transform
@@ -251,14 +245,8 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, l
         
     Returns
     ----------
-        theta : array_like
-        (num_V1_weights/sample_size, n * m) shape. Data after discrete fourier transform applied 
-    
     reconstruct : array_like
         (n, m) shape array. Reconstructed image pixel array
-        
-    s_unravel : vector
-        (num_V1_weights/sample_size, 1) shape. Coefficient value generated from fitting data to LASSO. Contains significant values with most of vector zeroed out.
     '''
     
     # Ignore convergence warning to allow convergence warning not filling up all spaces when testing
@@ -281,7 +269,7 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, l
     s_unravel = pywt.unravel_coeffs(s, coeff_slices, coeff_shapes)
     reconstruct = pywt.waverecn(s_unravel, dwt_type, mode = 'zero')
     
-    return theta, reconstruct, s_unravel
+    return reconstruct
 
 def select_observation_model(img_arr, num_cell, observation, cell_size = None, sparse_freq = None):
     # Check if the cell_size and sparse_freq is none while it is conduction V1 observation
@@ -352,9 +340,9 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
         raise Exception("fit_intercept = True not implemented")
     
     if (method == 'dct') :
-        theta, s, reconstruct = fourier_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept)
+        reconstruct = fourier_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept)
     elif (method == 'dwt') :
-        theta, reconstruct, s = wavelet_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept, dwt_type, lv)
+        reconstruct = wavelet_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept, dwt_type, lv)
 
         # Reform the image using sparse vector s with inverse descrete cosine
         
@@ -362,64 +350,7 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
         reform += mini.intercept_ # not sure this is right
     
     #return theta, reformed img, sparse vectors
-    return theta, reconstruct, s
-
-# def color_reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 4, dwt_type = 'db2') :
-#     ''' Reconstruct colored (RGB) image with sample data
-    
-#     Parameters
-#     ----------
-#     img_arr : numpy_array
-#           (n, m) shape image containing array of pixels
-          
-#     num_cell : int
-#         Number of blobs that will be used to be determining which pixles to grab and use
-    
-#     cell_size : int
-#         Determines field size of opened and closed blob of data. Affect the data training
-        
-#     sparse_freq : int
-#         Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
-      
-#     alpha : float
-#         Penalty for fitting data onto LASSO function to search for significant coefficents
-
-#     Returns
-#     ----------
-#     final : numpy_array
-#         (n * m) shape array containing reconstructed RGB image array pixels.
-    
-#     '''
-#     num_cell, n, m = W.shape
-    
-#     if alpha == None :
-#         alpha = 1 * 50 / num_cell
-        
-#     if fit_intercept:
-#         raise Exception("fit_intercept = True not implemented")
-        
-#     i = 0
-# #     dim = img_arr[:,:,i].shape
- 
-#     final = np.zeros((n, m, 3))
-    
-#     # sample_sz, n, m = W.shape
-
-#     # with same V1 cells generated, reconstruct images for each of 3 rgb arrays and append to final
-#     while (i < 3):
-#         if (method == 'dct') :
-#             theta, s, reconstruct = fourier_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept)
-#         elif (method == 'dwt') :
-#             theta, reconstruct, s = wavelet_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept, dwt_type, lv)
-        
-#         final[:,:,i] = reconstruct
-#         i+=1
-        
-#     final = np.round(final).astype(int)
-#     final[final < 0] = 0
-#     final[final > 255] = 255
-#     final = final.astype(int)
-#     return theta, final, s
+    return reconstruct
 
 def color_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, alpha = None, fit_intercept = False, method = 'dct', observation = 'pixel', lv = 4, dwt_type = 'db2') :
     ''' Reconstruct colored (RGB) image with sample data
@@ -440,7 +371,23 @@ def color_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, a
       
     alpha : float
         Penalty for fitting data onto LASSO function to search for significant coefficents
-
+    
+    fit_intercept : bool
+        Parameter for LASSO function. Automatically adjust intercept calculated by LASSO, but it is recommended to set if False
+        
+    method : String
+        Determines whether the function will be based on descrete cosine transform (dct) or descrete wavelet transform (dwt). Default set up to dct
+    
+    observation : String
+        Observation technique that are going to be used to collet sample for reconstruction. Default set up to 'pixel'
+        Supported observation : ['pixel', 'gaussian', 'V1']
+    
+    lv : int
+        Determines level of frequency details for wavelet transform. Not used for dct
+    
+    dwt_type : String
+        Determines types of wavelet transform when dwt is used for its method.
+    
     Returns
     ----------
     final : numpy_array
@@ -485,13 +432,54 @@ def color_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, a
 
 
 def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, filter_dim = (30, 30), alpha = None, method = 'dct', observation = 'pixel', lv = 4, dwt_type = 'db2', rand_weight = False, mode = 'black') :
-    ''' 
-    Parametersw
-    ----------
+    ''' Allows to reconstruct any size of signal data since regular reconstruct function can only deal with small size of data. For filter reconstruction function, it can reconstruct any size of data as the function will break data into several parts and use reconstruction on each parts.
     
+    Parameters
+    ----------
+    img_arr : numpy_array
+          (n, m) shape image containing array of pixels
+          
+    num_cell : int
+        Number of blobs that will be used to be determining which pixles to grab and use
+    
+    cell_size : int
+        Determines field size of opened and closed blob of data. Affect the data training
+        
+    sparse_freq : int
+        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
+    
+    filter_dim : tuple
+        Determines size of data that are going to be dealt with for each reconstruction
+    
+    alpha : float
+        Penalty for fitting data onto LASSO function to search for significant coefficents
+    
+    fit_intercept : bool
+        Parameter for LASSO function. Automatically adjust intercept calculated by LASSO, but it is recommended to set if False
+        
+    method : String
+        Determines whether the function will be based on descrete cosine transform (dct) or descrete wavelet transform (dwt). Default set up to dct
+    
+    observation : String
+        Observation technique that are going to be used to collet sample for reconstruction. Default set up to 'pixel'
+        Supported observation : ['pixel', 'gaussian', 'V1']
+    
+    lv : int
+        Determines level of frequency details for wavelet transform. Not used for dct
+    
+    dwt_type : String
+        Determines types of wavelet transform when dwt is used for its method.
+    
+    rand_weight : bool
+        Decide if reconstruction for each data part is going to use same weight or random weight. Default set up to be False
+    
+    mode : String
+        Determines whether the reconstruction is going to be in grayscaled or colored
     
     Returns
     ----------
+    result : numpy_array
+        (n * m) shaped or (n * m * z) array containing reconstructed grascale/RGB image array pixels.
     
     '''
     # Create Filter

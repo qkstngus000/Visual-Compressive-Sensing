@@ -6,7 +6,7 @@ param_Wed_May_31_12_55_18_2023
    sparse_freq: [2, 4, 8]
 
 
-param_Wed_Jul_19_04_17_17_2023
+param_Wed_Jul_19_04_17_17_2023 (dct_sweep_exp)
    rep: [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19]
    alp: [0.01, 0.1, 1.0, 10.0]
    num_cell: [50, 200, 500]
@@ -14,7 +14,7 @@ param_Wed_Jul_19_04_17_17_2023
    sparse_freq: [2, 4, 8]
 
 
-param_Sat_Jul_22_05_25_33_2023
+param_Sat_Jul_22_05_25_33_2023 (dct_hyperparam_sweep)
    rep: [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19]
    alp: [0.01, 0.1, 1.0, 10.0]
    num_cell: [50, 200, 500]

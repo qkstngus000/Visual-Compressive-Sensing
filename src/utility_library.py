@@ -9,6 +9,17 @@ sys.path.append("../")
 from src.compress_sensing_library import *
 
 def search_root():
+    ''' Search for the root directory of the project
+    
+    Parameters
+    ----------
+        
+    Returns
+    ----------
+    root : path
+        Return absolute paths for the project
+    
+    '''
     back_path = './'
     root = Path(os.path.abspath('./'))
     while not root.match('*/research'):
@@ -17,6 +28,31 @@ def search_root():
     return root
 
 def fig_save_path(img_nm, method, observation, save_nm):
+    ''' Gives absolute paths for generated figures to be saved to have organized folder structure. Figure will be saved under figure directory and its format is set up to be png file.If folder path does not exist with the parameter given, then create a new path
+    
+    Parameters
+    ----------
+        img_nm : String
+            Name of the image file data used 
+        
+        method : String
+            Method used for the reconstruction.
+            Possible methods are ['dct', 'dwt']
+        
+        observation : String
+            Observation used to collect data for reconstruction
+            Possible observations are ['pixel', 'gaussian', 'V1']
+        
+        save_nm : String
+            Name of the file that it will be saved to
+        
+    Returns
+    ----------
+    path : path
+        Return absolute path including its file name
+    
+    '''
+    
     save_nm = save_nm.replace(" ", "_")
     method = method.lower()
     
@@ -35,6 +71,30 @@ def fig_save_path(img_nm, method, observation, save_nm):
     return os.path.join(fig_path, "{save_nm}.png".format(save_nm = save_nm))
 
 def data_save_path(img_nm, method, observation, save_nm): 
+    ''' Gives absolute paths for collected data to be saved to have organized folder structure. File will be saved under result directory and its format is set up to be csv file. If folder path does not exist with the parameter given, then create a new path
+    
+    Parameters
+    ----------
+        img_nm : String
+            Name of the image file data used 
+        
+        method : String
+            Method used for the reconstruction.
+            Possible methods are ['dct', 'dwt']
+        
+        observation : String
+            Observation used to collect data for reconstruction
+            Possible observations are ['pixel', 'gaussian', 'V1']
+        
+        save_nm : String
+            Name of the file that it will be saved to
+        
+    Returns
+    ----------
+    path : path
+        Return absolute path including its file name
+    
+    '''
     save_nm = save_nm.replace(" ", "_")
     method = method.lower()
     
@@ -58,6 +118,25 @@ def data_save_path(img_nm, method, observation, save_nm):
 
 
 def process_image(img, mode = 'black', visibility = False):
+    ''' Opens image file with given file name and determines whether image file will be color or grayscale image. Show the image if the visibility is set to be True
+    
+    Parameters
+    ----------
+        img : String
+            Name of the image file data to be opened
+        
+        mode : String
+            Determines whether image data will be grascaled or not
+        
+        visibility : bool
+            Determines whether image will be shown or not to check if image is correctly opened     
+        
+    Returns
+    ----------
+    img_arr : array_like
+        Return numpy array of image
+    
+    '''
     root = search_root()
     img_path = Image.open(os.path.join(root, 'image/{img}'.format(img=img)))
     color = ['-c', 'color']

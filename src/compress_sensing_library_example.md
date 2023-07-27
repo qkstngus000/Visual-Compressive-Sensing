@@ -102,13 +102,13 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (10, 10))
 
 fig.suptitle("Pixel Grascaled Reconstruction")
 ## Reconstruction with 100 number of cells grayscaled
-theta_gray_100, reconst_gray_100, s_gray_100 = reconstruct(pixel_W_100, pixel_y_100, alpha)
+reconst_gray_100 = reconstruct(pixel_W_100, pixel_y_100, alpha)
 ax1.imshow(reconst_gray_100, 'gray')
 ax1.set_title("{num_cell} number of cells".format(num_cell = num_cell_100))
 ax1.axis("off")
 
 ## Reconstruction with 300 number of cells grayscaled
-theta_gray_300, reconst_gray_300, s_gray_300 = reconstruct(pixel_W_300, pixel_y_300, alpha)
+reconst_gray_300 = reconstruct(pixel_W_300, pixel_y_300, alpha)
 ax2.imshow(reconst_gray_300, 'gray')
 ax2.set_title("{num_cell} number of cells".format(num_cell = num_cell_300))
 ax2.axis("off")
@@ -216,13 +216,13 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (10, 10))
 
 fig.suptitle("gaussian Grascaled Reconstruction")
 ## Reconstruction with 100 number of cells grayscaled
-theta_gray_100, reconst_gray_100, s_gray_100 = reconstruct(gaussian_W_100, gaussian_y_100, alpha)
+reconst_gray_100 = reconstruct(gaussian_W_100, gaussian_y_100, alpha)
 ax1.imshow(reconst_gray_100, 'gray')
 ax1.set_title("{num_cell} number of cells".format(num_cell = num_cell_100))
 ax1.axis("off")
 
 # ## Reconstruction with 300 number of cells grayscaled
-theta_gray_300, reconst_gray_300, s_gray_300 = reconstruct(gaussian_W_300, gaussian_y_300, alpha)
+reconst_gray_300 = reconstruct(gaussian_W_300, gaussian_y_300, alpha)
 ax2.imshow(reconst_gray_300, 'gray')
 ax2.set_title("{num_cell} number of cells".format(num_cell = num_cell_300))
 ax2.axis("off")
@@ -327,13 +327,13 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (10, 10))
 
 fig.suptitle("V1 Grascaled Reconstruction")
 ## Reconstruction with 100 number of cells grayscaled
-theta_gray_100, reconst_gray_100, s_gray_100 = reconstruct(V1_W_100, V1_y_100, alpha)
+reconst_gray_100 = reconstruct(V1_W_100, V1_y_100, alpha)
 ax1.imshow(reconst_gray_100, 'gray')
 ax1.set_title("{num_cell} number of cells".format(num_cell = num_cell_100))
 ax1.axis("off")
 
 # ## Reconstruction with 300 number of cells grayscaled
-theta_gray_300, reconst_gray_300, s_gray_300 = reconstruct(V1_W_300, V1_y_300, alpha)
+reconst_gray_300 = reconstruct(V1_W_300, V1_y_300, alpha)
 ax2.imshow(reconst_gray_300, 'gray')
 ax2.set_title("{num_cell} number of cells".format(num_cell = num_cell_300))
 ax2.axis("off")
