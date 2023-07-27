@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 sys.path.append("../")
 from src.compress_sensing_library import *
 
+# Package for importing image representation
+from PIL import Image, ImageOps
+
 def search_root():
     ''' Search for the root directory of the project
     
@@ -67,7 +70,7 @@ def fig_save_path(img_nm, method, observation, save_nm):
     fig_path = os.path.join(root, "figures/{method}/{img_nm}/{observation}".format(
         method = method, img_nm = img_nm, observation = observation))
     Path(fig_path).mkdir(parents=True, exist_ok = True)
-    
+    #TODO: add timestamp onto save_nm autometically
     return os.path.join(fig_path, "{save_nm}.png".format(save_nm = save_nm))
 
 def data_save_path(img_nm, method, observation, save_nm): 
@@ -116,6 +119,18 @@ def data_save_path(img_nm, method, observation, save_nm):
     
     return os.path.join(result_path, "{save_nm}.csv".format(save_nm = save_nm))
 
+def color():
+    ''' Pools for user argument on color mode
+    
+    Parameters
+    ----------
+    
+    Returns
+    ----------
+    list : list
+        return list of possible user answer for color mode
+    '''
+    return ['-c', 'c', 'color', '-color']
 
 def process_image(img, mode = 'black', visibility = False):
     ''' Opens image file with given file name and determines whether image file will be color or grayscale image. Show the image if the visibility is set to be True
@@ -139,11 +154,10 @@ def process_image(img, mode = 'black', visibility = False):
     '''
     root = search_root()
     img_path = Image.open(os.path.join(root, 'image/{img}'.format(img=img)))
-    color = ['-c', 'color']
-    if mode.lower() not in color:
+    if mode.lower() not in color():
         img_path = ImageOps.grayscale(img_path)
     if visibility:
-        if mode.lower() not in color:
+        if mode.lower() not in color():
             print("Processing grayscale image")
             plt.imshow(img_path, 'gray')
             plt.title("grayscaled_{img}".format(img = img.split(".")[0]))
