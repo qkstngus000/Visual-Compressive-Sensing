@@ -198,8 +198,6 @@ def main() :
 
     print('running dask completed')
 
-    print('running dask completed')
-
     futures = dask.persist(*delay_list)
     print('futures completed')
     progress(futures)

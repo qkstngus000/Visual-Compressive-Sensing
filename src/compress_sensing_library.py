@@ -273,14 +273,33 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, l
     return reconstruct
 
 def select_observation_model(img_arr, num_cell, observation, cell_size = None, sparse_freq = None):
-    '''
+    ''' Helper function to select the observation model to make main function concise
+    
     Parameters
     ----------
+    img_arr : numpy_array
+          (n, m) shape image containing array of pixels
+          
+    num_cell : int
+        Number of blobs that will be used to be determining which pixles to grab and use
     
+    observation : String
+        Observation technique that are going to be used to collet sample for reconstruction. Default set up to 'pixel'
+        Supported observation : ['pixel', 'gaussian', 'V1']
+    
+    cell_size : int
+        Determines field size of opened and closed blob of data. Affect the data training
+        
+    sparse_freq : int
+        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training 
     
     Returns
     ----------
-    
+    W : array_like
+        (num_V1_weights, n*m) shape array. Lists of weighted data
+        
+    y : vector
+        (num_V1_weights/sample_size, 1) shape. Dot product of W and image
    
     '''
     # Check if the cell_size and sparse_freq is none while it is conduction V1 observation
@@ -400,8 +419,7 @@ def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None, al
         (n * m) shape array containing reconstructed RGB image array pixels.
     
     '''
-    
-    
+
     i = 0
     dim = img_arr[:,:,i].shape
     n, m = dim
