@@ -579,12 +579,16 @@ def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, 
         cur_m = nxt_m
 
         i+=1
-    if (mode.lower() in color()):
-        result = img_arr_aug[:n, :m, :rgb]
-    else :    
-        result = img_arr_aug[:n,:m]
+    result = img_arr_aug[:n, :m, :rgb] if (mode.lower() in color()) else img_arr_aug[:n,:m]
+#     if (mode.lower() in color()):
+#         result = img_arr_aug[:n, :m, :rgb]
+#     else :    
+#         result = img_arr_aug[:n,:m]
     result = np.round(result).astype(int)
     result[result < 0] = 0
+#         result = img_arr_aug[:n, :m, :rgb]
+#     else :    
+#         result = img_arr_aug[:n,:m]
     result[result > 255] = 255
     result = result.astype(int)
     
