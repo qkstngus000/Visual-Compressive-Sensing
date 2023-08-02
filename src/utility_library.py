@@ -67,10 +67,15 @@ def fig_save_path(img_nm, method, observation, save_nm):
     else :
         observation = observation.lower()
         
+    # Except for the combined num_cell vs error figure, add time that figure was created for its uniqueness
+    if (observation.lower() != 'num_cell_error') :
+        if save_nm[-1] != '_' :
+            save_nm = save_nm + "_"
+        save_nm = save_nm + "_".join(str.split(time.ctime().replace(":", "_")))
+        
     fig_path = os.path.join(root, "figures/{method}/{img_nm}/{observation}".format(
         method = method, img_nm = img_nm, observation = observation))
     Path(fig_path).mkdir(parents=True, exist_ok = True)
-    #TODO: add timestamp onto save_nm autometically
     return os.path.join(fig_path, "{save_nm}.png".format(save_nm = save_nm))
 
 def data_save_path(img_nm, method, observation, save_nm): 
@@ -109,6 +114,9 @@ def data_save_path(img_nm, method, observation, save_nm):
     else :
         observation = observation.lower()
         
+    if save_nm[-1] != '_' :
+        save_nm = save_nm + "_"
+    save_nm = save_nm + "_".join(str.split(time.ctime().replace(":", "_")))
         
     result_path = os.path.join(root, "result/{method}/{img_nm}/{observation}".format(
         method = method, img_nm = img_nm, observation = observation))

@@ -21,7 +21,7 @@ def remove_unnamed_data(data):
             data.drop('Unnamed: 0', axis = 1, inplace=True)
     return data
 
-def process_result_data(img_file, method, pixel_file=None, gaussian_file=None, V1_file=None):
+def process_result_data(img_file, method, pixel_file=None, gaussian_file=None, V1_file=None, data_grab = 'auto'):
     root = search_root()
     img_nm = img_file.split('.')[0]
     
@@ -94,40 +94,33 @@ def get_min_error_data(method, observation, data_df):
     param_list = []
     
     # V1 observation takes two more parameter
-    if (observation == 'V1'):
-        # Check the method first to check what parameter it has to deal with
-        if (method == 'dct'):
+    if (observation.upper() == 'V1'):
+        # Check the method first to check what parameter it has to deal with, since dwt takes two more parameters
+        if (method.lower() == 'dct'):
             param_list = ['num_cell', 'sparse_freq', 'cell_size', 'alp']
-        elif (method == 'dwt') :
+        elif (method.lower() == 'dwt') :
             param_list = ['num_cell', 'sparse_freq', 'cell_size', 'alp', 'lv']
             
     else :
-        # Check the method first to check what parameter it has to deal with
         if (method == 'dct'):
             param_list = ['num_cell', 'alp']
         elif (method == 'dwt') :
             param_list = ['num_cell', 'alp', 'lv']
     
+    # For each hyperparameter, gives mean of its own repetition
     data_mean_df = data_df.groupby(param_list, as_index=False).mean().drop('rep', axis=1) 
-
+    
+    # Grab the lowest mean error from each number of cell
     data_min_df = data_mean_df.sort_values('error').drop_duplicates('num_cell')
     data_min_df = data_min_df.rename(columns={'error': 'min_error'})
+    
+    # Mark the hyperparameter that gives lowest mean error to whole dataset
     data_merged_df = pd.merge(data_df, data_min_df, on=param_list, how='left')
+    
+    # Grab hyperparameters that was marked
     data_plotting_data = data_merged_df.loc[data_merged_df['min_error'].notnull()]
 
-    data_min_mean_err_df = pd.DataFrame()
-    for i in data_mean_df['num_cell'].unique():
-        data_temp = data_mean_df.loc[data_mean_df['num_cell'] == i]
-        #hyperparameter for each number of cell
-        ## Grabbing values by each values
-        data_min_mean_err_df = data_min_mean_err_df.append(data_temp.loc[data_temp['error'] == data_temp['error'].min()])
-
-    # Merge two data to extract
-    data_min_mean_err_df = data_min_mean_err_df.rename(columns={'error' : 'mean_err'})
-    data_merged_df = pd.merge(data_df, data_min_mean_err_df, on = param_list, how = 'left')
-    data_plotting_data = data_merged_df.loc[data_merged_df['mean_err'].notnull()]
-      
-    return (data_plotting_data, data_min_mean_err_df)
+    return (data_plotting_data, data_min_df)
 
 def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_file=None, save = False) :
     img_nm = img.split('.')[0]
@@ -146,8 +139,14 @@ def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_f
     
     for obs, plot in data.items():
         sns.lineplot(data = plot[0], x = 'num_cell', y = 'error', palette='Accent', label = obs)
-        plt.plot(plot[1]['num_cell'], plot[1]['mean_err'], 'r.')
+        plt.plot(plot[1]['num_cell'], plot[1]['min_error'], 'r.')
     plt.legend(loc = 'best')
+    if save :
+        # for its save name, the name of file order is pixel -> gaussian -> V1 
+        save_nm = pixel_file.split('.')[0] + '_' + gaussian_file.split('.')[0] + '_' + V1_file.split('.')[0]
+        save_path = fig_save_path(img_nm, method, 'num_cell_error', save_nm)
+        plt.savefig(save_path, dpi = 200)
+        
     plt.show()
     
 def main():
