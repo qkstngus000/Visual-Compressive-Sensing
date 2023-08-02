@@ -62,10 +62,10 @@ def fig_save_path(img_nm, method, observation, save_nm):
     # Search for the root path
     root = search_root()
         
-    if (observation.split('/')[0] != 'v1' or observation.split('/')[0] != 'V1') :
-        observation = observation.lower()
-    else :
+    if (observation.split('/')[0] == 'v1' or observation.split('/')[0] == 'V1') :
         observation = observation.upper()
+    else :
+        observation = observation.lower()
         
     fig_path = os.path.join(root, "figures/{method}/{img_nm}/{observation}".format(
         method = method, img_nm = img_nm, observation = observation))
@@ -105,11 +105,8 @@ def data_save_path(img_nm, method, observation, save_nm):
     root = search_root()
     
     if (observation.split('/')[0] == 'v1' or observation.split('/')[0] == 'V1') :
-        print("upper triggered: " + observation.split('/')[0])
         observation = observation.upper()
-        
     else :
-        print("lower triggered: " + observation)
         observation = observation.lower()
         
         
