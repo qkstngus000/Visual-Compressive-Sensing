@@ -4,6 +4,7 @@ import time
 import os.path
 import sys
 import os
+import re
 import matplotlib.pyplot as plt
 sys.path.append("../")
 from src.compress_sensing_library import *
@@ -55,27 +56,23 @@ def fig_save_path(img_nm, method, observation, save_nm):
         Return absolute path including its file name
     
     '''
-    
-    save_nm = save_nm.replace(" ", "_")
-    method = method.lower()
-    
     # Search for the root path
     root = search_root()
-        
-    if (observation.split('/')[0] == 'v1' or observation.split('/')[0] == 'V1') :
-        observation = observation.upper()
-    else :
-        observation = observation.lower()
-        
-    # Except for the combined num_cell vs error figure, add time that figure was created for its uniqueness
-    if (observation.lower() != 'num_cell_error') :
-        if save_nm[-1] != '_' :
-            save_nm = save_nm + "_"
+    
+    method = method.lower()
+    observation = observation.upper() if observation.split('/')[0].upper() == 'V1' else observation.lower()
+    
+    save_nm = save_nm.replace(" ", "_")
+    if (observation != 'num_cell_error') :
+        if (save_nm[-1] != "_") :
+            save_nm = save_nm + "_" 
         save_nm = save_nm + "_".join(str.split(time.ctime().replace(":", "_")))
+    
         
     fig_path = os.path.join(root, "figures/{method}/{img_nm}/{observation}".format(
         method = method, img_nm = img_nm, observation = observation))
     Path(fig_path).mkdir(parents=True, exist_ok = True)
+    #TODO: add timestamp onto save_nm autometically
     return os.path.join(fig_path, "{save_nm}.png".format(save_nm = save_nm))
 
 def data_save_path(img_nm, method, observation, save_nm): 
@@ -103,21 +100,24 @@ def data_save_path(img_nm, method, observation, save_nm):
         Return absolute path including its file name
     
     '''
-    save_nm = save_nm.replace(" ", "_")
-    method = method.lower()
-    
     # Search for the root path
     root = search_root()
     
-    if (observation.split('/')[0] == 'v1' or observation.split('/')[0] == 'V1') :
-        observation = observation.upper()
+    method = method.lower()
+    observation = observation.upper() if observation.split('/')[0].upper() == 'V1' else observation.lower()
+    
+    save_nm = save_nm.replace(" ", "_")
+    
+    match = re.findall("_hyperparam$", save_nm)
+    if (match) : 
+        save_nm = save_nm + '.txt'
     else :
-        observation = observation.lower()
-        
-    if save_nm[-1] != '_' :
-        save_nm = save_nm + "_"
-    save_nm = save_nm + "_".join(str.split(time.ctime().replace(":", "_")))
-        
+        if (save_nm[-1] != "_") :
+            save_nm = save_nm + "_" 
+        save_nm = save_nm + "_".join(str.split(time.ctime().replace(":", "_"))) + '.csv'  
+    print(save_nm)
+    sys.exit(0)
+    
     result_path = os.path.join(root, "result/{method}/{img_nm}/{observation}".format(
         method = method, img_nm = img_nm, observation = observation))
     Path(result_path).mkdir(parents=True, exist_ok = True)
@@ -175,7 +175,6 @@ def process_image(img, mode = 'black', visibility = False):
     img_arr = np.asarray(img_path)
     
     return img_arr
-
 
 def remove_unnamed_data(data):
     ''' Remove unnecessary data column that stores index 
