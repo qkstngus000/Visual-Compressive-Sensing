@@ -34,7 +34,7 @@ def remove_unnamed_data(data):
             data.drop('Unnamed: 0', axis = 1, inplace=True)
     return data
 
-def process_result_data(img_file, method, pixel_file=None, gaussian_file=None, V1_file=None, data_grab = 'auto'):
+def process_result_data(img_file, method, pixel_file=None, gaussian_file=None, V1_file=None):
     ''' Open 3 csv data files, make it as pandas dataframe, remove unnecessary column, find the plotting data with minimum mean error for each of num_cell
     
     Parameters
@@ -53,10 +53,6 @@ def process_result_data(img_file, method, pixel_file=None, gaussian_file=None, V
     
     V1_file : String
         V1 observation data file from hyperparameter sweep that is needed to plot
-    
-    data_grab : String
-        With structured path, decides to grab all three data file automatically or manually. Currently not implemented
-        ['auto', 'manual']
         
     Returns
     ----------
@@ -149,11 +145,11 @@ def get_min_error_data(method, observation, data_df):
             
     Returns
     ----------
-    data_plotting_data : 
-    
+    data_plotting_data : pandas dataframe
+        Dataframe storing all hyperparameters that have the minimum error
     
     data_min_df : pandas dataframe
-        Dataframe Storing reconstruction hyperparameters and errors, but without unnecessary column
+        Dataframe storing hyperparameters that have minimum mean errors for each num_ell, but without unnecessary column
     
     '''
     param_list = []
@@ -187,12 +183,43 @@ def get_min_error_data(method, observation, data_df):
 
     return (data_plotting_data, data_min_df)
 
-def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_file=None, save = False) :
+def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_file=None, data_grab = 'auto', save = False) :
+    ''' Generate figure that compares which method gives the best minimum error
+    
+    Parameters
+    ----------
+    img : String
+        the name of image file
+       
+    method : String
+        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+    
+    pixel_file : String
+        pixel observation data file from hyperparameter sweep that is needed to plot
+    
+    gaussian_file : String
+        gaussian observation data file from hyperparameter sweep that is needed to plot
+    
+    V1_file : String
+        V1 observation data file from hyperparameter sweep that is needed to plot
+    
+    data_grab : String
+        With structured path, decides to grab all three data file automatically or manually. Currently not implemented
+        ['auto', 'manual']
+    
+    save : bool
+        Save data into specified path
+        [True, False]
+            
+    Returns
+    ----------
+    '''
     img_nm = img.split('.')[0]
     
-    if None in [pixel_file, gaussian_file, V1_file]: 
-        print("All observation data file mus3pmt be given")
+    if None in [pixel_file, gaussian_file, V1_file] and data_grab == 'manual': 
+        print("All observation data file must be given")    
         sys.exit(0)
+    
     
     #Pre-processing data to receive
     data = process_result_data(img, method, pixel_file, gaussian_file, V1_file)
