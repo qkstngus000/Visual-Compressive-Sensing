@@ -88,46 +88,69 @@ def process_result_data(img_file, method, pixel_file=None, gaussian_file=None, V
         obs_dict.update({obs: get_min_error_data(method, obs, file)})
     
     return obs_dict
+
+def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, save_img = False): 
+    ''' Display the reconstructed image along with pixel error and a colorbar.
     
+    Parameters
+    ----------
+        img_arr : numpy array 
+            Contains the pixel values for the original image
+        
+        reconst : numpy array 
+            Containing the pixel values for the reconstructed image
+        
+        method : String
+            Method used for the reconstruction.
+            Possible methods are ['dct', 'dwt']
+        
+        observation : String
+            Observation used to collect data for reconstruction
+            Possible observations are ['pixel', 'gaussian', 'V1']
+        
+        num_cell : Integer
+            Number of blobs that will be used to be determining which pixles to grab and use
+    
+        img_name : String
+            Name of the original image file (e.g. "Peppers")
+        
+        save_img : boolean
+            Determines if the image will be saved.
+    '''
 
+    # setup figures and axes
+    # NOTE: changing figsize here requires you to rescale the colorbar as well --adjust the shrink parameter to fit.
+    fig, axis = plt.subplots(1, 2, figsize = (8, 8))
+    plt.tight_layout()
 
-def error_colorbar(img_arr, reconst, observation, num_cell): 
+    # prepare the reconstruction axis
+    axis[0].set_title("{observation} Reconst: {num_cell} cell".format(observation=observation, num_cell = num_cell))
+    axis[0].axis('off')
+
+    # prepare the observation error axis
+    axis[1].set_title("{observation} Error: {num_cell} cells".format(observation = observation, num_cell = num_cell))
+    axis[1].axis('off')
+    
+    # calculate error for RGB images
     if (len(img_arr.shape) == 3):
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (8, 8))
-        plt.tight_layout()
-        ax1.imshow(reconst, cmap='gray', vmin = 0, vmax = 255)
-        ax1.set_title("{observation} Reconst: {num_cell} cell".format(observation=observation, num_cell = num_cell))
-        ax1.axis('off')
+        axis[0].imshow(reconst, vmin = 0, vmax = 255)
+        err = axis[1].imshow(((img_arr - reconst)**2).mean(axis = 2), 'Reds', vmin = 0, vmax = 255)
 
-        err = ax2.imshow(((img_arr - reconst)**2).mean(axis = 2), 'Reds', vmin = 0, vmax = 255)
-        ax2.set_title("{observation}Error: {num_cell} cells".format(observation = observation, num_cell = num_cell))
-        ax2.axis('off')
-
-        divider2 = make_axes_locatable(ax2)
-        cax2 = divider2.append_axes("right", size="3%", pad=0.05)
-        plt.colorbar(err, cax = cax2)
-        # ax2.set_aspect('equal')
-        # save_path = fig_save_path('peppers', 'dct', 'gaussian/filter_Reconst', "{f_n}X{f_m}_filter_{num_cell}_cell".
-        #             format(f_n = filt_dim[0], f_m = filt_dim[1], num_cell = num_cell))
-        # fig.savefig(save_path, dpi = 300,  bbox_inches="tight")
-#         plt.show()
+    # calculate error for Grayscaled images
     else :
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (8, 8))
-        plt.tight_layout()
+        axis[0].imshow(reconst, cmap='gray', vmin = 0, vmax = 255)
+        err = axis[1].imshow((img_arr - reconst), 'Reds', vmin = 0, vmax = 255)
 
-        ax1.imshow(reconst, vmin = 0, vmax = 255)
-        ax1.set_title("{observation} Reconst: {num_cell} cell".format(observation=observation, num_cell = num_cell))
-        ax1.axis('off')
+    # apply colorbar -- NOTE : if figsize is not (8, 8) then shrink value must be changeed as well
+    cbar = fig.colorbar(err, ax=axis, shrink = 0.363, aspect=10)
+    cbar.set_label("Error")
 
-        err = ax2.imshow((img_arr - reconst), 'Reds', vmin = 0, vmax = 255)
-        ax2.set_title("{observation} Reconst: {num_cell} cell".format(observation=observation, num_cell = num_cell))
-        ax2.axis('off')
-
-        divider2 = make_axes_locatable(ax2)
-        cax2 = divider2.append_axes("right", size="3%", pad=0.05)
-        plt.colorbar(err, cax = cax2)
-        ax2.set_aspect('equal')
-    return fig, ax1, ax2
+    # save image to outfile if desired, else display to the user
+    if save_img == True:
+        outfile = fig_save_path(img_name, "dct", observation, "colorbar")
+        plt.savefig(outfile, dpi = 300, bbox_inces = "tight")
+    else:
+        plt.show()
 
 def get_min_error_data(method, observation, data_df):
     ''' Retrieve plotting data and minimum error parameter to be returned
@@ -245,7 +268,13 @@ def main():
     #variables needed
     #print(len(sys.argv))
     #lst = None
-    
+    img_arr = process_image("tree_part1.jpg", "color", False)
+    reconst = np.load("tree_part1_reconst.npy")
+    method = "dct"
+    observation = "V1"
+    num_cell = "500"
+    error_colorbar(img_arr, reconst, method, observation, num_cell, "peppers", False)
+
     return 0;
 if __name__ == "__main__":
     main()
