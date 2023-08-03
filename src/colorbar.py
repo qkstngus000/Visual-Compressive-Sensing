@@ -6,50 +6,6 @@ from compress_sensing_library import *
 # Package for importing image representation
 from PIL import Image, ImageOps
 
-def error_colorbar(img_arr, reconst): 
-    if (len(img_arr.shape) == 3):
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (8, 8), dpi=200)
-        fig.set_figheight(7)
-        fig.set_figwidth(7)
-        plt.tight_layout(h_pad=1)
-
-        ax1.imshow(reconst, vmin = 0, vmax = 255)
-        ax1.set_title("Reconst: {num_cell} cell".format(num_cell = num_cell))
-        ax1.axis('off')
-
-        err = ax2.imshow(((img_arr - reconst)**2).mean(axis = 2), 'Reds', vmin = 0, vmax = 255)
-        ax2.set_title("Error: {num_cell} cells".format(num_cell = num_cell))
-        ax2.axis('off')
-
-        divider2 = make_axes_locatable(ax2)
-        cax2 = divider2.append_axes("right", size="3%", pad=0.05)
-        plt.colorbar(err, cax = cax2)
-        # ax2.set_aspect('equal')
-        # save_path = fig_save_path('{img_nm}', '{method}', '{obs}/error_colorbar'.
-        #             format(img_nm=img_nm, method=method, obs=observation, num_cell = num_cell))
-        # fig.savefig(save_path, dpi = 300,  bbox_inches="tight")
-        plt.show()
-    else :
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (8, 8), dpi=200)
-        fig.set_figheight(7)
-        fig.set_figwidth(7)
-        plt.tight_layout(h_pad=1)
-
-        ax1.imshow(reconst, vmin = 0, vmax = 255)
-        ax1.set_title("Reconst: {num_cell} cell".format(num_cell = num_cell))
-        ax1.axis('off')
-
-        err = ax2.imshow((img_arr - reconst), 'Reds', vmin = 0, vmax = 255)
-        ax2.set_title("Error: {num_cell} cells".format(num_cell = num_cell))
-        ax2.axis('off')
-
-        divider2 = make_axes_locatable(ax2)
-        cax2 = divider2.append_axes("right", size="3%", pad=0.05)
-        plt.colorbar(err, cax = cax2)
-        ax2.set_aspect('equal')
-        
-        plt.show()
-
 def remove_unnamed_data(data):
     for index in data:
         if (index == 'Unnamed: 0') :

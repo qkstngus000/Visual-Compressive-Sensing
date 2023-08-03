@@ -15,12 +15,6 @@ from src.utility_library import *
 # Package for importing image representation
 from PIL import Image, ImageOps
 
-def remove_unnamed_data(data):
-    for index in data:
-        if (index == 'Unnamed: 0') :
-            data.drop('Unnamed: 0', axis = 1, inplace=True)
-    return data
-
 
 def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, save_img = False): 
     ''' Display the reconstructed image along with pixel error and a colorbar.
@@ -85,31 +79,66 @@ def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, sa
     else:
         plt.show()
 
-def get_min_error_V1(img_nm, method, observation, data):
+
+
+def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_file=None, data_grab = 'auto', save = False) :
+    ''' Generate figure that compares which method gives the best minimum error
     
-    V1_param_mean_df = V1_param_df.groupby(
-    ['num_cell', 'sparse_freq', 'cell_size', 'alp'], as_index=False).mean().drop('rep', axis=1) 
-
-    V1_param_min_df = V1_param_mean_df.sort_values('error').drop_duplicates('num_cell')
-    V1_param_min_df = V1_param_min_df.rename(columns={'error': 'min_error'})
-    V1_merged_df = pd.merge(V1_param_df, V1_param_min_df, 
-                                   on=['num_cell', 'sparse_freq', 'cell_size', 'alp'], how='left')
-    V1_plotting_data = V1_merged_df.loc[V1_merged_df['min_error'].notnull()]
-
-    V1_min_mean_err_df = pd.DataFrame()
-    for i in V1_param_mean_df['num_cell'].unique():
-        V1_temp = V1_param_mean_df.loc[V1_param_mean_df['num_cell'] == i]
-        #hyperparameter for each number of cell
-        ## Grabbing values by each values
-        V1_min_mean_err_df = V1_min_mean_err_df.append(V1_temp.loc[V1_temp['error'] == V1_temp['error'].min()])
+    Parameters
+    ----------
+    img : String
+        the name of image file
+       
+    method : String
+        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+    
+    pixel_file : String
+        pixel observation data file from hyperparameter sweep that is needed to plot
+    
+    gaussian_file : String
+        gaussian observation data file from hyperparameter sweep that is needed to plot
+    
+    V1_file : String
+        V1 observation data file from hyperparameter sweep that is needed to plot
+    
+    data_grab : String
+        With structured path, decides to grab all three data file automatically or manually. Currently not implemented
+        ['auto', 'manual']
+    
+    save : bool
+        Save data into specified path
+        [True, False]
+            
+    Returns
+    ----------
+    '''
+    img_nm = img.split('.')[0]
+    
+    if None in [pixel_file, gaussian_file, V1_file] and data_grab == 'manual': 
+        print("All observation data file must be given")    
+        sys.exit(0)
+    
+    
+    #Pre-processing data to receive
+    data = process_result_data(img, method, pixel_file, gaussian_file, V1_file)
+    plt.xticks(data['V1'][0]['num_cell'])
+    plt.xlabel('num_cell')
+    title = "Num_Cell_Vs_Error_{img}_".format(img = img_nm)
+    plt.title(title.replace('_', ' '))
+    plt.legend(['V1', 'Pixel', 'Gaussian'], loc = 'best')
+    
+    for obs, plot in data.items():
+        sns.lineplot(data = plot[0], x = 'num_cell', y = 'error', palette='Accent', label = obs)
+        plt.plot(plot[1]['num_cell'], plot[1]['min_error'], 'r.')
+    plt.legend(loc = 'best')
+    if save :
+        # for its save name, the name of file order is pixel -> gaussian -> V1 
+        save_nm = pixel_file.split('.')[0] + '_' + gaussian_file.split('.')[0] + '_' + V1_file.split('.')[0]
+        save_path = fig_save_path(img_nm, method, 'num_cell_error', save_nm)
+        plt.savefig(save_path, dpi = 200)
         
-    # Merge two data to extract
-    V1_min_mean_err_df = V1_min_mean_err_df.rename(columns={'error' : 'mean_err'})
-    V1_merged_df = pd.merge(V1_param_df, V1_min_mean_err_df, on = ['num_cell', 'sparse_freq', 'cell_size', 'alp'], how = 'left')
-    V1_plotting_data = V1_merged_df.loc[V1_merged_df['mean_err'].notnull()]
-    print(V1_param_min_df)
-
-
+    plt.show()
+    
 def main():
     #variables needed
     #print(len(sys.argv))
