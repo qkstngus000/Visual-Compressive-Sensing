@@ -16,12 +16,54 @@ from src.utility_library import *
 from PIL import Image, ImageOps
 
 def remove_unnamed_data(data):
+    ''' Remove unnecessary data column that stores index 
+    
+    Parameters
+    ----------
+    data : pandas dataframe
+        Dataframe Storing reconstruction hyperparameters and errors
+            
+    Returns
+    ----------
+    data : pandas dataframe
+        Dataframe Storing reconstruction hyperparameters and errors, but without unnecessary column
+    
+    '''
     for index in data:
         if (index == 'Unnamed: 0') :
             data.drop('Unnamed: 0', axis = 1, inplace=True)
     return data
 
 def process_result_data(img_file, method, pixel_file=None, gaussian_file=None, V1_file=None, data_grab = 'auto'):
+    ''' Open 3 csv data files, make it as pandas dataframe, remove unnecessary column, find the plotting data with minimum mean error for each of num_cell
+    
+    Parameters
+    ----------
+    img_file : String
+        The name of image file that will be worked on
+        
+    method : String
+        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+        
+    pixel_file : String
+        pixel observation data file from hyperparameter sweep that is needed to plot
+    
+    gaussian_file : String
+        gaussian observation data file from hyperparameter sweep that is needed to plot
+    
+    V1_file : String
+        V1 observation data file from hyperparameter sweep that is needed to plot
+    
+    data_grab : String
+        With structured path, decides to grab all three data file automatically or manually. Currently not implemented
+        ['auto', 'manual']
+        
+    Returns
+    ----------
+    obs_dict : python dictionary
+        Dictionary that contains ['V1', 'gaussian', 'pixel'] as a key and [0]th value storing plotting data with [1]st data containing minimum mean error parameter for each num_cell
+    
+    '''
     root = search_root()
     img_nm = img_file.split('.')[0]
     
@@ -31,9 +73,12 @@ def process_result_data(img_file, method, pixel_file=None, gaussian_file=None, V
         sys.exit(0)
         
         
-    load_V1 = "{root}/result/{method}/{img_nm}/V1/{file}".format(root = root, method = method, img_nm = img_nm, file = V1_file)
-    load_gaussian = "{root}/result/{method}/{img_nm}/gaussian/{file}".format(root = root, method = method, img_nm = img_nm, file = gaussian_file)
-    load_pixel = "{root}/result/{method}/{img_nm}/pixel/{file}".format(root = root, method = method, img_nm = img_nm, file = pixel_file)
+    load_V1 = "{root}/result/{method}/{img_nm}/V1/{file}".format(
+        root = root, method = method, img_nm = img_nm, file = V1_file)
+    load_gaussian = "{root}/result/{method}/{img_nm}/gaussian/{file}".format(
+        root = root, method = method, img_nm = img_nm, file = gaussian_file)
+    load_pixel = "{root}/result/{method}/{img_nm}/pixel/{file}".format(
+        root = root, method = method, img_nm = img_nm, file = pixel_file)
     
     obs_dict= {'V1': pd.read_csv(load_V1),
                'gaussian': pd.read_csv(load_gaussian), 
@@ -45,8 +90,6 @@ def process_result_data(img_file, method, pixel_file=None, gaussian_file=None, V
         
     for obs, file in obs_dict.items():
         obs_dict.update({obs: get_min_error_data(method, obs, file)})
-#         print(obs_dict.get(obs))
-    
     
     return obs_dict
     
@@ -91,6 +134,28 @@ def error_colorbar(img_arr, reconst, observation, num_cell):
     return fig, ax1, ax2
 
 def get_min_error_data(method, observation, data_df):
+    ''' Retrieve plotting data and minimum error parameter to be returned
+    
+    Parameters
+    ----------
+    method : String
+        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+        
+    observation : String
+        Observation technique that are going to be used to collet sample for reconstruction.
+    
+    data_df : pandas dataframe
+        Dataframe Storing reconstruction hyperparameters and errors
+            
+    Returns
+    ----------
+    data_plotting_data : 
+    
+    
+    data_min_df : pandas dataframe
+        Dataframe Storing reconstruction hyperparameters and errors, but without unnecessary column
+    
+    '''
     param_list = []
     
     # V1 observation takes two more parameter
@@ -126,7 +191,7 @@ def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_f
     img_nm = img.split('.')[0]
     
     if None in [pixel_file, gaussian_file, V1_file]: 
-        print("All observation data file must be given")
+        print("All observation data file mus3pmt be given")
         sys.exit(0)
     
     #Pre-processing data to receive
