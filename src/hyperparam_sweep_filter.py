@@ -74,7 +74,6 @@ def run_sweep(method, img, observation, mode, dwt_type, lv, alpha_list, num_cell
     # save parameter_error data with error_results data
     params_result_df.to_csv(param_path)
     hyperparam_track = data_save_path(image_nm, method, observation, '{mode}_hyperparam'.format(mode = mode))
-    hyperparam_track = hyperparam_track.split('.')[0] + '.txt'
     f = open(hyperparam_track, 'a+')
     hyperparam_list = list(zip(search_df.columns, search_list))
     f.write(f"{param_csv_nm}\n")
