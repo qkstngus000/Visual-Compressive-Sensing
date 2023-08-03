@@ -20,17 +20,6 @@ import argparse
 import pywt
 
 
-def main():
-    method, img, observation, mode, dwt_type, level, alpha_list, num_cell, cell_size, sparse_freq = parse_args()
-
-    print(parse_args())
-
-    if method == "dct":
-        run_dct_sweep(method, img, observation, mode, alpha_list, num_cell, cell_size, sparse_freq)
-    elif method == "dwt":
-        run_dwt_sweep(method, img, observation, mode, dwt_type, level, alpha_list, num_cell, cell_size, sparse_freq)
-    print(parse_args())
-
 def run_dwt_sweep(method, img, observation, mode, dwt_type, lv, alpha_list, num_cell, cell_size, sparse_freq):
     # Parse given hyperparameters that would affect results
     delay_list = []
@@ -286,15 +275,12 @@ def parse_args():
     # get image infile
     parser.add_argument('-img_name', action='store', metavar='IMG_NAME', help='filename of image to be reconstructed', required=True, nargs=1)
 
-
     # add standard params
     parser.add_argument('-method', choices=['dct', 'dwt'], action='store', metavar='METHOD', help='Method you would like to use for reconstruction', required=True, nargs=1)
     parser.add_argument('-observation', choices=['pixel', 'V1', 'gaussian'], action='store', metavar='OBSERVATION', help='observation type to use when sampling', required=True, nargs=1)
     parser.add_argument('-mode', choices=['color', 'black'], action='store', metavar='COLOR_MODE', help='color mode of reconstruction', required=True, nargs=1)
 
-
-    
-    # theres a lot of these -- use this function instead of typing all
+    # theres a lot of these -- use this function instead of manually typing all
     wavelist = pywt.wavelist()
 
     # add hyperparams REQUIRED for dwt ONLY
@@ -333,10 +319,20 @@ def parse_args():
     cell_size = [eval(i) for i in args.cell_size]
     sparse_freq = [eval(i) for i in args.sparse_freq]
 
-
-    
     return method, img_name, observation, mode, dwt_type, level, alpha_list, num_cells, cell_size, sparse_freq
     
-    
+
+def main():
+    method, img, observation, mode, dwt_type, level, alpha_list, num_cell, cell_size, sparse_freq = parse_args()
+
+    print(parse_args())
+
+    if method == "dct":
+        run_dct_sweep(method, img, observation, mode, alpha_list, num_cell, cell_size, sparse_freq)
+    elif method == "dwt":
+        run_dwt_sweep(method, img, observation, mode, dwt_type, level, alpha_list, num_cell, cell_size, sparse_freq)
+    print(parse_args())
+
+
 if __name__ == '__main__':
     main()
