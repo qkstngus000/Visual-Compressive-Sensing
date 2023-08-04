@@ -1,4 +1,5 @@
 result_*.csv
 /dask-worker-space
 src/dask-worker-space/
+src/__pycache__
 experiment/dask-worker-space
