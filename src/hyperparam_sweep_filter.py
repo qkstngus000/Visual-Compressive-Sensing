@@ -21,9 +21,46 @@ import pywt
 
 
 
+
 def run_sweep(method, img, observation, mode, dwt_type, lv, alpha_list, num_cell, cell_size, sparse_freq):
+    ''' Generate a sweep over desired hyperparameters and saves results to a file.
+    
+    Parameters
+    ----------
+    method : String
+        Method of reconstruction ('dwt' or 'dct')
+    
+    img : String
+        Name of image to reconstruct (e.g. 'tree_part1.jpg')
+
+    observation : String
+        Method of observation (e.g. pixel, gaussian, v1)
+    
+    mode : String
+        Desired mode to reconstruct image (e.g. 'Color' or 'Black').
+
+    dwt_type : String
+        Type of dwt method to be used -- see pywt.wavelist() for all possible dwt types.
+        
+    lv : List of int
+        List of one or more integers in [1, 4].
+        
+    alpha_list : List of float
+        Penalty for fitting data onto LASSO function to search for significant coefficents
+
+    num_cell : List of int
+        Number of blobs that will be used to be determining which pixles to grab and use
+    
+    cell_size : List of int
+        Determines field size of opened and closed blob of data. Affect the data training
+
+    sparse_freq : List of int
+        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
+        
+    '''
+
+
     delay_list = []
-    params = []
     rep = np.arange(20)
     image_nm = img.split('.')[0]
     img_arr = process_image(img, mode)
@@ -85,6 +122,43 @@ def run_sweep(method, img, observation, mode, dwt_type, lv, alpha_list, num_cell
 
 # run sim for non-v1 dwt
 def run_sim_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell, img_arr):
+    ''' Generate a sweep over desired hyperparameters and saves results to a file.
+    
+    Parameters
+    ----------
+    method : String
+        Method of reconstruction ('dwt' or 'dct')
+    
+    observation : String
+        Method of observation (e.g. pixel, gaussian, v1)
+    
+    mode : String
+        Desired mode to reconstruct image (e.g. 'Color' or 'Black').
+
+    dwt_type : String
+        Type of dwt method to use -- see pywt.wavelist() for all possible dwt types.
+        
+    rep : int
+        The current repetition with the given parameters.
+
+    lv : int
+        Generate level of signal frequencies when dwt is used. Should be in [1, 4].
+
+    alpha : float
+        Penalty for fitting data onto LASSO function to search for significant coefficents
+
+    num_cell : int
+        Number of blobs that will be used to be determining which pixles to grab and use
+
+    img_arr : numpy_array
+        (n, m) shape image containing array of pixels
+    
+    Returns
+    ----------
+    error : float
+        Computed normalized error value per each pixel
+        
+    '''
     dim = img_arr.shape
     if (len(dim) == 3) :
     	n, m, rgb = dim
@@ -108,6 +182,49 @@ def run_sim_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell, i
 
 # run sim for v1 dwt
 def run_sim_V1_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell, cell_size, sparse_freq, img_arr):
+    ''' Generate a sweep over desired hyperparameters and saves results to a file.
+    
+    Parameters
+    ----------
+    method : String
+        Method of reconstruction ('dwt' or 'dct')
+
+    observation : String
+        Method of observation (e.g. pixel, gaussian, v1)
+    
+    mode : String
+        Desired mode to reconstruct image (e.g. 'Color' or 'Black').
+
+    dwt_type : String
+        Type of dwt method to use -- see pywt.wavelist() for all possible dwt types.
+
+    rep: int
+        The current repetition with the given parameters.
+
+    lv : int
+        Generate level of signal frequencies when dwt is used. Should be in [1, 4].
+
+    alpha : float
+        Penalty for fitting data onto LASSO function to search for significant coefficents
+
+    num_cell : int
+        Number of blobs that will be used to be determining which pixles to grab and use
+    
+    cell_size : int
+        Determines field size of opened and closed blob of data. Affect the data training
+
+    sparse_freq : int
+        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
+
+    img_arr : numpy_array
+        (n, m) shape image containing array of pixels
+        
+    Returns
+    ----------
+    error : float
+        Computed normalized error value per each pixel
+
+    '''
     dim = img_arr.shape
     if (len(dim) == 3) :
     	n, m, rgb = dim
@@ -133,6 +250,38 @@ def run_sim_V1_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell
     
 # run sim for non-v1 dct 
 def run_sim_dct(method, observation, mode, rep, alpha, num_cell, img_arr):
+    ''' Generate a sweep over desired hyperparameters and saves results to a file.
+    
+    Parameters
+    ----------
+
+    method : String
+        Method of reconstruction ('dwt' or 'dct')
+
+    observation : String
+        Method of observation (e.g. pixel, gaussian, v1)
+    
+    mode : String
+        Desired mode to reconstruct image (e.g. 'Color' or 'Black').
+
+    rep: int
+        The current repetition with the given parameters.
+
+    alpha : float
+        Penalty for fitting data onto LASSO function to search for significant coefficents
+
+    num_cell : List of int
+        Number of blobs that will be used to be determining which pixles to grab and use
+    
+    img_arr : numpy_array
+        (n, m) shape image containing array of pixels
+
+    Returns
+    ----------
+    error : float
+        Computed normalized error value per each pixel
+
+    '''
     dim = img_arr.shape
     if (len(dim) == 3) :
     	n, m, rgb = dim
@@ -151,6 +300,43 @@ def run_sim_dct(method, observation, mode, rep, alpha, num_cell, img_arr):
 
 # run sim for v1 dct
 def run_sim_V1_dct(method, observation, mode, rep, alpha, num_cell, cell_size, sparse_freq, img_arr):
+    ''' Run a sim for V1 dct
+    
+    Parameters
+    ----------
+    method : String
+        Method of reconstruction ('dwt' or 'dct')
+    
+    observation : String
+        Method of observation (e.g. pixel, gaussian, v1)
+    
+    mode : String
+        Desired mode to reconstruct image (e.g. 'Color' or 'Black').
+
+    rep: int
+        The current repetition with the given parameters.
+
+    alpha : float
+        Penalty for fitting data onto LASSO function to search for significant coefficents
+
+    num_cell : int
+        Number of blobs that will be used to be determining which pixles to grab and use
+    
+    cell_size : int
+        Determines field size of opened and closed blob of data. Affect the data training
+
+    sparse_freq : int
+        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
+        
+    img_arr : numpy_array
+        (n, m) shape image containing array of pixels
+
+    Returns
+    ----------
+    error : float
+        Computed normalized error value per each pixel
+
+    '''
     dim = img_arr.shape
     if (len(dim) == 3) :
     	n, m, rgb = dim
