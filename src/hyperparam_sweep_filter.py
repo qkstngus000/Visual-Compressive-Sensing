@@ -66,13 +66,16 @@ def run_sweep(method, img, observation, mode, dwt_type, lv, alpha_list, num_cell
     progress(futures)
     # Compute the result
     results = dask.compute(*futures)
+    
+    # Saves Computed data to csv file format
     results_df = pd.DataFrame(results, columns=['error'])#, 'theta', 'reform', 's'])
     param_csv_nm = "param_"
     param_path = data_save_path(image_nm, method, observation, '{mode}_{param_csv_nm}'.format(mode = mode, param_csv_nm = param_csv_nm))
     # Add error onto parameter
     params_result_df = search_df.join(results_df['error'])
-    # save parameter_error data with error_results data
     params_result_df.to_csv(param_path)
+    
+    # Saves hyperparameter used for computing this data to txt file format
     hyperparam_track = data_save_path(image_nm, method, observation, '{mode}_hyperparam'.format(mode = mode))
     f = open(hyperparam_track, 'a+')
     hyperparam_list = list(zip(search_df.columns, search_list))
@@ -81,7 +84,9 @@ def run_sweep(method, img, observation, mode, dwt_type, lv, alpha_list, num_cell
         f.write(f"   {hyperparam[0]}: {hyperparam[1]}\n")
     f.write("\n\n")
     f.close()
-
+    
+    # Terminate Dask properly
+    client.close()
 
 # run sim for non-v1 dwt
 def run_sim_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell, img_arr):
