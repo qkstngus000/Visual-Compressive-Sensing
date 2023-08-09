@@ -61,12 +61,12 @@ def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, sa
     # calculate error for RGB images
     if (len(img_arr.shape) == 3):
         axis[0].imshow(reconst, vmin = 0, vmax = 255)
-        err = axis[1].imshow(((img_arr - reconst)**2).mean(axis = 2), 'Reds', vmin = 0, vmax = 255)
+        err = axis[1].imshow(((img_arr - reconst)**2).mean(axis = 2), 'Reds', vmin = 0, vmax = 80)
 
     # calculate error for Grayscaled images
     else :
         axis[0].imshow(reconst, cmap='gray', vmin = 0, vmax = 255)
-        err = axis[1].imshow((img_arr - reconst), 'Reds', vmin = 0, vmax = 255)
+        err = axis[1].imshow((img_arr - reconst), 'Reds', vmin = 0, vmax = 80)
 
     # apply colorbar -- NOTE : if figsize is not (8, 8) then shrink value must be changeed as well
     cbar = fig.colorbar(err, ax=axis, shrink = 0.363, aspect=10)

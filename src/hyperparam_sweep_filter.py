@@ -60,7 +60,7 @@ def run_sweep(method, img, observation, mode, dwt_type, lv, alpha_list, num_cell
 
 
     delay_list = []
-    rep = np.arange(20)
+    rep = np.arange(8)
     image_nm = img.split('.')[0]
     img_arr = process_image(img, mode)
 
