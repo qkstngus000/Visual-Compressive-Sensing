@@ -371,12 +371,13 @@ def parse_args():
     # add hyperparams REQUIRED for dwt ONLY
     parser.add_argument('-dwt_type', choices=wavelist, action='store', metavar='DWT_TYPE', help='dwt type', required=False, nargs=1)
     parser.add_argument('-level', choices=['1', '2', '3', '4'], action='store', metavar='LEVEL', help='level', required=False, nargs="+")
+    # add hyperparams REQUIRED for v1 only
+    parser.add_argument('-cell_size', action='store', metavar='CELL_SIZE', help='cell size', required=False, nargs="+")
+    parser.add_argument('-sparse_freq', action='store', metavar='SPARSE_FREQUENCY', help='sparse frequency', required=False, nargs="+")
     # add hyperparams that are used for both dct and dwt
     parser.add_argument('-alpha_list', action='store', metavar="ALPHAS", help='alpha values to use', required=True, nargs="+")
     parser.add_argument('-num_cells', action='store', metavar='NUM_CELLS', help='Method you would like to use for reconstruction', required=True, nargs="+")
-    parser.add_argument('-cell_size', action='store', metavar='CELL_SIZE', help='cell size', required=True, nargs="+")
-    parser.add_argument('-sparse_freq', action='store', metavar='SPARSE_FREQUENCY', help='sparse frequency', required=True, nargs="+")
-
+    
     args = parser.parse_args()
     method = args.method[0]
     img_name = args.img_name[0]
@@ -387,19 +388,22 @@ def parse_args():
         parser.error('dwt method requires -dwt_type and -level.')
     elif method == "dct" and (args.dwt_type is not None or args.level is not None):
         parser.error('dct method does not use -dwt_type and -level.')
+    if observation.lower() == "v1": and (args.cell_size is None or args.sparse_freq is None):
+        parser.error('v1 observation requires cell size and sparse freq.')
+    elif observation.lower() != "v1" and (args.cell_size is not None or args.sparse_freq is not None):
+        parser.error('Cell size and sparse freq params are only required for V1 observation.')
     dwt_type = args.dwt_type
     level = [eval(i) for i in args.level] if args.level is not None else None
     alpha_list = [eval(i) for i in args.alpha_list]
     num_cells = [eval(i) for i in args.num_cells]
-    cell_size = [eval(i) for i in args.cell_size]
-    sparse_freq = [eval(i) for i in args.sparse_freq]
+    cell_size = [eval(i) for i in args.cell_size] if args.cell_size is not None else None
+    sparse_freq = [eval(i) for i in args.sparse_freq] if args.sparse_freq is not None else None
 
     return method, img_name, observation, mode, dwt_type, level, alpha_list, num_cells, cell_size, sparse_freq
     
 
 def main():
     method, img, observation, mode, dwt_type, level, alpha_list, num_cell, cell_size, sparse_freq = parse_args()
-    print(parse_args())
     run_sweep(method, img, observation, mode, dwt_type, level, alpha_list, num_cell, cell_size, sparse_freq)
 
 if __name__ == '__main__':
