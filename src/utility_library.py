@@ -115,14 +115,12 @@ def data_save_path(img_nm, method, observation, save_nm):
         if (save_nm[-1] != "_") :
             save_nm = save_nm + "_" 
         save_nm = save_nm + "_".join(str.split(time.ctime().replace(":", "_"))) + '.csv'  
-    print(save_nm)
-    sys.exit(0)
     
     result_path = os.path.join(root, "result/{method}/{img_nm}/{observation}".format(
         method = method, img_nm = img_nm, observation = observation))
     Path(result_path).mkdir(parents=True, exist_ok = True)
     
-    return os.path.join(result_path, "{save_nm}.csv".format(save_nm = save_nm))
+    return os.path.join(result_path, save_nm)
 
 def color():
     ''' Pools for user argument on color mode

@@ -540,7 +540,7 @@ def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, 
         img_arr_aug = np.zeros((new_n, new_m))
         img_arr_aug[:n, :m] = img_arr
         
-    print("Process Reconstruction on {shape} image".format(shape = img_arr_aug.shape))
+#     print("Process Reconstruction on {shape} image".format(shape = img_arr_aug.shape))
     i = 1 # counter
     result = np.zeros(img_arr.shape)
     cur_n, cur_m = (0, 0)

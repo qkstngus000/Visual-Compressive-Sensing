@@ -148,7 +148,7 @@ def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_f
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Create a hyperparameter sweep')
+    parser = argparse.ArgumentParser(description='Create a live reconstruction of a desired image and display error with colorbar')
     # theres a lot of these -- use this function instead of manually typing all
     wavelist = pywt.wavelist()
     
