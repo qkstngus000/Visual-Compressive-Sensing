@@ -83,7 +83,7 @@ def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, sa
     # save image to outfile if desired, else display to the user
     if save_img == True:
         outfile = fig_save_path(img_name, "dct", observation, "colorbar")
-        plt.savefig('test.png', dpi = 300, bbox_inches = "tight")
+        plt.savefig(outfile, dpi = 300, bbox_inches = "tight")
     else:
         plt.show()
 
@@ -141,7 +141,7 @@ def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_f
     if save :
         # for its save name, the name of file order is pixel -> gaussian -> V1 
         save_nm = pixel_file.split('.')[0] + '_' + gaussian_file.split('.')[0] + '_' + V1_file.split('.')[0]
-        save_path = fig_save_path("test.png")
+        save_path = fig_save_path(img_nm, method, 'num_cell_error', save_nm)
         plt.savefig(save_path, dpi = 200)
         
     plt.show()
