@@ -388,7 +388,7 @@ def parse_args():
         parser.error('dwt method requires -dwt_type and -level.')
     elif method == "dct" and (args.dwt_type is not None or args.level is not None):
         parser.error('dct method does not use -dwt_type and -level.')
-    if observation.lower() == "v1": and (args.cell_size is None or args.sparse_freq is None):
+    if observation.lower() == "v1" and (args.cell_size is None or args.sparse_freq is None):
         parser.error('v1 observation requires cell size and sparse freq.')
     elif observation.lower() != "v1" and (args.cell_size is not None or args.sparse_freq is not None):
         parser.error('Cell size and sparse freq params are only required for V1 observation.')
