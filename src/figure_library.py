@@ -164,15 +164,15 @@ def add_colorbar_args(parser):
     
     parser.add_argument('-img_name', action='store', metavar='IMG_NAME', help='[Colorbar and Num Cell Figure] : filename of image to be reconstructed', required=False, nargs=1)
     # add standard params
-    parser.add_argument('-method', choices=['dct', 'dwt'], action='store', metavar='METHOD', help='[Colorbar and Num Cell Figure] : Method you would like to use for reconstruction', required=False, nargs=1)
-    parser.add_argument('-observation', choices=['pixel', 'V1', 'gaussian'], action='store', metavar='OBSERVATION', help='[Colorbar Figure] : observation type to use when sampling', required=False, nargs=1)
+    parser.add_argument('-method', choices=['dct', 'dwt'], action='store', metavar='METHOD', help='[Colorbar and Num Cell Figure] : Method to use for reconstruction', required=False, nargs=1)
+    parser.add_argument('-observation', choices=['pixel', 'V1', 'gaussian'], action='store', metavar='OBS', help='[Colorbar Figure] : observation type to use when sampling', required=False, nargs=1)
     parser.add_argument('-mode', choices=['color', 'black'], action='store', metavar='COLOR_MODE', help='[Colorbar Figure] : color mode of reconstruction', required=False, nargs=1)
     # add hyperparams REQUIRED for dwt ONLY
     parser.add_argument('-dwt_type', choices=wavelist, action='store', metavar='DWT_TYPE', help='[Colorbar Figure] : dwt type', required=False, nargs=1)
     parser.add_argument('-level', choices=['1', '2', '3', '4'], action='store', metavar='LEVEL', help='[Colorbar Figure] : level', required=False, nargs=1)
     # add hyperparams REQUIRED for V1 ONLY
     parser.add_argument('-cell_size', action='store', metavar='CELL_SIZE', help='[Colorbar Figure] : cell size', required=False, nargs=1)
-    parser.add_argument('-sparse_freq', action='store', metavar='SPARSE_FREQUENCY', help='[Colorbar Figure] : sparse frequency', required=False, nargs=1)
+    parser.add_argument('-sparse_freq', action='store', metavar='FREQ', help='[Colorbar Figure] : sparse frequency', required=False, nargs=1)
     # add hyperparams that are used for both dct and dwt
     parser.add_argument('-alpha', action='store', metavar="ALPHA", help='[Colorbar Figure] : alpha values to use', required=False, nargs=1)
     parser.add_argument('-num_cells', action='store', metavar='NUM_CELLS', help='[Colorbar Figure] : Method you would like to use for reconstruction', required=False, nargs=1)
@@ -204,9 +204,9 @@ def eval_colorbar_args(args, parser):
 
 
 def add_num_cell_args(parser):
-    parser.add_argument('-pixel_file', action='store', metavar='PIXEL', help='[Num Cell Figure] : file to read pixel data from', required=False, nargs=1)
-    parser.add_argument('-gaussian_file', action='store', metavar='GAUSSIAN', help='[Num Cell Figure] : file to read gaussian data from', required=False, nargs=1)
-    parser.add_argument('-v1_file', action='store', metavar='V1', help='[Num Cell Figure] : file to read V1 data from', required=False, nargs=1)
+    parser.add_argument('-pixel_file', action='store', metavar='FILE', help='[Num Cell Figure] : file to read pixel data from', required=False, nargs=1)
+    parser.add_argument('-gaussian_file', action='store', metavar='FILE', help='[Num Cell Figure] : file to read gaussian data from', required=False, nargs=1)
+    parser.add_argument('-v1_file', action='store', metavar='FILE', help='[Num Cell Figure] : file to read V1 data from', required=False, nargs=1)
     parser.add_argument('-data_grab', action='store_true', help='[Num Cell Figure] : auto grab data when argument is present', required=False)
     parser.add_argument('-save', action='store_true', help='[Num Cell Figure] : save into specified path when argument is present', required=False)
 
@@ -224,7 +224,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Generate a figure of your choosing.')
     
     # add figtype -- this is the only required argparse arg, determine which others should be there based on figtype
-    parser.add_argument('-fig_type', choices=['colorbar', 'num_cell'], action='store', metavar='FIGTYPE', help='type of figure to generate', required=True, nargs=1)
+    parser.add_argument('-fig_type', choices=['colorbar', 'num_cell'], action='store', metavar='FIGTYPE', help='[Colorbar and Num Cell Figure] : type of figure to generate', required=True, nargs=1)
 
     add_colorbar_args(parser)
     add_num_cell_args(parser)
