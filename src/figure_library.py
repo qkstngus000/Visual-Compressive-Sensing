@@ -142,6 +142,66 @@ def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_f
         
     plt.show()
 
+def alpha_error(img, method, pixel_data, gaussian_data, V1_data, save = False):
+    if None in [pixel_data, gaussian_data, V1_data]:
+        print("Currently all file required")
+        sys.exit(0)
+    
+    title = ''
+    
+    # Preprocess data not to have 
+    pixel_df = remove_unnamed_data(pd.read_csv(pixel_data))
+    gaussian_df = remove_unnamed_data(pd.read_csv(gaussian_data))
+    V1_df = remove_unnamed_data(pd.read_csv(V1_data))
+    
+    num_cell_list = V1_df['num_cell'].unique()
+    
+    for num_cell in num_cell_list :
+        # In order to bring fixed cell_size and sparse_frequency, bring parameter that has median error value
+        V1_df_mean = V1_df.loc[V1_df["num_cell"] == num_cell].groupby(list(V1_df.columns[1:-1]), 
+                                               as_index = False).mean().drop('rep', axis=1)
+        median_col = V1_df_mean.loc[V1_df_mean['error'] == V1_df_mean['error'].median()]
+
+        # Depending on the basis used (dct / dwt) add lv parameter
+        if (method.lower() == 'dct') :
+            cell_size, sparse_freq = V1_df_mean.loc[V1_df_mean['error'] == V1_df_mean['error'].
+                                                    median()][['cell_size', 'sparse_freq']].values.squeeze()
+            V1_df_mod = V1_df.loc[(V1_df['cell_size'] == cell_size) & 
+                                  (V1_df['sparse_freq'] == sparse_freq)]
+            title=r"$\alpha$_Error for {cell} cells (cell_size: {cell_size}, sparse_freq: {sparse_freq})".format(
+                cell = num_cell, cell_size = cell_size, sparse_freq = sparse_freq)
+        else :
+            cell_size, sparse_freq, lv = V1_df_mean.loc[V1_df_mean['error'] == V1_df_mean['error'].
+                                                    median()][['cell_size', 'sparse_freq', 'lv']].values.squeeze()
+            V1_df_mod = V1_df.loc[(V1_df['cell_size'] == cell_size) & 
+                                  (V1_df['sparse_freq'] == sparse_freq) & 
+                                  (V1_df['lv'] == lv)]
+            title=r"$\alpha$_Error for {cell} cells \
+            (cell_size: {cell_size}, sparse_freq: {sparse_freq}, lv: {lv})".format(
+                cell = num_cell, cell_size = cell_size, sparse_freq = sparse_freq, lv = lv)
+
+        fig = sns.relplot(data = V1_df_mod, x = 'alp', y = 'error', kind='line', palette='Accent', 
+                          legend = True, label = 'V1')
+
+
+        fig.map(sns.lineplot, x = 'alp', y = 'error', data = pixel_df.loc[pixel_df["num_cell"] == num_cell], 
+                label= 'pixel', color = 'red', 
+                legend = True)
+        fig.map(sns.lineplot, x = 'alp', y = 'error', data = gaussian_df.loc[gaussian_df["num_cell"] == num_cell], 
+                label= 'gaussian', color = 'green', 
+                legend = True)
+        fig.set(title = title)
+        fig.add_legend(title='Observation', loc = 'right')
+        fig.set(xscale='log')
+        fig.set(yscale='log')
+        plt.xlabel(r"$\alpha$")
+        
+        # Save the figure
+        if save :
+            save
+            path = fig_save_path(img, method, 'combined', title)
+            plt.savefig(path, dpi = 200)
+        plt.show()
 
 def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level, alpha, num_cells, cell_size, sparse_freq):
     '''
