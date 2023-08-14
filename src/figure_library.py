@@ -16,7 +16,6 @@ from src.arg_library import *
 from PIL import Image, ImageOps
 
 
-
 def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, save_img = False): 
     ''' Display the reconstructed image along with pixel error and a colorbar.
     
@@ -145,6 +144,42 @@ def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_f
 
 
 def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level, alpha, num_cells, cell_size, sparse_freq):
+    '''
+    Generates a reconstruction and error figure for desired parameters.
+
+    Parameters
+    ---------
+    method : String
+        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+
+    img_name : String
+        The name of image file to reconstruct from.
+            
+    observation : String
+        Observation used to collect data for reconstruction
+        Possible observations are ['pixel', 'gaussian', 'V1']
+        
+    mode : String
+        Mode to reconstruct image ['color' or 'black']
+    
+    dwt_type : String
+        Type of dwt method to be used -- see pywt.wavelist() for all possible dwt types.
+        
+    level : int
+        Level of signal frequencies for dwt -- should be an integer in [1, 4].
+        
+    alpha : float
+        Penalty for fitting data onto LASSO function to search for significant coefficents
+
+    num_cells : int
+        Number of blobs that will be used to be determining which pixels to grab and use
+    
+    cell_size : int
+        Determines field size of opened and closed blob of data. Affect the data training
+
+    sparse_freq : int
+        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
+    '''
     rand_weight = False
     filter_dim = (30, 30)
     img_arr = process_image(img_name, mode, False)
