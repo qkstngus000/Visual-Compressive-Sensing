@@ -198,7 +198,6 @@ def alpha_error(img, method, pixel_data, gaussian_data, V1_data, save = False):
         
         # Save the figure
         if save :
-            save
             path = fig_save_path(img, method, 'combined', title)
             plt.savefig(path, dpi = 200)
         plt.show()
