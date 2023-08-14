@@ -61,8 +61,9 @@ def fig_save_path(img_nm, method, observation, save_nm):
     
     method = method.lower()
     observation = observation.upper() if observation.split('/')[0].upper() == 'V1' else observation.lower()
-    
+    img_nm = img_nm.split('.')[0]
     save_nm = save_nm.replace(" ", "_")
+    
     if (observation != 'num_cell_error') :
         if (save_nm[-1] != "_") :
             save_nm = save_nm + "_" 
@@ -105,7 +106,7 @@ def data_save_path(img_nm, method, observation, save_nm):
     
     method = method.lower()
     observation = observation.upper() if observation.split('/')[0].upper() == 'V1' else observation.lower()
-    
+    img_nm = img_nm.split('.')[0]
     save_nm = save_nm.replace(" ", "_")
     
     match = re.findall("_hyperparam$", save_nm)
