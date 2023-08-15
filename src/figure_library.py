@@ -143,6 +143,31 @@ def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_f
     plt.show()
 
 def alpha_error(img, method, pixel_data, gaussian_data, V1_data, save = False):
+    ''' Generate figure that compares various alpha LASSO panelty and how it affect the error of the reconstruction among three different observation. 
+    
+    Parameters
+    ----------
+        img : String
+            Name of the image that is used by sweeped data
+        
+        method : String
+        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+    
+        pixel_data : String
+            pixel observation data file from hyperparameter sweep that is needed to plot
+
+        gaussian_data : String
+            gaussian observation data file from hyperparameter sweep that is needed to plot
+
+        V1_data : String
+            V1 observation data file from hyperparameter sweep that is needed to plot
+        
+        save : boolean
+            Determines if the image will be saved.
+            
+    Returns
+    ----------
+    '''
     if None in [pixel_data, gaussian_data, V1_data]:
         print("Currently all file required")
         sys.exit(0)
