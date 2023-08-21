@@ -69,6 +69,7 @@ def generate_V1_variables(img_arr, num_cell, cell_size, sparse_freq):
     y : vector
         (num_V1_weights/sample_size, 1) shape. Dot product of W and image
     '''
+    
     # Get size of image
     dim = np.asanyarray(img_arr).shape[:2]
     n, m = dim
@@ -137,9 +138,9 @@ def generate_gaussian_variables(img_arr, num_cell):
     y = generate_Y(W, img_arr)
     return W, y
 
-# Error Calculation by Frosbian Norm
+# Error Calculation by Frobenius Norm
 def error_calculation(img_arr, reconst):
-    ''' Compute mean error per each data using frosbian normalization technique
+    ''' Compute mean error per each data using frobenius norm
         
     Parameters
     ----------
@@ -415,7 +416,7 @@ def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None, al
     
     Returns
     ----------
-    final : numpy_array
+    img : numpy_array
         (n * m) shape array containing reconstructed RGB image array pixels.
     
     '''
@@ -431,9 +432,9 @@ def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None, al
         alpha = 1 * 50 / num_cell
     
 #     W = V1_weights(num_cell, dim, cell_size, sparse_freq) 
-    final = np.zeros(img_arr.shape)
+    img = np.zeros(img_arr.shape)
 
-    # with same V1 cells generated, reconstruct images for each of 3 rgb arrays and append to final
+    # with same V1 cells generated, reconstruct images for each of 3 rgb arrays and append to img
     while (i < 3):
         img_arr_pt = img_arr[:,:,i]
         img_arr_pt_dim = img_arr_pt.shape
@@ -445,14 +446,14 @@ def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None, al
             reconst = reconstruct(W, y, alpha, method = method)
         else :
             reconst = reconstruct(W, y, alpha, method = method, lv = lv, dwt_type = dwt_type)
-        final[:,:,i] = reconst
+        img[:,:,i] = reconst
         i+=1
         
-    final = np.round(final).astype(int)
-    final[final < 0] = 0
-    final[final > 255] = 255
-    final = final.astype(int)
-    return final
+    img = np.round(img).astype(int)
+    img[img < 0] = 0
+    img[img > 255] = 255
+    img = img.astype(int)
+    return img
 
 
 def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, filter_dim = (30, 30), alpha = None, method = 'dct', observation = 'pixel', lv = 4, dwt_type = 'db2', rand_weight = False, mode = 'black') :
