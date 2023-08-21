@@ -177,7 +177,7 @@ def run_sim_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell, i
     lv = int(lv)
     alpha = float(alpha)
     img_arr = np.array([img_arr]).squeeze()
-    reconst = filter_reconstruct(img_arr, num_cell = num_cell, alpha = alpha, method = method, observation = observation, mode = mode, lv = lv, dwt_type = dwt_type)
+    reconst = large_img_experiment(img_arr, num_cell = num_cell, alpha = alpha, method = method, observation = observation, mode = mode, lv = lv, dwt_type = dwt_type)
 
     # Call function and calculate error
     error = error_calculation(img_arr, reconst)
@@ -245,7 +245,7 @@ def run_sim_V1_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell
     
     img_arr = np.array([img_arr]).squeeze()
     #Filter reconst to make sure it can reconstruct any size 
-    reconst = filter_reconstruct(img_arr, num_cell = num_cell, cell_size=cell_size, sparse_freq=sparse_freq, alpha = alpha, method = method, observation = observation, mode = mode, lv = lv, dwt_type = dwt_type)
+    reconst = large_img_experiment(img_arr, num_cell = num_cell, cell_size=cell_size, sparse_freq=sparse_freq, alpha = alpha, method = method, observation = observation, mode = mode, lv = lv, dwt_type = dwt_type)
     
     # Calculates for the error per pixel
     error = error_calculation(img_arr, reconst)
@@ -297,7 +297,7 @@ def run_sim_dct(method, observation, mode, rep, alpha, num_cell, img_arr):
         num_cell = round(n * m * num_cell)
     num_cell = int(num_cell)
     img_arr = np.array([img_arr]).squeeze()
-    reconst = filter_reconstruct(img_arr, num_cell = num_cell, alpha = alpha, method = method, observation = observation, mode = mode)
+    reconst = large_img_experiment(img_arr, num_cell = num_cell, alpha = alpha, method = method, observation = observation, mode = mode)
     
     # Call function and calculate error
     error = error_calculation(img_arr, reconst)
@@ -352,7 +352,7 @@ def run_sim_V1_dct(method, observation, mode, rep, alpha, num_cell, cell_size, s
         num_cell = round(n * m * num_cell)
     num_cell = int(num_cell)
     img_arr = np.array([img_arr]).squeeze()
-    reconst = filter_reconstruct(img_arr, num_cell = num_cell, cell_size=cell_size, sparse_freq=sparse_freq, alpha = alpha, method = method, observation = observation, mode = mode)
+    reconst = large_img_experiment(img_arr, num_cell = num_cell, cell_size=cell_size, sparse_freq=sparse_freq, alpha = alpha, method = method, observation = observation, mode = mode)
     error = error_calculation(img_arr, reconst)
     
     return error

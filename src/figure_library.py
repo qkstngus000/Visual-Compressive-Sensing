@@ -268,7 +268,7 @@ def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level, 
     filter_dim = (30, 30)
     img_arr = process_image(img_name, mode, False)
     print(f"Image \"{img_name}\" loaded.") 
-    reconst = filter_reconstruct(img_arr, num_cells, cell_size, sparse_freq, filter_dim, alpha, method, observation, level, dwt_type, rand_weight, mode) 
+    reconst = large_img_experiment(img_arr, num_cells, cell_size, sparse_freq, filter_dim, alpha, method, observation, level, dwt_type, rand_weight, mode) 
     print(f"Image {img_name} reconstructed. Displaying reconstruction and error.") 
     error_colorbar(img_arr, reconst, method, observation, num_cells, img_name.split('.')[0], False)
 

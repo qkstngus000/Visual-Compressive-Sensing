@@ -43,7 +43,7 @@ def generate_Y(W, img):
     y = W @ img.reshape(n * m, 1)
     return y
 
-def generate_V1_variables(img_arr, num_cell, cell_size, sparse_freq):
+def generate_V1_observation(img_arr, num_cell, cell_size, sparse_freq):
     ''' Automatically generates variables needed for data reconstruction using V1 weights.
     
     Parameters
@@ -84,8 +84,8 @@ def generate_V1_variables(img_arr, num_cell, cell_size, sparse_freq):
     return W, y
 
 # Generate pixel Variables
-def generate_pixel_variables(img_arr, num_cell) :
-    ''' Generate random pixel arrays with its indexes length of sample size.
+def generate_pixel_observation(img_arr, num_cell) :
+    ''' Generate random pixel arrays with its indices length of sample size.
     
     
     Parameters
@@ -114,8 +114,8 @@ def generate_pixel_variables(img_arr, num_cell) :
     return W, y
 
 # Generate Gaussian Weights
-def generate_gaussian_variables(img_arr, num_cell):
-    ''' Generate 3 dimentional arrays. Creates arrays of randomly generated gaussian 2 dimentional arrays as a weight W
+def generate_gaussian_observation(img_arr, num_cell):
+    ''' Generate 3 dimensional arrays. Creates arrays of randomly generated gaussian 2 dimensional arrays as a weight W
     
     Parameters
     ----------
@@ -178,7 +178,8 @@ def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
         
     alpha : float
         Penalty for fitting data onto LASSO function to search for significant coefficents
-    
+        Defaults to 1 / 50 if not passed as an arg.
+
     sample_sz : int
         Number of sample collected
     
@@ -193,7 +194,7 @@ def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
         
     Returns
     ----------
-    reconstruct : array_like
+    img : array_like
         (n, m) shape array. Reconstructed image pixel array
     '''
     
@@ -205,12 +206,12 @@ def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
 
     ## Initialize Lasso and Fit data
     mini = Lasso(alpha = alpha, fit_intercept = fit_intercept)
-    mini.fit(theta, y)
+    mini.fit(theta, y)[3~
 
     ## Retrieve sparse vector s
     s = mini.coef_
-    reconstruct = fft.idctn(s.reshape(n, m), norm='ortho', axes=[0,1])
-    return reconstruct
+    img = fft.idctn(s.reshape(n, m), norm='ortho', axes=[0,1])
+    return img
 
 def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, lv) :
     ''' Reconstruct signals through wavelet transform
@@ -247,7 +248,7 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, l
         
     Returns
     ----------
-    reconstruct : array_like
+    img : array_like
         (n, m) shape array. Reconstructed image pixel array
     '''
     
@@ -269,12 +270,12 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, l
     s = mini.coef_
 
     s_unravel = pywt.unravel_coeffs(s, coeff_slices, coeff_shapes)
-    reconstruct = pywt.waverecn(s_unravel, dwt_type, mode = 'zero')
+    img = pywt.waverecn(s_unravel, dwt_type, mode = 'zero')
     
-    return reconstruct
+    return img
 
-def select_observation_model(img_arr, num_cell, observation, cell_size = None, sparse_freq = None):
-    ''' Helper function to select the observation model to make main function concise
+def generate_observations(img_arr, num_cell, observation, cell_size = None, sparse_freq = None):
+    ''' Helper function to generate observations using the specified technique
     
     Parameters
     ----------
@@ -312,11 +313,11 @@ def select_observation_model(img_arr, num_cell, observation, cell_size = None, s
         print(type(num_cell))
         sys.exit(0)
     if (observation.lower() == "v1"):
-        W, y = generate_V1_variables(img_arr, num_cell, cell_size, sparse_freq)
+        W, y = generate_V1_observation(img_arr, num_cell, cell_size, sparse_freq)
     elif (observation.lower() == "gaussian"):
-        W, y = generate_gaussian_variables(img_arr, num_cell)
+        W, y = generate_gaussian_observation(img_arr, num_cell)
     elif (observation.lower() == "pixel"):
-        W, y = generate_pixel_variables(img_arr, num_cell)
+        W, y = generate_pixel_observation(img_arr, num_cell)
     else:
         print("This obervation technique is currently not supported\n Please use valid observation: ['pixel', 'gaussian', 'V1']")
     return W, y
@@ -352,7 +353,7 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
         
     Returns
     ----------
-    reconstruct : array_like
+    img : array_like
         (n, m) shape array. Reconstructed image pixel array
         
     '''
@@ -366,9 +367,9 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
         raise Exception("fit_intercept = True not implemented")
     
     if (method == 'dct') :
-        reconstruct = fourier_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept)
+        img = fourier_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept)
     elif (method == 'dwt') :
-        reconstruct = wavelet_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept, dwt_type, lv)
+        img = wavelet_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept, dwt_type, lv)
 
         # Reform the image using sparse vector s with inverse descrete cosine
         
@@ -376,7 +377,7 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct', lv = 
         reform += mini.intercept_ # not sure this is right
     
     #return reformed img
-    return reconstruct
+    return img
 
 def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None, alpha = None, fit_intercept = False, method = 'dct', observation = 'pixel', lv = 4, dwt_type = 'db2') :
     ''' Reconstruct colored (RGB) image with sample data
@@ -440,7 +441,7 @@ def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None, al
         img_arr_pt_dim = img_arr_pt.shape
         n_pt, m_pt = img_arr_pt_dim
         
-        W, y = select_observation_model(img_arr_pt, num_cell, observation, cell_size, sparse_freq)
+        W, y = generate_observations(img_arr_pt, num_cell, observation, cell_size, sparse_freq)
             
         if (method == 'dct'):
             reconst = reconstruct(W, y, alpha, method = method)
@@ -456,7 +457,7 @@ def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None, al
     return img
 
 
-def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, filter_dim = (30, 30), alpha = None, method = 'dct', observation = 'pixel', lv = 4, dwt_type = 'db2', rand_weight = False, mode = 'black') :
+def large_img_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None, filter_dim = (30, 30), alpha = None, method = 'dct', observation = 'pixel', lv = 4, dwt_type = 'db2', rand_weight = False, mode = 'black') :
     ''' Allows to reconstruct any size of signal data since regular reconstruct function can only deal with small size of data. For filter reconstruction function, it can reconstruct any size of data as the function will break data into several parts and use reconstruction on each parts.
     
     Parameters
@@ -507,6 +508,7 @@ def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, 
         (n * m) shaped or (n * m * z) array containing reconstructed grascale/RGB image array pixels.
     
     '''
+                       
     # Create Filter
     filt = np.zeros(filter_dim)
     filt_n, filt_m = filter_dim
@@ -569,7 +571,7 @@ def filter_reconstruct(img_arr, num_cell, cell_size = None, sparse_freq = None, 
             img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m, :] = reconst
         else:    
             img_arr_pt = img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m]
-            W, y = select_observation_model(img_arr_pt, num_cell, observation, cell_size, sparse_freq)
+            W, y = generate_observations(img_arr_pt, num_cell, observation, cell_size, sparse_freq)
             W_model = W.reshape(num_cell, filt_n, filt_m)    
 
             if (method == 'dct'):
