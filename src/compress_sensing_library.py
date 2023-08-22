@@ -216,7 +216,7 @@ def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
 
     ## Initialize Lasso and Fit data
     mini = Lasso(alpha = alpha, fit_intercept = fit_intercept)
-    mini.fit(theta, y)[3~
+    mini.fit(theta, y)
 
     ## Retrieve sparse vector s
     s = mini.coef_

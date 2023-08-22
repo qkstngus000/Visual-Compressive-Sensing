@@ -16,8 +16,10 @@ from src.arg_library import *
 from PIL import Image, ImageOps
 
 
-def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, save_img = False): 
-    ''' Display the reconstructed image along with pixel error and a colorbar.
+def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name,
+                   save_img = False): 
+    ''' 
+    Display the reconstructed image along with pixel error and a colorbar.
     
     Parameters
     ----------
@@ -36,7 +38,8 @@ def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, sa
             Possible observations are ['pixel', 'gaussian', 'V1']
         
         num_cell : Integer
-            Number of blobs that will be used to be determining which pixles to grab and use
+            Number of blobs that will be used to be determining 
+            which pixels to use.
     
         img_name : String
             Name of the original image file (e.g. "Peppers")
@@ -85,36 +88,40 @@ def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, sa
 
 
 
-def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_file=None, data_grab = 'auto', save = False) :
-    ''' Generate figure that compares which method gives the best minimum error
+def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None,
+                          V1_file=None, data_grab = 'auto', save = False) :
+    ''' 
+    Generate figure that compares which method gives the best minimum error
     
     Parameters
     ----------
     img : String
-        the name of image file
+        The name of image file.
        
     method : String
-        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+        Basis the data file was worked on. 
+        Currently supporting dct and dwt (discrete cosine/wavelet transform).
     
     pixel_file : String
-        pixel observation data file from hyperparameter sweep that is needed to plot
+        Pixel observation data file from hyperparameter sweep.
+        Required for plotting.
     
     gaussian_file : String
-        gaussian observation data file from hyperparameter sweep that is needed to plot
+        Gaussian observation data file from hyperparameter sweep.
+        Required for plotting.
     
     V1_file : String
-        V1 observation data file from hyperparameter sweep that is needed to plot
+        V1 observation data file from hyperparameter sweep.
+        Required for plotting.
     
     data_grab : String
-        With structured path, decides to grab all three data file automatically or manually. Currently not implemented
-        ['auto', 'manual']
+        With structured path, decides to grab all three data files 
+        automatically or manually. Currently not implemented.
+        ['auto', 'manual'].
     
     save : bool
-        Save data into specified path
+        Save data into specified path.
         [True, False]
-            
-    Returns
-    ----------
     '''
     img_nm = img.split('.')[0]
     
@@ -143,30 +150,33 @@ def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_f
     plt.show()
 
 def alpha_error(img, method, pixel_data, gaussian_data, V1_data, save = False):
-    ''' Generate figure that compares various alpha LASSO panelty and how it affect the error of the reconstruction among three different observation. 
+    ''' 
+    Generate figure that compares various alpha LASSO penalty and how it affects
+    the error of the reconstruction among three different observations. 
     
     Parameters
     ----------
-        img : String
-            Name of the image that is used by sweeped data
+    img : String
+        Name of the image that is used by sweeped data
         
-        method : String
-        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+    method : String
+        Basis the data file was worked on. 
+        Currently supporting dct and dwt (discrete cosine/wavelet transform).
     
-        pixel_data : String
-            pixel observation data file from hyperparameter sweep that is needed to plot
+    pixel_data : String
+        Pixel observation data file from hyperparameter sweep.
+        Required for plotting.
 
-        gaussian_data : String
-            gaussian observation data file from hyperparameter sweep that is needed to plot
+    gaussian_data : String
+        Gaussian observation data file from hyperparameter sweep.
+        Required for plotting.
 
-        V1_data : String
-            V1 observation data file from hyperparameter sweep that is needed to plot
-        
-        save : boolean
-            Determines if the image will be saved.
-            
-    Returns
-    ----------
+    V1_data : String
+        V1 observation data file from hyperparameter sweep.
+        Required for plotting.
+
+    save : boolean
+        Determines if the image will be saved.
     '''
     if None in [pixel_data, gaussian_data, V1_data]:
         print("Currently all file required")
@@ -227,14 +237,16 @@ def alpha_error(img, method, pixel_data, gaussian_data, V1_data, save = False):
             plt.savefig(path, dpi = 200)
         plt.show()
 
-def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level, alpha, num_cells, cell_size, sparse_freq):
+def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level,
+                          alpha, num_cells, cell_size, sparse_freq):
     '''
     Generates a reconstruction and error figure for desired parameters.
 
     Parameters
     ---------
     method : String
-        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+        Basis the data file was worked on. 
+        Currently supporting dct and dwt (discrete cosine/wavelet transform).
 
     img_name : String
         The name of image file to reconstruct from.
@@ -247,22 +259,27 @@ def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level, 
         Mode to reconstruct image ['color' or 'black']
     
     dwt_type : String
-        Type of dwt method to be used -- see pywt.wavelist() for all possible dwt types.
+        Type of dwt method to be used.
+        See pywt.wavelist() for all possible dwt types.
         
     level : int
         Level of signal frequencies for dwt -- should be an integer in [1, 4].
         
     alpha : float
-        Penalty for fitting data onto LASSO function to search for significant coefficents
+        Penalty for fitting data onto LASSO function to 
+        search for significant coefficents.
 
     num_cells : int
-        Number of blobs that will be used to be determining which pixels to grab and use
+        Number of blobs that will be used to be determining 
+        which pixels to grab and use.
     
     cell_size : int
-        Determines field size of opened and closed blob of data. Affect the data training
+        Determines field size of opened and closed blob of data. 
+        Affect the data training.
 
     sparse_freq : int
-        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
+        Determines filed frequency on how frequently 
+        opened and closed area would appear. Affect the data training
     '''
     rand_weight = False
     filter_dim = (30, 30)
