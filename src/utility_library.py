@@ -13,11 +13,9 @@ from src.compress_sensing_library import *
 from PIL import Image, ImageOps
 
 def search_root():
-    ''' Search for the root directory of the project
-    
-    Parameters
-    ----------
-        
+    ''' 
+    Search for the root directory of the project
+            
     Returns
     ----------
     root : path
@@ -32,29 +30,32 @@ def search_root():
     return root
 
 def fig_save_path(img_nm, method, observation, save_nm):
-    ''' Gives absolute paths for generated figures to be saved to have organized folder structure. Figure will be saved under figure directory and its format is set up to be png file.If folder path does not exist with the parameter given, then create a new path
+    ''' 
+    Gives absolute paths for generated figures to be saved to have organized 
+    folder structure. Figure will be saved under figure directory and its format
+    is set up to be png file. If folder path does not exist with the parameter 
+    given, then create a new path.
     
     Parameters
     ----------
-        img_nm : String
-            Name of the image file data used 
+    img_nm : String
+        Name of the image file data used 
         
-        method : String
-            Method used for the reconstruction.
-            Possible methods are ['dct', 'dwt']
+    method : String
+        Method used for the reconstruction.
+        Possible methods are ['dct', 'dwt']
         
-        observation : String
-            Observation used to collect data for reconstruction
-            Possible observations are ['pixel', 'gaussian', 'V1']
+    observation : String
+        Observation used to collect data for reconstruction
+        Possible observations are ['pixel', 'gaussian', 'V1']
         
-        save_nm : String
-            Name of the file that it will be saved to
+    save_nm : String
+        Name of the file that it will be saved to
         
     Returns
     ----------
     path : path
         Return absolute path including its file name
-    
     '''
     # Search for the root path
     root = search_root()
@@ -77,29 +78,32 @@ def fig_save_path(img_nm, method, observation, save_nm):
     return os.path.join(fig_path, "{save_nm}.png".format(save_nm = save_nm))
 
 def data_save_path(img_nm, method, observation, save_nm): 
-    ''' Gives absolute paths for collected data to be saved to have organized folder structure. File will be saved under result directory and its format is set up to be csv file. If folder path does not exist with the parameter given, then create a new path
+    ''' 
+    Gives absolute paths for collected data to be saved to have organized folder
+    structure. File will be saved under result directory and its format is set 
+    up to be csv file. If folder path does not exist with the parameter given,
+    then create a new path
     
     Parameters
     ----------
-        img_nm : String
-            Name of the image file data used 
+    img_nm : String
+        Name of the image file data used 
         
-        method : String
-            Method used for the reconstruction.
-            Possible methods are ['dct', 'dwt']
+    method : String
+        Method used for the reconstruction.
+        Possible methods are ['dct', 'dwt']
         
-        observation : String
-            Observation used to collect data for reconstruction
-            Possible observations are ['pixel', 'gaussian', 'V1']
+    observation : String
+        Observation used to collect data for reconstruction
+        Possible observations are ['pixel', 'gaussian', 'V1']
         
-        save_nm : String
-            Name of the file that it will be saved to
+    save_nm : String
+        Name of the file that it will be saved to
         
     Returns
     ----------
     path : path
         Return absolute path including its file name
-    
     '''
     # Search for the root path
     root = search_root()
@@ -124,11 +128,9 @@ def data_save_path(img_nm, method, observation, save_nm):
     return os.path.join(result_path, save_nm)
 
 def color():
-    ''' Pools for user argument on color mode
-    
-    Parameters
-    ----------
-    
+    ''' 
+    Pools for user argument on color mode
+        
     Returns
     ----------
     list : list
@@ -137,24 +139,26 @@ def color():
     return ['-c', 'c', 'color', '-color']
 
 def process_image(img, mode = 'black', visibility = False):
-    ''' Opens image file with given file name and determines whether image file will be color or grayscale image. Show the image if the visibility is set to be True
+    ''' 
+    Opens image file with given file name and determines whether image file will
+    be color or grayscale image. Show the image if the visibility is set to be 
+    True.
     
     Parameters
     ----------
-        img : String
-            Name of the image file data to be opened
+    img : String
+        Name of the image file data to be opened.
         
-        mode : String
-            Determines whether image data will be grascaled or not
+    mode : String
+        Determines whether image data will be grascaled or not.
         
-        visibility : bool
-            Determines whether image will be shown or not to check if image is correctly opened     
+    visibility : bool
+        Determines whether image will be shown to the user or not.
         
     Returns
     ----------
     img_arr : array_like
         Return numpy array of image
-    
     '''
     root = search_root()
     img_path = Image.open(os.path.join(root, 'image/{img}'.format(img=img)))
@@ -176,26 +180,29 @@ def process_image(img, mode = 'black', visibility = False):
     return img_arr
 
 def remove_unnamed_data(data):
-    ''' Remove unnecessary data column that stores index 
+    ''' 
+    Remove unnecessary data column that stores index.
     
     Parameters
     ----------
     data : pandas dataframe
-        Dataframe Storing reconstruction hyperparameters and errors
+        Dataframe Storing reconstruction hyperparameters and errors.
             
     Returns
     ----------
     data : pandas dataframe
-        Dataframe Storing reconstruction hyperparameters and errors, but without unnecessary column
-    
+        Stores reconstruction hyperparameters and errors without unnecessary column.
     '''
     for index in data:
         if (index == 'Unnamed: 0') :
             data.drop('Unnamed: 0', axis = 1, inplace=True)
     return data
 
-def process_result_data(img_file, method, pixel_file=None, gaussian_file=None, V1_file=None):
-    ''' Open 3 csv data files, make it as pandas dataframe, remove unnecessary column, find the plotting data with minimum mean error for each of num_cell
+def process_result_data(img_file, method, pixel_file=None,
+                        gaussian_file=None, V1_file=None):
+    ''' 
+    Open 3 csv data files, make it as pandas dataframe, remove unnecessary 
+    column, find the plotting data with minimum mean error for each of num_cell.
     
     Parameters
     ----------
@@ -203,22 +210,27 @@ def process_result_data(img_file, method, pixel_file=None, gaussian_file=None, V
         The name of image file that will be worked on
         
     method : String
-        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+        Basis the data file was worked on. 
+        Currently upports dct and dwt (discrete cosine/wavelet transform).
         
     pixel_file : String
-        pixel observation data file from hyperparameter sweep that is needed to plot
+        Pixel observation data file from hyperparameter sweep.
+        Required for plotting.
     
     gaussian_file : String
-        gaussian observation data file from hyperparameter sweep that is needed to plot
-    
+        Gaussian observation data file from hyperparameter sweep.
+        Required for plotting.
+
     V1_file : String
-        V1 observation data file from hyperparameter sweep that is needed to plot
+        V1 observation data file from hyperparameter sweep.
+        Required for plotting.
         
     Returns
     ----------
     obs_dict : python dictionary
-        Dictionary that contains ['V1', 'gaussian', 'pixel'] as a key and [0]th value storing plotting data with [1]st data containing minimum mean error parameter for each num_cell
-    
+        Dictionary that contains ['V1', 'gaussian', 'pixel'] as a key
+        [0]th value storing plotting data with [1]st data containing 
+        minimum mean error parameter for each num_cell.
     '''
     root = search_root()
     img_nm = img_file.split('.')[0]
@@ -250,27 +262,29 @@ def process_result_data(img_file, method, pixel_file=None, gaussian_file=None, V
     return obs_dict
 
 def get_min_error_data(method, observation, data_df):
-    ''' Retrieve plotting data and minimum error parameter to be returned
+    ''' 
+    Retrieve plotting data and minimum error parameter to be returned.
     
     Parameters
     ----------
     method : String
-        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+        Basis the data file was worked on. 
+        Currently supports dct and dwt (discrete cosine/wavelet transform).
         
     observation : String
-        Observation technique that are going to be used to collet sample for reconstruction.
+        Observation technique to be used for sampling image data.
     
     data_df : pandas dataframe
-        Dataframe Storing reconstruction hyperparameters and errors
+        Stores reconstruction hyperparameters and errors.
             
     Returns
     ----------
     data_plotting_data : pandas dataframe
-        Dataframe storing all hyperparameters that have the minimum error
+        Dataframe storing all hyperparameters that have the minimum error.
     
     data_min_df : pandas dataframe
-        Dataframe storing hyperparameters that have minimum mean errors for each num_ell, but without unnecessary column
-    
+        Dataframe storing hyperparameters that have minimum mean errors 
+        for each num_cell, but without unnecessary column.
     '''
     param_list = []
     
@@ -289,7 +303,7 @@ def get_min_error_data(method, observation, data_df):
             param_list = ['num_cell', 'alp', 'lv']
     
     # For each hyperparameter, gives mean of its own repetition
-    data_mean_df = data_df.groupby(param_list, as_index=False).mean().drop('rep', axis=1) 
+    data_mean_df = data_df.groupby(param_list, as_index=False).mean().drop('rep', axis=1)
     
     # Grab the lowest mean error from each number of cell
     data_min_df = data_mean_df.sort_values('error').drop_duplicates('num_cell')
