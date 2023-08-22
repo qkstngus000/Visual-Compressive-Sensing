@@ -22,8 +22,10 @@ import pywt
 
 
 
-def run_sweep(method, img, observation, mode, dwt_type, lv, alpha_list, num_cell, cell_size, sparse_freq):
-    ''' Generate a sweep over desired hyperparameters and saves results to a file.
+def run_sweep(method, img, observation, mode, dwt_type, lv,
+              alpha_list, num_cell, cell_size, sparse_freq):
+    ''' 
+    Generate a sweep over desired hyperparameters and saves results to a file.
     
     Parameters
     ----------
@@ -37,26 +39,31 @@ def run_sweep(method, img, observation, mode, dwt_type, lv, alpha_list, num_cell
         Method of observation (e.g. pixel, gaussian, v1)
     
     mode : String
-        Desired mode to reconstruct image (e.g. 'Color' for RGB, 'Black' for greyscaled images).
+        Desired mode to reconstruct image 
+        (e.g. 'Color' for RGB, 'Black' for greyscaled images).
 
     dwt_type : String
-        Type of dwt method to be used -- see pywt.wavelist() for all possible dwt types.
+        Type of dwt method to be used.
+        See pywt.wavelist() for all possible dwt types.
         
     lv : List of int
         List of one or more integers in [1, 4].
         
     alpha_list : List of float
-        Penalty for fitting data onto LASSO function to search for significant coefficents
+        Penalty for fitting data onto LASSO function 
+        to search for significant coefficents.
 
     num_cell : List of int
-        Number of blobs that will be used to be determining which pixels to grab and use
+        Number of blobs that will be used to be 
+        determining which pixels to grab and use.
     
     cell_size : List of int
-        Determines field size of opened and closed blob of data. Affect the data training
+        Determines field size of opened and closed blob of data. 
+        Affect the data training.
 
     sparse_freq : List of int
-        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
-        
+        Determines filed frequency on how frequently 
+        opened and closed area would appear. Affect the data training
     '''
 
 
@@ -126,8 +133,10 @@ def run_sweep(method, img, observation, mode, dwt_type, lv, alpha_list, num_cell
     client.close()
 
 # run sim for non-v1 dwt
-def run_sim_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell, img_arr):
-    ''' Run a sim for non-v1 dwt
+def run_sim_dwt(method, observation, mode, dwt_type, rep,
+                lv, alpha, num_cell, img_arr):
+    ''' 
+    Run a sim for non-v1 dwt
     
     Parameters
     ----------
@@ -141,19 +150,23 @@ def run_sim_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell, i
         Desired mode to reconstruct image (e.g. 'Color' or 'Black').
 
     dwt_type : String
-        Type of dwt method to use -- see pywt.wavelist() for all possible dwt types.
+        Type of dwt method to use.
+        See pywt.wavelist() for all possible dwt types.
         
     rep : int
         The current repetition with the given parameters.
 
     lv : int
-        Generate level of signal frequencies when dwt is used. Should be in [1, 4].
+        Generate level of signal frequencies when dwt is used. 
+        Should be in [1, 4].
 
     alpha : float
-        Penalty for fitting data onto LASSO function to search for significant coefficents
+        Penalty for fitting data onto LASSO function 
+        to search for significant coefficents
 
     num_cell : int
-        Number of blobs that will be used to be determining which pixles to grab and use
+        Number of blobs that will be used to be 
+        determining which pixels to grab and use.
 
     img_arr : numpy_array
         (n, m) shape image containing array of pixels
@@ -162,7 +175,6 @@ def run_sim_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell, i
     ----------
     error : float
         Computed normalized error value per each pixel
-        
     '''
     dim = img_arr.shape
     if (len(dim) == 3) :
@@ -186,8 +198,10 @@ def run_sim_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell, i
 
 
 # run sim for v1 dwt
-def run_sim_V1_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell, cell_size, sparse_freq, img_arr):
-    ''' Run a sim for v1 dwt
+def run_sim_V1_dwt(method, observation, mode, dwt_type, rep,
+                   lv, alpha, num_cell, cell_size, sparse_freq, img_arr):
+    ''' 
+    Run a sim for v1 dwt
     
     Parameters
     ----------
@@ -201,25 +215,31 @@ def run_sim_V1_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell
         Desired mode to reconstruct image (e.g. 'Color' or 'Black').
 
     dwt_type : String
-        Type of dwt method to use -- see pywt.wavelist() for all possible dwt types.
+        Type of dwt method to use.
+        See pywt.wavelist() for all possible dwt types.
 
     rep: int
         The current repetition with the given parameters.
 
     lv : int
-        Generate level of signal frequencies when dwt is used. Should be in [1, 4].
+        Generate level of signal frequencies when dwt is used. 
+        Should be in [1, 4].
 
     alpha : float
-        Penalty for fitting data onto LASSO function to search for significant coefficents
+        Penalty for fitting data onto LASSO function to 
+        search for significant coefficents
 
     num_cell : int
-        Number of blobs that will be used to be determining which pixles to grab and use
+        Number of blobs that will be used to 
+        be determining which pixels to grab and use.
     
     cell_size : int
-        Determines field size of opened and closed blob of data. Affect the data training
+        Determines field size of opened and closed blob of data. 
+        Affect the data training
 
     sparse_freq : int
-        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
+        Determines filed frequency on how frequently 
+        opened and closed area would appear. Affect the data training
 
     img_arr : numpy_array
         (n, m) shape image containing array of pixels
@@ -228,7 +248,6 @@ def run_sim_V1_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell
     ----------
     error : float
         Computed normalized error value per each pixel
-
     '''
     dim = img_arr.shape
     if (len(dim) == 3) :
@@ -255,7 +274,8 @@ def run_sim_V1_dwt(method, observation, mode, dwt_type, rep, lv, alpha, num_cell
     
 # run sim for non-v1 dct 
 def run_sim_dct(method, observation, mode, rep, alpha, num_cell, img_arr):
-    ''' Run a sim for non-v1 dct
+    ''' 
+    Run a sim for non-v1 dct
     
     Parameters
     ----------
@@ -273,10 +293,12 @@ def run_sim_dct(method, observation, mode, rep, alpha, num_cell, img_arr):
         The current repetition with the given parameters.
 
     alpha : float
-        Penalty for fitting data onto LASSO function to search for significant coefficents
+        Penalty for fitting data onto LASSO function to 
+        search for significant coefficents
 
     num_cell : List of int
-        Number of blobs that will be used to be determining which pixles to grab and use
+        Number of blobs that will be used to be 
+        determining which pixles to grab and use
     
     img_arr : numpy_array
         (n, m) shape image containing array of pixels
@@ -285,7 +307,6 @@ def run_sim_dct(method, observation, mode, rep, alpha, num_cell, img_arr):
     ----------
     error : float
         Computed normalized error value per each pixel
-
     '''
     dim = img_arr.shape
     if (len(dim) == 3) :
@@ -304,8 +325,10 @@ def run_sim_dct(method, observation, mode, rep, alpha, num_cell, img_arr):
     return error
 
 # run sim for v1 dct
-def run_sim_V1_dct(method, observation, mode, rep, alpha, num_cell, cell_size, sparse_freq, img_arr):
-    ''' Run a sim for V1 dct
+def run_sim_V1_dct(method, observation, mode, rep, alpha,
+                   num_cell, cell_size, sparse_freq, img_arr):
+    ''' 
+    Run a sim for V1 dct
     
     Parameters
     ----------
@@ -322,16 +345,20 @@ def run_sim_V1_dct(method, observation, mode, rep, alpha, num_cell, cell_size, s
         The current repetition with the given parameters.
 
     alpha : float
-        Penalty for fitting data onto LASSO function to search for significant coefficents
+        Penalty for fitting data onto LASSO function to 
+        search for significant coefficents
 
     num_cell : int
-        Number of blobs that will be used to be determining which pixles to grab and use
+        Number of blobs that will be used to be 
+        determining which pixels to grab and use
     
     cell_size : int
-        Determines field size of opened and closed blob of data. Affect the data training
+        Determines field size of opened and closed blob of data. 
+        Affect the data training
 
     sparse_freq : int
-        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
+        Determines filed frequency on how frequently 
+        opened and closed area would appear. Affect the data training
         
     img_arr : numpy_array
         (n, m) shape image containing array of pixels
@@ -340,7 +367,6 @@ def run_sim_V1_dct(method, observation, mode, rep, alpha, num_cell, cell_size, s
     ----------
     error : float
         Computed normalized error value per each pixel
-
     '''
     dim = img_arr.shape
     if (len(dim) == 3) :

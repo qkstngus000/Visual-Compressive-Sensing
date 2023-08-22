@@ -48,7 +48,8 @@ def generate_Y(W, img):
 
 def generate_V1_observation(img_arr, num_cell, cell_size, sparse_freq):
     ''' 
-    Automatically generates variables needed for data reconstruction using V1 weights.
+    Automatically generates variables needed for 
+    data reconstruction using V1 weights.
     
     Parameters
     ----------    
@@ -56,15 +57,17 @@ def generate_V1_observation(img_arr, num_cell, cell_size, sparse_freq):
         (n, m) shape image containing array of pixels
           
     num_cell : int
-        Number of blobs that will be used to be determining which pixels to grab and use
+        Number of blobs that will be used to be 
+        determining which pixels to grab and use.
     
     cell_size : int
         Determines field size of opened and closed blob of data. 
-        Affect the data training
+        Affect the data training.
         
     sparse_freq : int
-        Determines filed frequency on how frequently opened and closed area would appear. 
-        Affect the data training
+        Determines filed frequency on how frequently 
+        opened and closed area would appear. 
+        Affect the data training.
     
     Returns
     ----------
@@ -124,7 +127,8 @@ def generate_pixel_observation(img_arr, num_cell) :
 def generate_gaussian_observation(img_arr, num_cell):
     ''' 
     Generate 3 dimensional arrays. 
-    Creates arrays of randomly generated gaussian 2 dimensional arrays as a weight W.
+    Creates arrays of randomly generated gaussian 
+    2 dimensional arrays as a weight W.
     
     Parameters
     ----------
@@ -132,7 +136,8 @@ def generate_gaussian_observation(img_arr, num_cell):
         (n, m) sized data array.
         
     num_cell : int
-        Number of blobs that will be used to be determining which pixels to grab and use.
+        Number of blobs that will be used to be 
+        determining which pixels to grab and use.
         
     Returns
     ----------
@@ -187,7 +192,8 @@ def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
         (num_V1_weights/sample_size, 1) shape. Dot product of W and image.
         
     alpha : float
-        Penalty for fitting data onto LASSO function to search for significant coefficents.
+        Penalty for fitting data onto LASSO function to 
+        search for significant coefficents.
         Defaults to 1 / 50 if not passed as an arg.
 
     sample_sz : int
@@ -200,7 +206,8 @@ def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
         Width of each data.
     
     fit_intercept : bool
-        default set to false to prevent LASSO function to calculate intercept for model.
+        default set to false to prevent 
+        LASSO function to calculate intercept for model.
         
     Returns
     ----------
@@ -558,7 +565,8 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
         Default set up to be False.
     
     mode : String
-        Determines whether the reconstruction is going to be in grayscaled or colored.
+        Determines whether the reconstruction is going to be in 
+        grayscaled or colored.
     
     Returns
     ----------

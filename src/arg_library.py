@@ -6,7 +6,8 @@ sys.path.append("../")
 
 def add_colorbar_args(parser):
     '''
-    Add arguments to the parser that are required for the colorbar_live_reconst function in figure_library.py
+    Add arguments to the parser that are required for 
+    colorbar_live_reconst function in figure_library.py
 
     Parameters
     ----------
@@ -33,7 +34,8 @@ def add_colorbar_args(parser):
 
 def eval_colorbar_args(args, parser):
     '''
-    Evaluate the colorbar arguments to ensure that they are sufficient for plotting
+    Evaluate the colorbar arguments to 
+    ensure that they are sufficient for plotting.
     
     Parameters
     ----------
@@ -46,7 +48,8 @@ def eval_colorbar_args(args, parser):
     Returns
     -------
     method : String
-        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+        Basis the data file was worked on. 
+        Currently supporting dct and dwt (discrete cosine/wavelet transform).
 
     img_name : String
         The name of image file to reconstruct from.
@@ -59,23 +62,29 @@ def eval_colorbar_args(args, parser):
         Mode to reconstruct image ['color' or 'black']
     
     dwt_type : String
-        Type of dwt method to be used -- see pywt.wavelist() for all possible dwt types.
+        Type of dwt method to be used.
+        See pywt.wavelist() for all possible dwt types.
         
     level : int
-        Level of signal frequencies for dwt -- should be an integer in [1, 4].
+        Level of signal frequencies for dwt.
+        Should be an integer in [1, 4].
         
     alpha : float
-        Penalty for fitting data onto LASSO function to search for significant coefficents
+        Penalty for fitting data onto LASSO function to 
+        search for significant coefficents.
 
     num_cells : int
-        Number of blobs that will be used to be determining which pixels to grab and use
+        Number of blobs that will be used to be 
+        determining which pixels to grab and use.
     
     cell_size : int
-        Determines field size of opened and closed blob of data. Affect the data training
+        Determines field size of opened and closed blob of data. 
+        Affect the data training
 
     sparse_freq : int
-        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
-    
+        Determines filed frequency on how frequently 
+        opened and closed area would appear. 
+        Affect the data training
     '''
     method = args.method[0] if args.method is not None else None
     img_name = args.img_name[0] if args.img_name is not None else None
@@ -103,13 +112,13 @@ def eval_colorbar_args(args, parser):
 
 def add_num_cell_args(parser):
     '''
-    Add arguments to the parser that are required for the num_cell_error function in figure_library.py
+    Add arguments to the parser that are required for 
+    the num_cell_error function in figure_library.py
 
     Parameters
     ----------
     parser : ArgumentParser
         parser object from argparse used to add arguments
-
     '''
     
     parser.add_argument('-pixel_file', action='store', metavar='FILE', help='[Num Cell Figure] : file to read pixel data from', required=False, nargs=1)
@@ -120,7 +129,8 @@ def add_num_cell_args(parser):
 
 def eval_num_cell_args(args, parser):
     '''
-    Evaluate the args to ensure that they are sufficient for generating num cell error plot.
+    Evaluate the args to ensure that they are sufficient for 
+    generating num cell error plot.
     
     Parameters
     ----------
@@ -226,26 +236,32 @@ def parse_sweep_args():
         Method of observation (e.g. pixel, gaussian, v1).
     
     mode : String
-        Desired mode to reconstruct image (e.g. 'Color' for RGB, 'Black' for greyscaled images).
+        Desired mode to reconstruct image.
+        (e.g. 'Color' for RGB, 'Black' for greyscaled images).
 
     dwt_type : String
-        Type of dwt method to be used -- see pywt.wavelist() for all possible dwt types.
+        Type of dwt method to be used.
+        See pywt.wavelist() for all possible dwt types.
         
     lv : List of int
         List of one or more integers in [1, 4].
         
     alpha_list : List of float
-        Penalty for fitting data onto LASSO function to search for significant coefficents.
+        Penalty for fitting data onto LASSO function to 
+        search for significant coefficents.
 
     num_cell : List of int
-        Number of blobs that will be used to be determining which pixels to grab and use.
+        Number of blobs that will be used to be 
+        determining which pixels to grab and use.
     
     cell_size : List of int
-        Determines field size of opened and closed blob of data. Affect the data training.
+        Determines field size of opened and closed blob of data. 
+        Affect the data training.
 
     sparse_freq : List of int
-        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training.
-
+        Determines filed frequency on how frequently 
+        opened and closed area would appear. 
+        Affect the data training.
     '''
 
     parser = argparse.ArgumentParser(description='Create a hyperparameter sweep')
@@ -262,7 +278,6 @@ def add_sweep_args(parser):
     ----------
     parser : ArgumentParser
         parser object used to hold argument information
-
     '''
     # theres a lot of these -- use this function instead of manually typing all
     wavelist = pywt.wavelist()
@@ -285,7 +300,8 @@ def add_sweep_args(parser):
 
 def eval_sweep_args(args, parser):
     '''
-    Evaluate the colorbar arguments to ensure that they are sufficient for plotting
+    Evaluate the colorbar arguments to 
+    ensure that they are sufficient for plotting.
     
     Parameters
     ----------
@@ -307,27 +323,34 @@ def eval_sweep_args(args, parser):
         Method of observation (e.g. pixel, gaussian, v1).
     
     mode : String
-        Desired mode to reconstruct image (e.g. 'Color' for RGB, 'Black' for greyscaled images).
+        Desired mode to reconstruct image 
+        (e.g. 'Color' for RGB, 'Black' for greyscaled images).
 
     dwt_type : String
-        Type of dwt method to be used -- see pywt.wavelist() for all possible dwt types.
+        Type of dwt method to be used
+        See pywt.wavelist() for all possible dwt types.
         
     lv : List of int
         List of one or more integers in [1, 4].
         
     alpha_list : List of float
-        Penalty for fitting data onto LASSO function to search for significant coefficents.
+        Penalty for fitting data onto LASSO function to 
+        search for significant coefficents.
 
     num_cell : List of int
-        Number of blobs that will be used to be determining which pixels to grab and use.
+        Number of blobs that will be used to be 
+        determining which pixels to grab and use.
     
     cell_size : List of int
-        Determines field size of opened and closed blob of data. Affect the data training.
+        Determines field size of opened and closed blob of data. 
+        Affect the data training.
 
     sparse_freq : List of int
-        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training.
-
+        Determines filed frequency on how frequently 
+        opened and closed area would appear. 
+        Affect the data training.
     '''
+    
     #args = parser.parse_args()
     method = args.method[0]
     img_name = args.img_name[0]
