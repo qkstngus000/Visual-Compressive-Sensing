@@ -61,7 +61,8 @@ def fig_save_path(img_nm, method, observation, save_nm):
     root = search_root()
     
     method = method.lower()
-    observation = observation.upper() if observation.split('/')[0].upper() == 'V1' else observation.lower()
+    observation = observation.upper() if \
+        observation.split('/')[0].upper() == 'V1' else observation.lower()
     img_nm = img_nm.split('.')[0]
     save_nm = save_nm.replace(" ", "_")
     
@@ -71,8 +72,7 @@ def fig_save_path(img_nm, method, observation, save_nm):
         save_nm = save_nm + "_".join(str.split(time.ctime().replace(":", "_")))
     
         
-    fig_path = os.path.join(root, "figures/{method}/{img_nm}/{observation}".format(
-        method = method, img_nm = img_nm, observation = observation))
+    fig_path = os.path.join(root, f"figures/{method}/{img_nm}/{observation}")
     Path(fig_path).mkdir(parents=True, exist_ok = True)
     #TODO: add timestamp onto save_nm autometically
     return os.path.join(fig_path, "{save_nm}.png".format(save_nm = save_nm))
@@ -109,7 +109,9 @@ def data_save_path(img_nm, method, observation, save_nm):
     root = search_root()
     
     method = method.lower()
-    observation = observation.upper() if observation.split('/')[0].upper() == 'V1' else observation.lower()
+    observation = observation.upper() \
+        if observation.split('/')[0].upper() == 'V1'\
+        else observation.lower()
     img_nm = img_nm.split('.')[0]
     save_nm = save_nm.replace(" ", "_")
     
@@ -119,10 +121,10 @@ def data_save_path(img_nm, method, observation, save_nm):
     else :
         if (save_nm[-1] != "_") :
             save_nm = save_nm + "_" 
-        save_nm = save_nm + "_".join(str.split(time.ctime().replace(":", "_"))) + '.csv'  
+        save_nm = save_nm + "_".join(
+            str.split(time.ctime().replace(":", "_"))) + '.csv'  
     
-    result_path = os.path.join(root, "result/{method}/{img_nm}/{observation}".format(
-        method = method, img_nm = img_nm, observation = observation))
+    result_path = os.path.join(root, f"result/{method}/{img_nm}/{observation}")
     Path(result_path).mkdir(parents=True, exist_ok = True)
     
     return os.path.join(result_path, save_nm)
@@ -191,7 +193,8 @@ def remove_unnamed_data(data):
     Returns
     ----------
     data : pandas dataframe
-        Stores reconstruction hyperparameters and errors without unnecessary column.
+        Stores reconstruction hyperparameters and errors 
+        without unnecessary column.
     '''
     for index in data:
         if (index == 'Unnamed: 0') :
@@ -235,18 +238,16 @@ def process_result_data(img_file, method, pixel_file=None,
     root = search_root()
     img_nm = img_file.split('.')[0]
     
-    # TODO: Currently all three files required, but thinking if plot can be generated with just one or two files as well
+    # TODO: Currently all three files required,
+    # thinking if plot can be generated with just one or two files as well
     if (V1_file==None or gaussian_file==None or pixel_file==None):
         print("All three files required to generate figure")
         sys.exit(0)
         
         
-    load_V1 = "{root}/result/{method}/{img_nm}/V1/{file}".format(
-        root = root, method = method, img_nm = img_nm, file = V1_file)
-    load_gaussian = "{root}/result/{method}/{img_nm}/gaussian/{file}".format(
-        root = root, method = method, img_nm = img_nm, file = gaussian_file)
-    load_pixel = "{root}/result/{method}/{img_nm}/pixel/{file}".format(
-        root = root, method = method, img_nm = img_nm, file = pixel_file)
+    load_V1 = f"{root}/result/{method}/{img_nm}/V1/{V1_file}"
+    load_gaussian = f"{root}/result/{method}/{img_nm}/gaussian/{gaussian_file}"
+    load_pixel = f"{root}/result/{method}/{img_nm}/pixel/{pixel_file}"
     
     obs_dict= {'V1': pd.read_csv(load_V1),
                'gaussian': pd.read_csv(load_gaussian), 
@@ -290,7 +291,8 @@ def get_min_error_data(method, observation, data_df):
     
     # V1 observation takes two more parameter
     if (observation.upper() == 'V1'):
-        # Check the method first to check what parameter it has to deal with, since dwt takes two more parameters
+        # Check the method first to check what parameter it has to deal with
+        # since dwt takes two more parameters
         if (method.lower() == 'dct'):
             param_list = ['num_cell', 'sparse_freq', 'cell_size', 'alp']
         elif (method.lower() == 'dwt') :
@@ -303,7 +305,8 @@ def get_min_error_data(method, observation, data_df):
             param_list = ['num_cell', 'alp', 'lv']
     
     # For each hyperparameter, gives mean of its own repetition
-    data_mean_df = data_df.groupby(param_list, as_index=False).mean().drop('rep', axis=1)
+    data_mean_df = data_df.groupby(param_list,
+                                   as_index=False).mean().drop('rep', axis=1)
     
     # Grab the lowest mean error from each number of cell
     data_min_df = data_mean_df.sort_values('error').drop_duplicates('num_cell')
@@ -313,6 +316,11 @@ def get_min_error_data(method, observation, data_df):
     data_merged_df = pd.merge(data_df, data_min_df, on=param_list, how='left')
     
     # Grab hyperparameters that was marked
-    data_plotting_data = data_merged_df.loc[data_merged_df['min_error'].notnull()]
+    data_plotting_data = data_merged_df.loc[
+        data_merged_df['min_error'].notnull()
+    ]
 
     return (data_plotting_data, data_min_df)
+
+if __name__ == "__main__":
+    print(get_min_error_data("a", "b", "c"))
