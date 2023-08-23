@@ -82,15 +82,15 @@ def run_sweep(method, img, observation, mode, dwt_type, lv,
             search = list(itertools.product(*search_list))
             search_df = pd.DataFrame(search, columns= [ 'rep', 'alp',
                                                         'num_cell'])
-            sim_wrapper = lambda alp, num_cell: \
+            sim_wrapper = lambda rep, alp, num_cell: \
                 run_sim_dct(method, observation, mode,
                             alp, num_cell, img_arr)
         elif method.lower() == 'dwt':
-            search_list = [rep, lv, alpha_list, num_cell]
+            search_list = [rep, dwt_type, lv, alpha_list, num_cell]
             search = list(itertools.product(*search_list))             
-            search_df = pd.DataFrame(search, columns= [ 'rep', 'lv',
+            search_df = pd.DataFrame(search, columns= [ 'rep', 'dwt_type', 'lv',
                                                         'alp', 'num_cell'])
-            sim_wrapper = lambda lv, alp, num_cell: \
+            sim_wrapper = lambda rep, dwt_type, lv, alp, num_cell: \
                 run_sim_dwt(method, observation, mode, dwt_type,
                             lv, alp, num_cell, img_arr)
     # give v1 param search space
@@ -102,16 +102,17 @@ def run_sweep(method, img, observation, mode, dwt_type, lv,
             search_df = pd.DataFrame(search,
                                      columns= ['rep', 'alp', 'num_cell',
                                                'cell_size', 'sparse_freq'])
-            sim_wrapper = lambda alp, num_cell, cell_size, sparse_freq: \
+            sim_wrapper = lambda rep, alp, num_cell, cell_size, sparse_freq: \
                 run_sim_V1_dct(method, observation, mode, alp,
                                num_cell, cell_size, sparse_freq, img_arr)
         elif method.lower() == 'dwt':
-            search_list = [rep, lv, alpha_list, num_cell, cell_size, sparse_freq]
+            search_list = [rep, dwt_type, lv, alpha_list, num_cell, cell_size, sparse_freq]
             search = list(itertools.product(*search_list))             
-            search_df = pd.DataFrame(search, columns= [ 'rep', 'lv', 'alp',
-                                                        'num_cell', 'cell_size',
-                                                        'sparse_freq'])
-            sim_wrapper = lambda lv, alp, num_cell, cell_size, \
+            search_df = pd.DataFrame(search, columns= [ 'rep', 'dwt_type', 'lv',
+                                                        'alp', 'num_cell',
+                                                        'cell_size', 'sparse_freq'
+                                                       ])
+            sim_wrapper = lambda rep, dwt_type, lv, alp, num_cell, cell_size, \
                 sparse_freq: run_sim_V1_dwt(method, observation, mode,
                                             dwt_type, lv, alp, num_cell,
                                             cell_size, sparse_freq, img_arr)
@@ -141,7 +142,7 @@ def run_sweep(method, img, observation, mode, dwt_type, lv,
                                       '{mode}_hyperparam'.format(mode = mode))
     f = open(hyperparam_track, 'a+')
     hyperparam_list = list(zip(search_df.columns, search_list))
-    f.write(f"{param_csv_nm}\n")
+    f.write(f"{param_path.split('/')[-1]}\n")
     for hyperparam in hyperparam_list :
         f.write(f"   {hyperparam[0]}: {hyperparam[1]}\n")
     f.write("\n\n")
