@@ -510,7 +510,7 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
                          sparse_freq = None, filter_dim = (30, 30),
                          alpha = None, method = 'dct', observation = 'pixel',
                          lv = 4, dwt_type = 'db2', rand_weight = False,
-                         mode = 'black') :
+                         color = False) :
     ''' 
     Allows to reconstruct any size of signal data since regular reconstruct 
     function can only deal with small size of data. 
