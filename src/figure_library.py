@@ -54,11 +54,11 @@ def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name,
     plt.tight_layout()
 
     # prepare the reconstruction axis
-    axis[0].set_title("{observation} Reconst: {num_cell} cell".format(observation=observation, num_cell = num_cell))
+    axis[0].set_title(f"{observation} Reconst: {num_cell} cell")
     axis[0].axis('off')
 
     # prepare the observation error axis
-    axis[1].set_title("{observation} Error: {num_cell} cells".format(observation = observation, num_cell = num_cell))
+    axis[1].set_title(f"{observation} Error: {num_cell} cells")
     axis[1].axis('off')
     
     # calculate error for RGB images
@@ -66,7 +66,8 @@ def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name,
         axis[0].imshow(reconst, vmin = 0, vmax = 255)
         vmax = ((img_arr - reconst)**2).mean(axis = 2)
         vmax = vmax.max() if vmax.max() < 255 else 255
-        err = axis[1].imshow(((img_arr - reconst)**2).mean(axis = 2), 'Reds', vmin = 0, vmax = vmax)
+        err = axis[1].imshow(((img_arr - reconst)**2).mean(axis = 2),
+                             'Reds', vmin = 0, vmax = vmax)
 
     # calculate error for Grayscaled images
     else :
@@ -143,7 +144,8 @@ def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None,
     plt.legend(loc = 'best')
     if save :
         # for its save name, the name of file order is pixel -> gaussian -> V1 
-        save_nm = pixel_file.split('.')[0] + '_' + gaussian_file.split('.')[0] + '_' + V1_file.split('.')[0]
+        save_nm = pixel_file.split('.')[0] + '_' + \
+            gaussian_file.split('.')[0] + '_' + V1_file.split('.')[0]
         save_path = fig_save_path(img_nm, method, 'num_cell_error', save_nm)
         plt.savefig(save_path, dpi = 200)
         
@@ -193,36 +195,41 @@ def alpha_error(img, method, pixel_data, gaussian_data, V1_data, save = False):
     
     for num_cell in num_cell_list :
         # In order to bring fixed cell_size and sparse_frequency, bring parameter that has median error value
-        V1_df_mean = V1_df.loc[V1_df["num_cell"] == num_cell].groupby(list(V1_df.columns[1:-1]), 
-                                               as_index = False).mean().drop('rep', axis=1)
-        median_col = V1_df_mean.loc[V1_df_mean['error'] == V1_df_mean['error'].median()]
+        V1_df_mean = V1_df.loc[V1_df["num_cell"] == num_cell].groupby(
+            list(V1_df.columns[1:-1]),
+            as_index = False).mean().drop('rep', axis=1)
+        median_col = V1_df_mean.loc[V1_df_mean['error'] == \
+                                    V1_df_mean['error'].median()]
 
         # Depending on the basis used (dct / dwt) add lv parameter
         if (method.lower() == 'dct') :
-            cell_size, sparse_freq = V1_df_mean.loc[V1_df_mean['error'] == V1_df_mean['error'].
-                                                    median()][['cell_size', 'sparse_freq']].values.squeeze()
+            cell_size, sparse_freq = V1_df_mean.loc[
+                V1_df_mean['error'] == V1_df_mean['error'].median()]\
+                [['cell_size', 'sparse_freq']].values.squeeze()
             V1_df_mod = V1_df.loc[(V1_df['cell_size'] == cell_size) & 
                                   (V1_df['sparse_freq'] == sparse_freq)]
-            title=r"$\alpha$_Error for {cell} cells (cell_size: {cell_size}, sparse_freq: {sparse_freq})".format(
-                cell = num_cell, cell_size = cell_size, sparse_freq = sparse_freq)
+            title=rf"$\alpha$_Error for {num_cell} cells"+\
+            rf" (cell_size: {cell_size}, sparse_freq: {sparse_freq})"
         else :
-            cell_size, sparse_freq, lv = V1_df_mean.loc[V1_df_mean['error'] == V1_df_mean['error'].
-                                                    median()][['cell_size', 'sparse_freq', 'lv']].values.squeeze()
+            cell_size, sparse_freq, lv = V1_df_mean.loc[
+                V1_df_mean['error'] == V1_df_mean['error'].median()]\
+                [['cell_size', 'sparse_freq', 'lv']].values.squeeze()
             V1_df_mod = V1_df.loc[(V1_df['cell_size'] == cell_size) & 
                                   (V1_df['sparse_freq'] == sparse_freq) & 
                                   (V1_df['lv'] == lv)]
-            title=r"$\alpha$_Error for {cell} cells \
-            (cell_size: {cell_size}, sparse_freq: {sparse_freq}, lv: {lv})".format(
-                cell = num_cell, cell_size = cell_size, sparse_freq = sparse_freq, lv = lv)
+            title=rf"$\alpha$_Error for {num_cell} cells "+\
+                rf"(cell_size: {cell_size}, sparse_freq: {sparse_freq}, lv: {lv})"
 
-        fig = sns.relplot(data = V1_df_mod, x = 'alp', y = 'error', kind='line', palette='Accent', 
-                          legend = True, label = 'V1')
+        fig = sns.relplot(data = V1_df_mod, x = 'alp', y = 'error', kind='line',
+                          palette='Accent', legend = True, label = 'V1')
 
 
-        fig.map(sns.lineplot, x = 'alp', y = 'error', data = pixel_df.loc[pixel_df["num_cell"] == num_cell], 
+        fig.map(sns.lineplot, x = 'alp', y = 'error',
+                data = pixel_df.loc[pixel_df["num_cell"] == num_cell], 
                 label= 'pixel', color = 'red', 
                 legend = True)
-        fig.map(sns.lineplot, x = 'alp', y = 'error', data = gaussian_df.loc[gaussian_df["num_cell"] == num_cell], 
+        fig.map(sns.lineplot, x = 'alp', y = 'error',
+                data = gaussian_df.loc[gaussian_df["num_cell"] == num_cell], 
                 label= 'gaussian', color = 'green', 
                 legend = True)
         fig.set(title = title)
@@ -285,19 +292,26 @@ def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level,
     filter_dim = (30, 30)
     img_arr = process_image(img_name, mode, False)
     print(f"Image \"{img_name}\" loaded.") 
-    reconst = large_img_experiment(img_arr, num_cells, cell_size, sparse_freq, filter_dim, alpha, method, observation, level, dwt_type, rand_weight, mode) 
+    reconst = large_img_experiment(
+        img_arr, num_cells, cell_size, sparse_freq, filter_dim, alpha, method,
+        observation, level, dwt_type, rand_weight, mode) 
     print(f"Image {img_name} reconstructed. Displaying reconstruction and error.") 
-    error_colorbar(img_arr, reconst, method, observation, num_cells, img_name.split('.')[0], False)
+    error_colorbar(img_arr, reconst, method, observation,
+                   num_cells, img_name.split('.')[0], False)
 
     
 def main():
     fig_type, args = parse_figure_args()
     if fig_type == 'colorbar' :
-      method, img_name, observation, mode, dwt_type, level, alpha, num_cells, cell_size, sparse_freq = args
-      colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level, alpha, num_cells, cell_size, sparse_freq)      
+      method, img_name, observation, mode, dwt_type, level, alpha, num_cells,\
+          cell_size, sparse_freq = args
+      colorbar_live_reconst(
+          method, img_name, observation, mode, dwt_type, level,
+          alpha, num_cells, cell_size, sparse_freq)      
     elif fig_type == 'num_cell':
         img_name, method, pixel, gaussian, v1, data_grab, save = args
-        num_cell_error_figure(img_name, method, pixel, gaussian, v1, data_grab, save)
+        num_cell_error_figure(img_name, method, pixel,
+                              gaussian, v1, data_grab, save)
 
 
 if __name__ == "__main__":
