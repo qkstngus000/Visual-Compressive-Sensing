@@ -80,28 +80,44 @@ def run_sweep(method, img, observation, mode, dwt_type, lv,
         if method.lower() == 'dct':
             search_list = [rep, alpha_list, num_cell]
             search = list(itertools.product(*search_list))
-            search_df = pd.DataFrame(search, columns= [ 'rep', 'alp', 'num_cell'])
-            sim_wrapper = lambda rep, alp, num_cell: run_sim_dct(method, observation, mode, rep, alp, num_cell, img_arr)
+            search_df = pd.DataFrame(search, columns= [ 'rep', 'alp',
+                                                        'num_cell'])
+            sim_wrapper = lambda rep, alp, num_cell: \
+                run_sim_dct(method, observation, mode,
+                            rep, alp, num_cell, img_arr)
         elif method.lower() == 'dwt':
             search_list = [rep, lv, alpha_list, num_cell]
             search = list(itertools.product(*search_list))             
-            search_df = pd.DataFrame(search, columns= [ 'rep', 'lv', 'alp', 'num_cell'])
-            sim_wrapper = lambda rep, lv, alp, num_cell: run_sim_dwt(method, observation, mode, dwt_type, rep, lv, alp, num_cell, img_arr)
+            search_df = pd.DataFrame(search, columns= [ 'rep', 'lv',
+                                                        'alp', 'num_cell'])
+            sim_wrapper = lambda rep, lv, alp, num_cell: \
+                run_sim_dwt(method, observation, mode, dwt_type,
+                            rep, lv, alp, num_cell, img_arr)
     # give v1 param search space
     elif observation.upper() == 'V1':
         # specify search space for dct and dwt params
         if method.lower() == 'dct': 
             search_list = [rep, alpha_list, num_cell, cell_size, sparse_freq]
             search = list(itertools.product(*search_list))
-            search_df = pd.DataFrame(search, columns= ['rep', 'alp', 'num_cell', 'cell_size', 'sparse_freq'])
-            sim_wrapper = lambda rep, alp, num_cell, cell_size, sparse_freq: run_sim_V1_dct(method, observation, mode, rep, alp, num_cell, cell_size, sparse_freq, img_arr)
+            search_df = pd.DataFrame(search,
+                                     columns= ['rep', 'alp', 'num_cell',
+                                               'cell_size', 'sparse_freq'])
+            sim_wrapper = lambda rep, alp, num_cell, cell_size, sparse_freq: \
+                run_sim_V1_dct(method, observation, mode, rep, alp,
+                               num_cell, cell_size, sparse_freq, img_arr)
         elif method.lower() == 'dwt':
             search_list = [rep, lv, alpha_list, num_cell, cell_size, sparse_freq]
             search = list(itertools.product(*search_list))             
-            search_df = pd.DataFrame(search, columns= [ 'rep', 'lv', 'alp', 'num_cell', 'cell_size', 'sparse_freq'])
-            sim_wrapper = lambda rep, lv, alp, num_cell, cell_size, sparse_freq: run_sim_V1_dwt(method, observation, mode, dwt_type, rep, lv, alp, num_cell, cell_size, sparse_freq, img_arr)
+            search_df = pd.DataFrame(search, columns= [ 'rep', 'lv', 'alp',
+                                                        'num_cell', 'cell_size',
+                                                        'sparse_freq'])
+            sim_wrapper = lambda rep, lv, alp, num_cell, cell_size, \
+                sparse_freq: run_sim_V1_dwt(method, observation, mode,
+                                            dwt_type, rep, lv, alp, num_cell,
+                                            cell_size, sparse_freq, img_arr)
     else: 
-         print("The observation {observation} is currently not supported. Please try valid observation type.".format(observation = observation))
+         print(f"The observation {observation} is currently not supported.")
+         print(" Please try valid observation type.")
 
     for p in search_df.values:
         delay = dask.delayed(sim_wrapper)(*p)
@@ -114,13 +130,15 @@ def run_sweep(method, img, observation, mode, dwt_type, lv,
     # Saves Computed data to csv file format
     results_df = pd.DataFrame(results, columns=['error'])#, 'theta', 'reform', 's'])
     param_csv_nm = "param_"
-    param_path = data_save_path(image_nm, method, observation, '{mode}_{param_csv_nm}'.format(mode = mode, param_csv_nm = param_csv_nm))
+    param_path = data_save_path(image_nm, method, observation,
+                                f'{mode}_{param_csv_nm}')
     # Add error onto parameter
     params_result_df = search_df.join(results_df['error'])
     params_result_df.to_csv(param_path, index=False)
     
     # Saves hyperparameter used for computing this data to txt file format
-    hyperparam_track = data_save_path(image_nm, method, observation, '{mode}_hyperparam'.format(mode = mode))
+    hyperparam_track = data_save_path(image_nm, method, observation,
+                                      '{mode}_hyperparam'.format(mode = mode))
     f = open(hyperparam_track, 'a+')
     hyperparam_list = list(zip(search_df.columns, search_list))
     f.write(f"{param_csv_nm}\n")
@@ -189,7 +207,9 @@ def run_sim_dwt(method, observation, mode, dwt_type, rep,
     lv = int(lv)
     alpha = float(alpha)
     img_arr = np.array([img_arr]).squeeze()
-    reconst = large_img_experiment(img_arr, num_cell = num_cell, alpha = alpha, method = method, observation = observation, mode = mode, lv = lv, dwt_type = dwt_type)
+    reconst = large_img_experiment(img_arr, num_cell = num_cell, alpha = alpha,
+                                   method = method, observation = observation,
+                                   mode = mode, lv = lv, dwt_type = dwt_type)
 
     # Call function and calculate error
     error = error_calculation(img_arr, reconst)
@@ -264,7 +284,11 @@ def run_sim_V1_dwt(method, observation, mode, dwt_type, rep,
     
     img_arr = np.array([img_arr]).squeeze()
     #Filter reconst to make sure it can reconstruct any size 
-    reconst = large_img_experiment(img_arr, num_cell = num_cell, cell_size=cell_size, sparse_freq=sparse_freq, alpha = alpha, method = method, observation = observation, mode = mode, lv = lv, dwt_type = dwt_type)
+    reconst = large_img_experiment(img_arr, num_cell = num_cell,
+                                   cell_size=cell_size, sparse_freq=sparse_freq,
+                                   alpha = alpha, method = method,
+                                   observation = observation, mode = mode,
+                                   lv = lv, dwt_type = dwt_type)
     
     # Calculates for the error per pixel
     error = error_calculation(img_arr, reconst)
@@ -318,7 +342,9 @@ def run_sim_dct(method, observation, mode, rep, alpha, num_cell, img_arr):
         num_cell = round(n * m * num_cell)
     num_cell = int(num_cell)
     img_arr = np.array([img_arr]).squeeze()
-    reconst = large_img_experiment(img_arr, num_cell = num_cell, alpha = alpha, method = method, observation = observation, mode = mode)
+    reconst = large_img_experiment(img_arr, num_cell = num_cell, alpha = alpha,
+                                   method = method, observation = observation,
+                                   mode = mode)
     
     # Call function and calculate error
     error = error_calculation(img_arr, reconst)
@@ -378,15 +404,20 @@ def run_sim_V1_dct(method, observation, mode, rep, alpha,
         num_cell = round(n * m * num_cell)
     num_cell = int(num_cell)
     img_arr = np.array([img_arr]).squeeze()
-    reconst = large_img_experiment(img_arr, num_cell = num_cell, cell_size=cell_size, sparse_freq=sparse_freq, alpha = alpha, method = method, observation = observation, mode = mode)
+    reconst = large_img_experiment(img_arr, num_cell = num_cell,
+                                   cell_size=cell_size, sparse_freq=sparse_freq,
+                                   alpha = alpha, method = method,
+                                   observation = observation, mode = mode)
     error = error_calculation(img_arr, reconst)
     
     return error
 
 
 def main():
-    method, img, observation, mode, dwt_type, level, alpha_list, num_cell, cell_size, sparse_freq = parse_sweep_args()
-    run_sweep(method, img, observation, mode, dwt_type, level, alpha_list, num_cell, cell_size, sparse_freq)
+    method, img, observation, mode, dwt_type, level, alpha_list, \
+        num_cell, cell_size, sparse_freq = parse_sweep_args()
+    run_sweep(method, img, observation, mode, dwt_type, level, alpha_list,
+              num_cell, cell_size, sparse_freq)
 
 if __name__ == '__main__':
     main()
