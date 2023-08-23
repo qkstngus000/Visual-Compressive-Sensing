@@ -82,17 +82,17 @@ def run_sweep(method, img, observation, mode, dwt_type, lv,
             search = list(itertools.product(*search_list))
             search_df = pd.DataFrame(search, columns= [ 'rep', 'alp',
                                                         'num_cell'])
-            sim_wrapper = lambda rep, alp, num_cell: \
+            sim_wrapper = lambda alp, num_cell: \
                 run_sim_dct(method, observation, mode,
-                            rep, alp, num_cell, img_arr)
+                            alp, num_cell, img_arr)
         elif method.lower() == 'dwt':
             search_list = [rep, lv, alpha_list, num_cell]
             search = list(itertools.product(*search_list))             
             search_df = pd.DataFrame(search, columns= [ 'rep', 'lv',
                                                         'alp', 'num_cell'])
-            sim_wrapper = lambda rep, lv, alp, num_cell: \
+            sim_wrapper = lambda lv, alp, num_cell: \
                 run_sim_dwt(method, observation, mode, dwt_type,
-                            rep, lv, alp, num_cell, img_arr)
+                            lv, alp, num_cell, img_arr)
     # give v1 param search space
     elif observation.upper() == 'V1':
         # specify search space for dct and dwt params
@@ -102,8 +102,8 @@ def run_sweep(method, img, observation, mode, dwt_type, lv,
             search_df = pd.DataFrame(search,
                                      columns= ['rep', 'alp', 'num_cell',
                                                'cell_size', 'sparse_freq'])
-            sim_wrapper = lambda rep, alp, num_cell, cell_size, sparse_freq: \
-                run_sim_V1_dct(method, observation, mode, rep, alp,
+            sim_wrapper = lambda alp, num_cell, cell_size, sparse_freq: \
+                run_sim_V1_dct(method, observation, mode, alp,
                                num_cell, cell_size, sparse_freq, img_arr)
         elif method.lower() == 'dwt':
             search_list = [rep, lv, alpha_list, num_cell, cell_size, sparse_freq]
@@ -111,9 +111,9 @@ def run_sweep(method, img, observation, mode, dwt_type, lv,
             search_df = pd.DataFrame(search, columns= [ 'rep', 'lv', 'alp',
                                                         'num_cell', 'cell_size',
                                                         'sparse_freq'])
-            sim_wrapper = lambda rep, lv, alp, num_cell, cell_size, \
+            sim_wrapper = lambda lv, alp, num_cell, cell_size, \
                 sparse_freq: run_sim_V1_dwt(method, observation, mode,
-                                            dwt_type, rep, lv, alp, num_cell,
+                                            dwt_type, lv, alp, num_cell,
                                             cell_size, sparse_freq, img_arr)
     else: 
          print(f"The observation {observation} is currently not supported.")
@@ -151,7 +151,7 @@ def run_sweep(method, img, observation, mode, dwt_type, lv,
     client.close()
 
 # run sim for non-v1 dwt
-def run_sim_dwt(method, observation, mode, dwt_type, rep,
+def run_sim_dwt(method, observation, mode, dwt_type,
                 lv, alpha, num_cell, img_arr):
     ''' 
     Run a sim for non-v1 dwt
@@ -170,10 +170,7 @@ def run_sim_dwt(method, observation, mode, dwt_type, rep,
     dwt_type : String
         Type of dwt method to use.
         See pywt.wavelist() for all possible dwt types.
-        
-    rep : int
-        The current repetition with the given parameters.
-
+    
     lv : int
         Generate level of signal frequencies when dwt is used. 
         Should be in [1, 4].
@@ -203,7 +200,6 @@ def run_sim_dwt(method, observation, mode, dwt_type, rep,
     if (num_cell < 1):
         num_cell = round(n * m * num_cell)
     num_cell = int(num_cell)
-    rep = int(rep)
     lv = int(lv)
     alpha = float(alpha)
     img_arr = np.array([img_arr]).squeeze()
@@ -218,7 +214,7 @@ def run_sim_dwt(method, observation, mode, dwt_type, rep,
 
 
 # run sim for v1 dwt
-def run_sim_V1_dwt(method, observation, mode, dwt_type, rep,
+def run_sim_V1_dwt(method, observation, mode, dwt_type,
                    lv, alpha, num_cell, cell_size, sparse_freq, img_arr):
     ''' 
     Run a sim for v1 dwt
@@ -237,9 +233,6 @@ def run_sim_V1_dwt(method, observation, mode, dwt_type, rep,
     dwt_type : String
         Type of dwt method to use.
         See pywt.wavelist() for all possible dwt types.
-
-    rep: int
-        The current repetition with the given parameters.
 
     lv : int
         Generate level of signal frequencies when dwt is used. 
@@ -279,7 +272,6 @@ def run_sim_V1_dwt(method, observation, mode, dwt_type, rep,
         num_cell = round(n * m * num_cell)
     num_cell = int(num_cell)
     lv = int(lv)
-    rep = int(rep)
     alpha = float(alpha)
     
     img_arr = np.array([img_arr]).squeeze()
@@ -297,7 +289,7 @@ def run_sim_V1_dwt(method, observation, mode, dwt_type, rep,
 
     
 # run sim for non-v1 dct 
-def run_sim_dct(method, observation, mode, rep, alpha, num_cell, img_arr):
+def run_sim_dct(method, observation, mode, alpha, num_cell, img_arr):
     ''' 
     Run a sim for non-v1 dct
     
@@ -312,9 +304,6 @@ def run_sim_dct(method, observation, mode, rep, alpha, num_cell, img_arr):
     
     mode : String
         Desired mode to reconstruct image (e.g. 'Color' or 'Black').
-
-    rep: int
-        The current repetition with the given parameters.
 
     alpha : float
         Penalty for fitting data onto LASSO function to 
@@ -351,7 +340,7 @@ def run_sim_dct(method, observation, mode, rep, alpha, num_cell, img_arr):
     return error
 
 # run sim for v1 dct
-def run_sim_V1_dct(method, observation, mode, rep, alpha,
+def run_sim_V1_dct(method, observation, mode, alpha,
                    num_cell, cell_size, sparse_freq, img_arr):
     ''' 
     Run a sim for V1 dct
@@ -366,9 +355,6 @@ def run_sim_V1_dct(method, observation, mode, rep, alpha,
     
     mode : String
         Desired mode to reconstruct image (e.g. 'Color' or 'Black').
-
-    rep: int
-        The current repetition with the given parameters.
 
     alpha : float
         Penalty for fitting data onto LASSO function to 
