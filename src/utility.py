@@ -129,17 +129,6 @@ def data_save_path(img_nm, method, observation, save_nm):
     
     return os.path.join(result_path, save_nm)
 
-def color():
-    ''' 
-    Pools for user argument on color mode
-        
-    Returns
-    ----------
-    list : list
-        return list of possible user answer for color mode
-    '''
-    return ['-c', 'c', 'color', '-color']
-
 def process_image(img, mode = 'black', visibility = False):
     ''' 
     Opens image file with given file name and determines whether image file will
