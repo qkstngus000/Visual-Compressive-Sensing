@@ -8,7 +8,7 @@ from scipy import fftpack as fft
 import pywt
 from pywt import wavedecn
 from sklearn.linear_model import Lasso
-from pathlib import Path
+
 import warnings
 from sklearn.exceptions import ConvergenceWarning
 from src.utility import *

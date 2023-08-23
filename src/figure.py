@@ -22,33 +22,34 @@ def show_reconstruction_error(img_arr, reconst, method,
     
     Parameters
     ----------
-        img_arr : numpy array 
-            Contains the pixel values for the original image
-        
-        reconst : numpy array 
-            Containing the pixel values for the reconstructed image
-        
-        method : String
-            Method used for the reconstruction.
-            Possible methods are ['dct', 'dwt']
-        
-        observation : String
-            Observation used to collect data for reconstruction
-            Possible observations are ['pixel', 'gaussian', 'V1']
-        
-        num_cell : Integer
-            Number of blobs that will be used to be determining 
-            which pixels to use.
-    
-        img_name : String
-            Name of the original image file (e.g. "Peppers")
-        
-        save_img : boolean
-            Determines if the image will be saved.
+    img_arr : numpy array 
+        Contains the pixel values for the original image
+
+    reconst : numpy array 
+        Containing the pixel values for the reconstructed image
+
+    method : String
+        Method used for the reconstruction.
+        Possible methods are ['dct', 'dwt']
+
+    observation : String
+        Observation used to collect data for reconstruction
+        Possible observations are ['pixel', 'gaussian', 'V1']
+
+    num_cell : Integer
+        Number of blobs that will be used to be determining 
+        which pixels to use.
+
+    img_name : String
+        Name of the original image file (e.g. "Peppers")
+
+    save_img : boolean
+        Determines if the image will be saved.
     '''
 
     # setup figures and axes
-    # NOTE: changing figsize here requires you to rescale the colorbar as well --adjust the shrink parameter to fit.
+    # NOTE: changing figsize here requires you to rescale the colorbar as well
+    ## --adjust the shrink parameter to fit.
     fig, axis = plt.subplots(1, 2, figsize = (8, 8))
     plt.tight_layout()
 

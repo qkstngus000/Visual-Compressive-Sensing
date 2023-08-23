@@ -277,7 +277,7 @@ def run_sim_V1_dwt(method, observation, mode, dwt_type,
     img_arr = np.array([img_arr]).squeeze()
     #Filter reconst to make sure it can reconstruct any size 
     reconst = large_img_experiment(img_arr, num_cell = num_cell,
-                                   cell_size=cell_size, sparse_freq=sparse_freq,
+                                   cell_size = cell_size, sparse_freq = sparse_freq,
                                    alpha = alpha, method = method,
                                    observation = observation, mode = mode,
                                    lv = lv, dwt_type = dwt_type)
