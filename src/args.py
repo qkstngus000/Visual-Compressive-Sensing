@@ -2,7 +2,6 @@
 import pywt
 import argparse
 import sys
-sys.path.append("../")
 
 def add_colorbar_args(parser):
     '''

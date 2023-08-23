@@ -1,15 +1,14 @@
 import numpy as np
 import numpy.linalg as la
 import sys
-sys.path.append("../")
 import matplotlib.pyplot as plt
 
 # Package for importing image representation
 from PIL import Image, ImageOps
 
-from src.compress_sensing_library import *
-from src.utility_library import *
-from src.arg_library import parse_sweep_args
+from src.compress_sensing import *
+from src.utility import *
+from src.args import parse_sweep_args
 import pandas as pd
 import itertools
 import dask

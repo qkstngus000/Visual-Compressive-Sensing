@@ -1,7 +1,6 @@
 import numpy as np
 import sys
 import os
-sys.path.append("../")
 from structured_random_features.src.models.weights import V1_weights
 
 # Packages for dct, dwt and fitting data
@@ -12,7 +11,7 @@ from sklearn.linear_model import Lasso
 from pathlib import Path
 import warnings
 from sklearn.exceptions import ConvergenceWarning
-from src.utility_library import *
+from src.utility import *
 
 # Packages for images
 from PIL import Image, ImageOps

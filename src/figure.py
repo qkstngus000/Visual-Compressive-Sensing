@@ -3,15 +3,14 @@ import numpy as np
 import pandas as pd
 
 import sys
-sys.path.append("../")
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import seaborn as sns
 import time
 import os.path
-from src.compress_sensing_library import *
-from src.utility_library import *
-from src.arg_library import *
+from src.compress_sensing import *
+from src.utility import *
+from src.args import *
 # Package for importing image representation
 from PIL import Image, ImageOps
 

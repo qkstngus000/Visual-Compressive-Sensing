@@ -6,7 +6,7 @@ import sys
 import os
 import re
 import matplotlib.pyplot as plt
-from src.compress_sensing import *
+from compress_sensing_library import *
 
 # Package for importing image representation
 from PIL import Image, ImageOps
