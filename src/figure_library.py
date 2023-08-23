@@ -16,8 +16,8 @@ from src.arg_library import *
 from PIL import Image, ImageOps
 
 
-def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name,
-                   save_img = False): 
+def show_reconstruction_error(img_arr, reconst, method,
+                              observation, num_cell, img_name, save_img = False): 
     ''' 
     Display the reconstructed image along with pixel error and a colorbar.
     
@@ -82,14 +82,14 @@ def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name,
     cbar.set_label("Error")
     # save image to outfile if desired, else display to the user
     if save_img == True:
-        outfile = fig_save_path(img_name, "dct", observation, "colorbar")
+        outfile = fig_save_path(img_name, method, observation, "colorbar")
         plt.savefig(outfile, dpi = 300, bbox_inches = "tight")
     else:
         plt.show()
 
 
 
-def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None,
+def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
                           V1_file=None, data_grab = 'auto', save = False) :
     ''' 
     Generate figure that compares which method gives the best minimum error
@@ -151,7 +151,7 @@ def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None,
         
     plt.show()
 
-def alpha_error(img, method, pixel_data, gaussian_data, V1_data, save = False):
+def error_vs_alpha(img, method, pixel_data, gaussian_data, V1_data, save = False):
     ''' 
     Generate figure that compares various alpha LASSO penalty and how it affects
     the error of the reconstruction among three different observations. 
@@ -296,7 +296,7 @@ def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level,
         img_arr, num_cells, cell_size, sparse_freq, filter_dim, alpha, method,
         observation, level, dwt_type, rand_weight, mode) 
     print(f"Image {img_name} reconstructed. Displaying reconstruction and error.") 
-    error_colorbar(img_arr, reconst, method, observation,
+    show_reconstruction_error(img_arr, reconst, method, observation,
                    num_cells, img_name.split('.')[0], False)
 
     
@@ -310,7 +310,7 @@ def main():
           alpha, num_cells, cell_size, sparse_freq)      
     elif fig_type == 'num_cell':
         img_name, method, pixel, gaussian, v1, data_grab, save = args
-        num_cell_error_figure(img_name, method, pixel,
+        error_vs_num_cell(img_name, method, pixel,
                               gaussian, v1, data_grab, save)
 
 

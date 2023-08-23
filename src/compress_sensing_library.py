@@ -230,7 +230,8 @@ def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
     img = fft.idctn(s.reshape(n, m), norm='ortho', axes=[0,1])
     return img
 
-def wavelet_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept, dwt_type, lv) :
+def wavelet_reconstruct(W, y, alpha, sample_sz, n, m,
+                        fit_intercept, dwt_type, lv) :
     ''' 
     Reconstruct signals through wavelet transform.
     
@@ -332,8 +333,10 @@ def generate_observations(img_arr, num_cell, observation, cell_size = None,
    
     '''
     # Check if the cell_size and sparse_freq is none while it is conduction V1 observation
-    if (observation.lower() == "v1" and (cell_size == None or sparse_freq == None)) :
-        print("For {observation} observation, both cell_size and sparse_freq parameters are required".format(observation = observation))
+    if (observation.lower() == "v1" and (cell_size == None
+                                         or sparse_freq == None)) :
+        print(f"For {observation} observation, both cell_size"+
+              " and sparse_freq parameters are required")
         sys.exit(0)
     if (type(num_cell) == str):
         print(num_cell)
@@ -401,7 +404,8 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct',
     if (method == 'dct') :
         img = fourier_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept)
     elif (method == 'dwt') :
-        img = wavelet_reconstruct(W, y, alpha, num_cell, n, m, fit_intercept, dwt_type, lv)
+        img = wavelet_reconstruct(W, y, alpha, num_cell, n, m,
+                                  fit_intercept, dwt_type, lv)
 
         # Reform the image using sparse vector s with inverse discrete cosine
         
@@ -485,12 +489,14 @@ def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None,
         img_arr_pt_dim = img_arr_pt.shape
         n_pt, m_pt = img_arr_pt_dim
         
-        W, y = generate_observations(img_arr_pt, num_cell, observation, cell_size, sparse_freq)
+        W, y = generate_observations(img_arr_pt, num_cell, observation,
+                                     cell_size, sparse_freq)
             
         if (method == 'dct'):
             reconst = reconstruct(W, y, alpha, method = method)
         else :
-            reconst = reconstruct(W, y, alpha, method = method, lv = lv, dwt_type = dwt_type)
+            reconst = reconstruct(W, y, alpha, method = method,
+                                  lv = lv, dwt_type = dwt_type)
         img[:,:,i] = reconst
         i+=1
         
@@ -637,18 +643,21 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
             img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m, :] = reconst
         else:    
             img_arr_pt = img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m]
-            W, y = generate_observations(img_arr_pt, num_cell, observation, cell_size, sparse_freq)
+            W, y = generate_observations(img_arr_pt, num_cell, observation,
+                                         cell_size, sparse_freq)
             W_model = W.reshape(num_cell, filt_n, filt_m)    
 
             if (method == 'dct'):
                 reconst = reconstruct(W, y, alpha, method = method)
             else :
-                reconst = reconstruct(W, y, alpha, method = method, lv = lv, dwt_type = dwt_type)
+                reconst = reconstruct(W, y, alpha, method = method, lv = lv,
+                                      dwt_type = dwt_type)
             img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m] = reconst
         cur_m = nxt_m
 
         i+=1
-    result = img_arr_aug[:n, :m, :rgb] if (mode.lower() in color()) else img_arr_aug[:n,:m]
+    result = img_arr_aug[:n, :m, :rgb] \
+        if (mode.lower() in color()) else img_arr_aug[:n,:m]
 #     if (mode.lower() in color()):
 #         result = img_arr_aug[:n, :m, :rgb]
 #     else :    
