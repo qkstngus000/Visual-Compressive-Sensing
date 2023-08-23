@@ -16,8 +16,10 @@ from src.arg_library import *
 from PIL import Image, ImageOps
 
 
-def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, save_img = False): 
-    ''' Display the reconstructed image along with pixel error and a colorbar.
+def show_reconstruction_error(img_arr, reconst, method,
+                              observation, num_cell, img_name, save_img = False): 
+    ''' 
+    Display the reconstructed image along with pixel error and a colorbar.
     
     Parameters
     ----------
@@ -36,7 +38,8 @@ def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, sa
             Possible observations are ['pixel', 'gaussian', 'V1']
         
         num_cell : Integer
-            Number of blobs that will be used to be determining which pixles to grab and use
+            Number of blobs that will be used to be determining 
+            which pixels to use.
     
         img_name : String
             Name of the original image file (e.g. "Peppers")
@@ -51,11 +54,11 @@ def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, sa
     plt.tight_layout()
 
     # prepare the reconstruction axis
-    axis[0].set_title("{observation} Reconst: {num_cell} cell".format(observation=observation, num_cell = num_cell))
+    axis[0].set_title(f"{observation} Reconst: {num_cell} cell")
     axis[0].axis('off')
 
     # prepare the observation error axis
-    axis[1].set_title("{observation} Error: {num_cell} cells".format(observation = observation, num_cell = num_cell))
+    axis[1].set_title(f"{observation} Error: {num_cell} cells")
     axis[1].axis('off')
     
     # calculate error for RGB images
@@ -63,7 +66,8 @@ def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, sa
         axis[0].imshow(reconst, vmin = 0, vmax = 255)
         vmax = ((img_arr - reconst)**2).mean(axis = 2)
         vmax = vmax.max() if vmax.max() < 255 else 255
-        err = axis[1].imshow(((img_arr - reconst)**2).mean(axis = 2), 'Reds', vmin = 0, vmax = vmax)
+        err = axis[1].imshow(((img_arr - reconst)**2).mean(axis = 2),
+                             'Reds', vmin = 0, vmax = vmax)
 
     # calculate error for Grayscaled images
     else :
@@ -78,43 +82,47 @@ def error_colorbar(img_arr, reconst, method, observation, num_cell, img_name, sa
     cbar.set_label("Error")
     # save image to outfile if desired, else display to the user
     if save_img == True:
-        outfile = fig_save_path(img_name, "dct", observation, "colorbar")
+        outfile = fig_save_path(img_name, method, observation, "colorbar")
         plt.savefig(outfile, dpi = 300, bbox_inches = "tight")
     else:
         plt.show()
 
 
 
-def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_file=None, data_grab = 'auto', save = False) :
-    ''' Generate figure that compares which method gives the best minimum error
+def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
+                          V1_file=None, data_grab = 'auto', save = False) :
+    ''' 
+    Generate figure that compares which method gives the best minimum error
     
     Parameters
     ----------
     img : String
-        the name of image file
+        The name of image file.
        
     method : String
-        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+        Basis the data file was worked on. 
+        Currently supporting dct and dwt (discrete cosine/wavelet transform).
     
     pixel_file : String
-        pixel observation data file from hyperparameter sweep that is needed to plot
+        Pixel observation data file from hyperparameter sweep.
+        Required for plotting.
     
     gaussian_file : String
-        gaussian observation data file from hyperparameter sweep that is needed to plot
+        Gaussian observation data file from hyperparameter sweep.
+        Required for plotting.
     
     V1_file : String
-        V1 observation data file from hyperparameter sweep that is needed to plot
+        V1 observation data file from hyperparameter sweep.
+        Required for plotting.
     
     data_grab : String
-        With structured path, decides to grab all three data file automatically or manually. Currently not implemented
-        ['auto', 'manual']
+        With structured path, decides to grab all three data files 
+        automatically or manually. Currently not implemented.
+        ['auto', 'manual'].
     
     save : bool
-        Save data into specified path
+        Save data into specified path.
         [True, False]
-            
-    Returns
-    ----------
     '''
     img_nm = img.split('.')[0]
     
@@ -136,37 +144,41 @@ def num_cell_error_figure(img, method, pixel_file=None, gaussian_file=None, V1_f
     plt.legend(loc = 'best')
     if save :
         # for its save name, the name of file order is pixel -> gaussian -> V1 
-        save_nm = pixel_file.split('.')[0] + '_' + gaussian_file.split('.')[0] + '_' + V1_file.split('.')[0]
+        save_nm = pixel_file.split('.')[0] + '_' + \
+            gaussian_file.split('.')[0] + '_' + V1_file.split('.')[0]
         save_path = fig_save_path(img_nm, method, 'num_cell_error', save_nm)
         plt.savefig(save_path, dpi = 200)
         
     plt.show()
 
-def alpha_error(img, method, pixel_data, gaussian_data, V1_data, save = False):
-    ''' Generate figure that compares various alpha LASSO panelty and how it affect the error of the reconstruction among three different observation. 
+def error_vs_alpha(img, method, pixel_data, gaussian_data, V1_data, save = False):
+    ''' 
+    Generate figure that compares various alpha LASSO penalty and how it affects
+    the error of the reconstruction among three different observations. 
     
     Parameters
     ----------
-        img : String
-            Name of the image that is used by sweeped data
+    img : String
+        Name of the image that is used by sweeped data
         
-        method : String
-        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+    method : String
+        Basis the data file was worked on. 
+        Currently supporting dct and dwt (discrete cosine/wavelet transform).
     
-        pixel_data : String
-            pixel observation data file from hyperparameter sweep that is needed to plot
+    pixel_data : String
+        Pixel observation data file from hyperparameter sweep.
+        Required for plotting.
 
-        gaussian_data : String
-            gaussian observation data file from hyperparameter sweep that is needed to plot
+    gaussian_data : String
+        Gaussian observation data file from hyperparameter sweep.
+        Required for plotting.
 
-        V1_data : String
-            V1 observation data file from hyperparameter sweep that is needed to plot
-        
-        save : boolean
-            Determines if the image will be saved.
-            
-    Returns
-    ----------
+    V1_data : String
+        V1 observation data file from hyperparameter sweep.
+        Required for plotting.
+
+    save : boolean
+        Determines if the image will be saved.
     '''
     if None in [pixel_data, gaussian_data, V1_data]:
         print("Currently all file required")
@@ -183,36 +195,41 @@ def alpha_error(img, method, pixel_data, gaussian_data, V1_data, save = False):
     
     for num_cell in num_cell_list :
         # In order to bring fixed cell_size and sparse_frequency, bring parameter that has median error value
-        V1_df_mean = V1_df.loc[V1_df["num_cell"] == num_cell].groupby(list(V1_df.columns[1:-1]), 
-                                               as_index = False).mean().drop('rep', axis=1)
-        median_col = V1_df_mean.loc[V1_df_mean['error'] == V1_df_mean['error'].median()]
+        V1_df_mean = V1_df.loc[V1_df["num_cell"] == num_cell].groupby(
+            list(V1_df.columns[1:-1]),
+            as_index = False).mean().drop('rep', axis=1)
+        median_col = V1_df_mean.loc[V1_df_mean['error'] == \
+                                    V1_df_mean['error'].median()]
 
         # Depending on the basis used (dct / dwt) add lv parameter
         if (method.lower() == 'dct') :
-            cell_size, sparse_freq = V1_df_mean.loc[V1_df_mean['error'] == V1_df_mean['error'].
-                                                    median()][['cell_size', 'sparse_freq']].values.squeeze()
+            cell_size, sparse_freq = V1_df_mean.loc[
+                V1_df_mean['error'] == V1_df_mean['error'].median()]\
+                [['cell_size', 'sparse_freq']].values.squeeze()
             V1_df_mod = V1_df.loc[(V1_df['cell_size'] == cell_size) & 
                                   (V1_df['sparse_freq'] == sparse_freq)]
-            title=r"$\alpha$_Error for {cell} cells (cell_size: {cell_size}, sparse_freq: {sparse_freq})".format(
-                cell = num_cell, cell_size = cell_size, sparse_freq = sparse_freq)
+            title=rf"$\alpha$_Error for {num_cell} cells"+\
+            rf" (cell_size: {cell_size}, sparse_freq: {sparse_freq})"
         else :
-            cell_size, sparse_freq, lv = V1_df_mean.loc[V1_df_mean['error'] == V1_df_mean['error'].
-                                                    median()][['cell_size', 'sparse_freq', 'lv']].values.squeeze()
+            cell_size, sparse_freq, lv = V1_df_mean.loc[
+                V1_df_mean['error'] == V1_df_mean['error'].median()]\
+                [['cell_size', 'sparse_freq', 'lv']].values.squeeze()
             V1_df_mod = V1_df.loc[(V1_df['cell_size'] == cell_size) & 
                                   (V1_df['sparse_freq'] == sparse_freq) & 
                                   (V1_df['lv'] == lv)]
-            title=r"$\alpha$_Error for {cell} cells \
-            (cell_size: {cell_size}, sparse_freq: {sparse_freq}, lv: {lv})".format(
-                cell = num_cell, cell_size = cell_size, sparse_freq = sparse_freq, lv = lv)
+            title=rf"$\alpha$_Error for {num_cell} cells "+\
+                rf"(cell_size: {cell_size}, sparse_freq: {sparse_freq}, lv: {lv})"
 
-        fig = sns.relplot(data = V1_df_mod, x = 'alp', y = 'error', kind='line', palette='Accent', 
-                          legend = True, label = 'V1')
+        fig = sns.relplot(data = V1_df_mod, x = 'alp', y = 'error', kind='line',
+                          palette='Accent', legend = True, label = 'V1')
 
 
-        fig.map(sns.lineplot, x = 'alp', y = 'error', data = pixel_df.loc[pixel_df["num_cell"] == num_cell], 
+        fig.map(sns.lineplot, x = 'alp', y = 'error',
+                data = pixel_df.loc[pixel_df["num_cell"] == num_cell], 
                 label= 'pixel', color = 'red', 
                 legend = True)
-        fig.map(sns.lineplot, x = 'alp', y = 'error', data = gaussian_df.loc[gaussian_df["num_cell"] == num_cell], 
+        fig.map(sns.lineplot, x = 'alp', y = 'error',
+                data = gaussian_df.loc[gaussian_df["num_cell"] == num_cell], 
                 label= 'gaussian', color = 'green', 
                 legend = True)
         fig.set(title = title)
@@ -227,14 +244,16 @@ def alpha_error(img, method, pixel_data, gaussian_data, V1_data, save = False):
             plt.savefig(path, dpi = 200)
         plt.show()
 
-def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level, alpha, num_cells, cell_size, sparse_freq):
+def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level,
+                          alpha, num_cells, cell_size, sparse_freq):
     '''
     Generates a reconstruction and error figure for desired parameters.
 
     Parameters
     ---------
     method : String
-        Basis the data file was worked on. Currently supporting dct (descrete cosine transform) and dwt (descrete wavelet transform)
+        Basis the data file was worked on. 
+        Currently supporting dct and dwt (discrete cosine/wavelet transform).
 
     img_name : String
         The name of image file to reconstruct from.
@@ -247,40 +266,52 @@ def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level, 
         Mode to reconstruct image ['color' or 'black']
     
     dwt_type : String
-        Type of dwt method to be used -- see pywt.wavelist() for all possible dwt types.
+        Type of dwt method to be used.
+        See pywt.wavelist() for all possible dwt types.
         
     level : int
         Level of signal frequencies for dwt -- should be an integer in [1, 4].
         
     alpha : float
-        Penalty for fitting data onto LASSO function to search for significant coefficents
+        Penalty for fitting data onto LASSO function to 
+        search for significant coefficents.
 
     num_cells : int
-        Number of blobs that will be used to be determining which pixels to grab and use
+        Number of blobs that will be used to be determining 
+        which pixels to grab and use.
     
     cell_size : int
-        Determines field size of opened and closed blob of data. Affect the data training
+        Determines field size of opened and closed blob of data. 
+        Affect the data training.
 
     sparse_freq : int
-        Determines filed frequency on how frequently opened and closed area would appear. Affect the data training
+        Determines filed frequency on how frequently 
+        opened and closed area would appear. Affect the data training
     '''
     rand_weight = False
     filter_dim = (30, 30)
     img_arr = process_image(img_name, mode, False)
     print(f"Image \"{img_name}\" loaded.") 
-    reconst = filter_reconstruct(img_arr, num_cells, cell_size, sparse_freq, filter_dim, alpha, method, observation, level, dwt_type, rand_weight, mode) 
+    reconst = large_img_experiment(
+        img_arr, num_cells, cell_size, sparse_freq, filter_dim, alpha, method,
+        observation, level, dwt_type, rand_weight, mode) 
     print(f"Image {img_name} reconstructed. Displaying reconstruction and error.") 
-    error_colorbar(img_arr, reconst, method, observation, num_cells, img_name.split('.')[0], False)
+    show_reconstruction_error(img_arr, reconst, method, observation,
+                   num_cells, img_name.split('.')[0], False)
 
     
 def main():
     fig_type, args = parse_figure_args()
     if fig_type == 'colorbar' :
-      method, img_name, observation, mode, dwt_type, level, alpha, num_cells, cell_size, sparse_freq = args
-      colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level, alpha, num_cells, cell_size, sparse_freq)      
+      method, img_name, observation, mode, dwt_type, level, alpha, num_cells,\
+          cell_size, sparse_freq = args
+      colorbar_live_reconst(
+          method, img_name, observation, mode, dwt_type, level,
+          alpha, num_cells, cell_size, sparse_freq)      
     elif fig_type == 'num_cell':
         img_name, method, pixel, gaussian, v1, data_grab, save = args
-        num_cell_error_figure(img_name, method, pixel, gaussian, v1, data_grab, save)
+        error_vs_num_cell(img_name, method, pixel,
+                              gaussian, v1, data_grab, save)
 
 
 if __name__ == "__main__":
