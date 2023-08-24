@@ -9,6 +9,10 @@ Description: Compressed sensing [(CS)](https://github.com/qkstngus000/Compress-S
 ## Installation
 Assuming you have python environment, fork this project into desired directory.
 
+To use the libraries in the src directory as a package, run command below in the root directory of the project.
+
+    pip install -e .
+
 ## Organization
 
 ### src
@@ -16,7 +20,7 @@ This is where all source codes are stored. Source code mainly separated into 5 d
     
 &ensp; * Compress Sensing Library (1): Contains all codes that deals with computations of signal data with its observation method. 
 
-&ensp; * (hyperparam sweep file) (2): Calls Signal reconstruction method defined in Compress Sensing Library and call dask (parallel computation library) to compute hyperparameters that user wants to test. There are total two hyperparameter sweep files, which one deals with descrete cosine transform ([DCT](https://en.wikipedia.org/wiki/Dual-clutch_transmission)) and the other deals with descrete wavelet transform ([DWT](https://en.wikipedia.org/wiki/Discrete_wavelet_transform)). 
+&ensp; * (hyperparam sweep file) (2): Calls Signal reconstruction method defined in Compress Sensing Library and call dask (parallel computation library) to compute hyperparameters that user wants to test. There are total two hyperparameter sweep files, which one deals with descrete cosine transform ([DCT](https://en.wikipedia.org/wiki/Discrete_cosine_transform)) and the other deals with descrete wavelet transform ([DWT](https://en.wikipedia.org/wiki/Discrete_wavelet_transform)). 
 
 &ensp; * Utility Library (1): Contains all methods that are not directly related to signal computation nor observation method, but used to approach desired goal such as saving function, connecting functions and others.
 
@@ -37,8 +41,7 @@ This is the base of our project where folder contains neural-network V1 model th
 
 ## Function Usage
 ### compress_sensing_library
-For examples, please look at this [example link](./src/compress_sensing_library_example.md) to see how to apply functions listed in compressed_sensing_library.
+For examples, please look at this [example link](./compress_sensing_example.md) to see how to apply functions listed in compressed_sensing_library.
     
 ### figure library
 This library is still in development phase.
-
