@@ -16,7 +16,7 @@ from PIL import Image, ImageOps
 
 
 def show_reconstruction_error(img_arr, reconst, method,
-                              observation, num_cell, img_name, save_img = False): 
+                              observation, num_cell, img_name): 
     ''' 
     Display the reconstructed image along with pixel error and a colorbar.
     
@@ -42,9 +42,6 @@ def show_reconstruction_error(img_arr, reconst, method,
 
     img_name : String
         Name of the original image file (e.g. "Peppers")
-
-    save_img : boolean
-        Determines if the image will be saved.
     '''
 
     # setup figures and axes
@@ -80,17 +77,11 @@ def show_reconstruction_error(img_arr, reconst, method,
     # apply colorbar -- NOTE : if figsize is not (8, 8) then shrink value must be changeed as well
     cbar = fig.colorbar(err, ax=axis, shrink = 0.363, aspect=10)
     cbar.set_label("Error")
-    # save image to outfile if desired, else display to the user
-    if save_img == True:
-        outfile = fig_save_path(img_name, method, observation, "colorbar")
-        plt.savefig(outfile, dpi = 300, bbox_inches = "tight")
-    else:
-        plt.show()
 
 
 
 def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
-                          V1_file=None, data_grab = 'auto', save = False) :
+                          V1_file=None, data_grab = 'auto') :
     ''' 
     Generate figure that compares which method gives the best minimum error
     
@@ -290,24 +281,23 @@ def colorbar_live_reconst(method, img_name, observation, color, dwt_type, level,
     reconst = large_img_experiment(
         img_arr, num_cells, cell_size, sparse_freq, filter_dim, alpha, method,
         observation, level, dwt_type, rand_weight, color) 
-    print(f"Image {img_name} reconstructed. Displaying reconstruction and error.") 
     show_reconstruction_error(img_arr, reconst, method, observation,
-                   num_cells, img_name.split('.')[0], False)
+                   num_cells, img_name.split('.')[0])
 
-    
 def main():
-    fig_type, args = parse_figure_args()
+    fig_type, args, save = parse_figure_args()
     if fig_type == 'colorbar' :
       method, img_name, observation, color, dwt_type, level, alpha, num_cells,\
           cell_size, sparse_freq = args
       colorbar_live_reconst(
           method, img_name, observation, color, dwt_type, level,
           alpha, num_cells, cell_size, sparse_freq)
-      
+      if save:
+          save_reconstruction_error(img_name, method, observation)
     elif fig_type == 'num_cell':
-        img_name, method, pixel, gaussian, v1, data_grab, save = args
+        img_name, method, pixel, gaussian, v1, data_grab = args
         error_vs_num_cell(img_name, method, pixel,
-                              gaussian, v1, data_grab, save)
+                              gaussian, v1, data_grab)
         if save:
             save_num_cell(img_name, pixel, gaussian, v1, method)
     elif fig_type == 'alpha':

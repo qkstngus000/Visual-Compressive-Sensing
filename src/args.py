@@ -115,6 +115,7 @@ def eval_colorbar_args(args, parser):
     img_name = args.img_name[0] if args.img_name is not None else None
     observation = args.observation[0] if args.observation is not None else None
     color = args.color
+    save = args.save
     num_cells = eval(args.num_cells[0]) if args.num_cells is not None else None
     if None in [method, img_name, observation, num_cells]:
         parser.error('[Colorbar Figure] : at least method, img_name, '+
@@ -143,7 +144,7 @@ def eval_colorbar_args(args, parser):
     sparse_freq = eval(args.sparse_freq[0]) \
         if args.sparse_freq is not None else None
     return method, img_name, observation, color, dwt_type, level, alpha,\
-        num_cells, cell_size, sparse_freq
+        num_cells, cell_size, sparse_freq#, save
 
 
 def add_num_cell_args(parser):
@@ -173,11 +174,7 @@ def add_num_cell_args(parser):
         '-data_grab', action='store_true',
         help='[Num Cell Figure] : auto grab data when argument is present',
         required=False)
-    parser.add_argument(
-        '-save', action='store_true',
-        help='[Num Cell Figure] : save into specified path '+
-        'when argument is present',
-        required=False)
+
 
 def eval_num_cell_args(args, parser):
     '''
@@ -223,12 +220,12 @@ def eval_num_cell_args(args, parser):
     gaussian = args.gaussian_file[0] if args.gaussian_file is not None else None
     v1 = args.v1_file[0] if args.v1_file is not None else None
     data_grab = args.data_grab# if args.data_grab is not None else None
-    save = args.save# if args.save is not None else None
+    #   save = args.save# if args.save is not None else None
     if None in [method, img_name, pixel, gaussian, v1]:
         parser.error(
             '[Num Cell Figure] : at least method, img_name, pixel_file, '+
             'gaussian_file, V1_file required for num cell error figure')
-    return img_name, method, pixel, gaussian, v1, data_grab, save
+    return img_name, method, pixel, gaussian, v1, data_grab#, save
 
 def add_generic_figure_args(parser):
     ''' 
@@ -254,7 +251,11 @@ def add_generic_figure_args(parser):
         '-method', choices=['dct', 'dwt'], action='store',
         help='[Colorbar and Num Cell Figure] : Method to use for reconstruction',
         metavar='METHOD', required=False, nargs=1)
-
+    parser.add_argument(
+        '-save', action='store_true',
+        help='[Colorbar and Num Cell Figure] : save into specified path '+
+        'when argument is present',
+        required=False)
 
 def parse_figure_args():
     '''
@@ -275,12 +276,13 @@ def parse_figure_args():
     add_num_cell_args(parser)
     args = parser.parse_args()
     fig_type = args.fig_type[0]
+    save = args.save
     if fig_type == 'colorbar':
         params = eval_colorbar_args(args, parser)
     elif fig_type == 'num_cell':
         params = eval_num_cell_args(args, parser)
 
-    return fig_type, params
+    return fig_type, params, save
 
 
 

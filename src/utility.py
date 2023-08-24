@@ -252,6 +252,26 @@ def process_result_data(img_file, method, pixel_file=None,
     
     return obs_dict
 
+def save_reconstruction_error(img_name, method, observation):
+    '''
+    Saves the reconstruction error figure to a filepath built from params 
+
+    Parameters
+    ----------
+    img_name : String
+        Name of image file to reconstruct
+
+    method : String
+        Basis the data file was worked on. 
+        Currently supports dct and dwt (discrete cosine/wavelet transform).
+
+    observation : String
+        Observation technique to be used for sampling image data.
+    '''
+    outfile = fig_save_path(img_name, method, observation, "colorbar")
+    plt.savefig(outfile, dpi = 300, bbox_inches = "tight")
+    print(f'saving reconstruction error figure to {outfile}')
+
 def save_num_cell(img_name, pixel_file, gaussian_file, V1_file, method):
     '''
     Saves the num cell figure to a filepath built from params 
@@ -279,7 +299,7 @@ def save_num_cell(img_name, pixel_file, gaussian_file, V1_file, method):
         gaussian_file.split('.')[0] + '_' + V1_file.split('.')[0]
     save_path = fig_save_path(img_name, method, 'num_cell_error', save_name)
     plt.savefig(save_path, dpi = 200)
-    print(f'saving image to {save_path}')
+    print(f'saving error vs num_cell figure to {save_path}')
 
 def get_min_error_data(method, observation, data_df):
     ''' 
