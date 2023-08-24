@@ -252,6 +252,35 @@ def process_result_data(img_file, method, pixel_file=None,
     
     return obs_dict
 
+def save_num_cell(img_name, pixel_file, gaussian_file, V1_file, method):
+    '''
+    Saves the num cell figure to a filepath built from params 
+
+    Parameters
+    ----------
+    img_name : String
+        Name of image file to reconstruct
+
+    pixel_file : String
+        Pixel observation data file from hyperparameter sweep.
+    
+    gaussian_file : String
+        Gaussian observation data file from hyperparameter sweep.
+    
+    V1_file : String
+        V1 observation data file from hyperparameter sweep.
+
+    method : String
+        Basis the data file was worked on. 
+        Currently supports dct and dwt (discrete cosine/wavelet transform).
+    '''
+    # for its save name, the name of file order is pixel -> gaussian -> V1 
+    save_name = pixel_file.split('.')[0] + '_' + \
+        gaussian_file.split('.')[0] + '_' + V1_file.split('.')[0]
+    save_path = fig_save_path(img_name, method, 'num_cell_error', save_name)
+    plt.savefig(save_path, dpi = 200)
+    print(f'saving image to {save_path}')
+
 def get_min_error_data(method, observation, data_df):
     ''' 
     Retrieve plotting data and minimum error parameter to be returned.

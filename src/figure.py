@@ -142,14 +142,7 @@ def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
         sns.lineplot(data = plot[0], x = 'num_cell', y = 'error', label = obs)
         plt.plot(plot[1]['num_cell'], plot[1]['min_error'], 'r.')
     plt.legend(loc = 'best')
-    if save :
-        # for its save name, the name of file order is pixel -> gaussian -> V1 
-        save_nm = pixel_file.split('.')[0] + '_' + \
-            gaussian_file.split('.')[0] + '_' + V1_file.split('.')[0]
-        save_path = fig_save_path(img_nm, method, 'num_cell_error', save_nm)
-        plt.savefig(save_path, dpi = 200)
-        
-    plt.show()
+
 
 def error_vs_alpha(img, method, pixel_data, gaussian_data, V1_data, save = False):
     ''' 
@@ -309,12 +302,19 @@ def main():
           cell_size, sparse_freq = args
       colorbar_live_reconst(
           method, img_name, observation, color, dwt_type, level,
-          alpha, num_cells, cell_size, sparse_freq)      
+          alpha, num_cells, cell_size, sparse_freq)
+      
     elif fig_type == 'num_cell':
         img_name, method, pixel, gaussian, v1, data_grab, save = args
         error_vs_num_cell(img_name, method, pixel,
                               gaussian, v1, data_grab, save)
+        if save:
+            save_num_cell(img_name, pixel, gaussian, v1, method)
+    elif fig_type == 'alpha':
+        print("NOT IMPLEMENTED")
 
+    if not save:
+        plt.show()
 
 if __name__ == "__main__":
     main()
