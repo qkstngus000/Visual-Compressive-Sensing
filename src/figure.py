@@ -244,7 +244,7 @@ def error_vs_alpha(img, method, pixel_data, gaussian_data, V1_data, save = False
             plt.savefig(path, dpi = 200)
         plt.show()
 
-def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level,
+def colorbar_live_reconst(method, img_name, observation, color, dwt_type, level,
                           alpha, num_cells, cell_size, sparse_freq):
     '''
     Generates a reconstruction and error figure for desired parameters.
@@ -262,15 +262,17 @@ def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level,
         Observation used to collect data for reconstruction
         Possible observations are ['pixel', 'gaussian', 'V1']
         
-    mode : String
-        Mode to reconstruct image ['color' or 'black']
+    color : bool
+        Indicates if the image working on is color image or black/white image
+        Possible colors are [True, False]
     
     dwt_type : String
         Type of dwt method to be used.
         See pywt.wavelist() for all possible dwt types.
         
     level : int
-        Level of signal frequencies for dwt -- should be an integer in [1, 4].
+        Level of signal frequencies for dwt 
+        Better to be an integer in between [1, 4].
         
     alpha : float
         Penalty for fitting data onto LASSO function to 
@@ -290,11 +292,11 @@ def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level,
     '''
     rand_weight = False
     filter_dim = (30, 30)
-    img_arr = process_image(img_name, mode, False)
+    img_arr = process_image(img_name, color, False)
     print(f"Image \"{img_name}\" loaded.") 
     reconst = large_img_experiment(
         img_arr, num_cells, cell_size, sparse_freq, filter_dim, alpha, method,
-        observation, level, dwt_type, rand_weight, mode) 
+        observation, level, dwt_type, rand_weight, color) 
     print(f"Image {img_name} reconstructed. Displaying reconstruction and error.") 
     show_reconstruction_error(img_arr, reconst, method, observation,
                    num_cells, img_name.split('.')[0], False)
@@ -303,10 +305,10 @@ def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level,
 def main():
     fig_type, args = parse_figure_args()
     if fig_type == 'colorbar' :
-      method, img_name, observation, mode, dwt_type, level, alpha, num_cells,\
+      method, img_name, observation, color, dwt_type, level, alpha, num_cells,\
           cell_size, sparse_freq = args
       colorbar_live_reconst(
-          method, img_name, observation, mode, dwt_type, level,
+          method, img_name, observation, color, dwt_type, level,
           alpha, num_cells, cell_size, sparse_freq)      
     elif fig_type == 'num_cell':
         img_name, method, pixel, gaussian, v1, data_grab, save = args

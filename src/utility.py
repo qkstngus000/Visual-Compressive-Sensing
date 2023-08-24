@@ -129,7 +129,7 @@ def data_save_path(img_nm, method, observation, save_nm):
     
     return os.path.join(result_path, save_nm)
 
-def process_image(img, mode = 'black', visibility = False):
+def process_image(img, color = False, visibility = False):
     ''' 
     Opens image file with given file name and determines whether image file will
     be color or grayscale image. Show the image if the visibility is set to be 
@@ -140,8 +140,9 @@ def process_image(img, mode = 'black', visibility = False):
     img : String
         Name of the image file data to be opened.
         
-    mode : String
-        Determines whether image data will be grascaled or not.
+    color : bool
+        Indicates if the image working on is color image or black/white image
+        Possible colors are [True, False]
         
     visibility : bool
         Determines whether image will be shown to the user or not.
@@ -153,10 +154,10 @@ def process_image(img, mode = 'black', visibility = False):
     '''
     root = search_root()
     img_path = Image.open(os.path.join(root, 'image/{img}'.format(img=img)))
-    if mode.lower() not in color():
+    if not color:
         img_path = ImageOps.grayscale(img_path)
     if visibility:
-        if mode.lower() not in color():
+        if not color:
             print("Processing grayscale image")
             plt.imshow(img_path, 'gray')
             plt.title("grayscaled_{img}".format(img = img.split(".")[0]))
