@@ -3,15 +3,14 @@ import numpy as np
 import pandas as pd
 
 import sys
-sys.path.append("../")
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import seaborn as sns
 import time
 import os.path
-from src.compress_sensing_library import *
-from src.utility_library import *
-from src.arg_library import *
+from src.compress_sensing import *
+from src.utility import *
+from src.args import *
 # Package for importing image representation
 from PIL import Image, ImageOps
 
@@ -23,33 +22,34 @@ def show_reconstruction_error(img_arr, reconst, method,
     
     Parameters
     ----------
-        img_arr : numpy array 
-            Contains the pixel values for the original image
-        
-        reconst : numpy array 
-            Containing the pixel values for the reconstructed image
-        
-        method : String
-            Method used for the reconstruction.
-            Possible methods are ['dct', 'dwt']
-        
-        observation : String
-            Observation used to collect data for reconstruction
-            Possible observations are ['pixel', 'gaussian', 'V1']
-        
-        num_cell : Integer
-            Number of blobs that will be used to be determining 
-            which pixels to use.
-    
-        img_name : String
-            Name of the original image file (e.g. "Peppers")
-        
-        save_img : boolean
-            Determines if the image will be saved.
+    img_arr : numpy array 
+        Contains the pixel values for the original image
+
+    reconst : numpy array 
+        Containing the pixel values for the reconstructed image
+
+    method : String
+        Method used for the reconstruction.
+        Possible methods are ['dct', 'dwt']
+
+    observation : String
+        Observation used to collect data for reconstruction
+        Possible observations are ['pixel', 'gaussian', 'V1']
+
+    num_cell : Integer
+        Number of blobs that will be used to be determining 
+        which pixels to use.
+
+    img_name : String
+        Name of the original image file (e.g. "Peppers")
+
+    save_img : boolean
+        Determines if the image will be saved.
     '''
 
     # setup figures and axes
-    # NOTE: changing figsize here requires you to rescale the colorbar as well --adjust the shrink parameter to fit.
+    # NOTE: changing figsize here requires you to rescale the colorbar as well
+    ## --adjust the shrink parameter to fit.
     fig, axis = plt.subplots(1, 2, figsize = (8, 8))
     plt.tight_layout()
 
@@ -244,7 +244,7 @@ def error_vs_alpha(img, method, pixel_data, gaussian_data, V1_data, save = False
             plt.savefig(path, dpi = 200)
         plt.show()
 
-def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level,
+def colorbar_live_reconst(method, img_name, observation, color, dwt_type, level,
                           alpha, num_cells, cell_size, sparse_freq):
     '''
     Generates a reconstruction and error figure for desired parameters.
@@ -262,15 +262,17 @@ def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level,
         Observation used to collect data for reconstruction
         Possible observations are ['pixel', 'gaussian', 'V1']
         
-    mode : String
-        Mode to reconstruct image ['color' or 'black']
+    color : bool
+        Indicates if the image working on is color image or black/white image
+        Possible colors are [True, False]
     
     dwt_type : String
         Type of dwt method to be used.
         See pywt.wavelist() for all possible dwt types.
         
     level : int
-        Level of signal frequencies for dwt -- should be an integer in [1, 4].
+        Level of signal frequencies for dwt 
+        Better to be an integer in between [1, 4].
         
     alpha : float
         Penalty for fitting data onto LASSO function to 
@@ -290,11 +292,11 @@ def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level,
     '''
     rand_weight = False
     filter_dim = (30, 30)
-    img_arr = process_image(img_name, mode, False)
+    img_arr = process_image(img_name, color, False)
     print(f"Image \"{img_name}\" loaded.") 
     reconst = large_img_experiment(
         img_arr, num_cells, cell_size, sparse_freq, filter_dim, alpha, method,
-        observation, level, dwt_type, rand_weight, mode) 
+        observation, level, dwt_type, rand_weight, color) 
     print(f"Image {img_name} reconstructed. Displaying reconstruction and error.") 
     show_reconstruction_error(img_arr, reconst, method, observation,
                    num_cells, img_name.split('.')[0], False)
@@ -303,10 +305,10 @@ def colorbar_live_reconst(method, img_name, observation, mode, dwt_type, level,
 def main():
     fig_type, args = parse_figure_args()
     if fig_type == 'colorbar' :
-      method, img_name, observation, mode, dwt_type, level, alpha, num_cells,\
+      method, img_name, observation, color, dwt_type, level, alpha, num_cells,\
           cell_size, sparse_freq = args
       colorbar_live_reconst(
-          method, img_name, observation, mode, dwt_type, level,
+          method, img_name, observation, color, dwt_type, level,
           alpha, num_cells, cell_size, sparse_freq)      
     elif fig_type == 'num_cell':
         img_name, method, pixel, gaussian, v1, data_grab, save = args

@@ -1,0 +1,9 @@
+color_param_Thu_Aug_17_05_03_34_2023.csv
+   rep: [0 1 2 3 4 5 6 7]
+   lv: [1, 2, 4]
+   alp: [0.01, 0.1, 1, 10]
+   num_cell: [50, 100, 200, 500]
+   cell_size: [2, 4, 8]
+   sparse_freq: [2, 4, 8]
+
+

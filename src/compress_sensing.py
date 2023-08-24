@@ -1,7 +1,6 @@
 import numpy as np
 import sys
 import os
-sys.path.append("../")
 from structured_random_features.src.models.weights import V1_weights
 
 # Packages for dct, dwt and fitting data
@@ -9,10 +8,10 @@ from scipy import fftpack as fft
 import pywt
 from pywt import wavedecn
 from sklearn.linear_model import Lasso
-from pathlib import Path
+
 import warnings
 from sklearn.exceptions import ConvergenceWarning
-from src.utility_library import *
+from src.utility import *
 
 # Packages for images
 from PIL import Image, ImageOps
@@ -511,7 +510,7 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
                          sparse_freq = None, filter_dim = (30, 30),
                          alpha = None, method = 'dct', observation = 'pixel',
                          lv = 4, dwt_type = 'db2', rand_weight = False,
-                         mode = 'black') :
+                         color = False) :
     ''' 
     Allows to reconstruct any size of signal data since regular reconstruct 
     function can only deal with small size of data. 
@@ -567,16 +566,19 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
 
     rand_weight : bool
         Decide if reconstruction for each data part is going to use 
-        same weight or random weight. 
+        same weight or random weight. #         result = img_arr_aug[:n, :m, :rgb]
+#     else :    
+#         result = img_arr_aug[:n,:m]
+
         Default set up to be False.
     
-    mode : String
-        Determines whether the reconstruction is going to be in 
-        grayscaled or colored.
+    color : bool
+        Indicates if the image working on is color image or black/white image
+        Possible colors are [True, False]
     
     Returns
     ----------
-    result : numpy_array
+    img : numpy_array
         (n * m) shaped or (n * m * z) array containing reconstructed 
         grayscale/RGB image array pixels.
     '''
@@ -587,14 +589,14 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
     
     if (num_cell < 1):
         num_cell = int(round(num_cell * filt_n * filt_m))
-    if (mode.lower() not in color() and len(img_arr.shape) == 3):
+    if (not color and len(img_arr.shape) == 3):
         img_arr = np.asarray(ImageOps.grayscale(Image.fromarray(img_arr)))
     #alpha parameter is dependent on the number of cell if alpha is not specified
     if (alpha == None) :
         alpha = 1 * 50 / num_cell
     
     # Retrieve image dimension
-    if (mode in color()):
+    if color :
         n, m, rgb = img_arr.shape
     else:
         n, m = dim = img_arr.shape
@@ -608,7 +610,7 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
         new_m = m + (filt_m - (m % filt_m))
     else :
         new_m = m
-    if (mode.lower() in color()):
+    if color :
         img_arr_aug = np.zeros((new_n, new_m, rgb))
         img_arr_aug[:n, :m, :] = img_arr
     else:
@@ -628,7 +630,7 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
             cur_m = 0
 
         nxt_m = cur_m + filt_m
-        if (mode.lower() in color()):
+        if color :
             img_arr_pt = img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m, :]
             reconst = color_experiment(
                 img_arr_pt,  
@@ -657,17 +659,11 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
 
         i+=1
     result = img_arr_aug[:n, :m, :rgb] \
-        if (mode.lower() in color()) else img_arr_aug[:n,:m]
-#     if (mode.lower() in color()):
-#         result = img_arr_aug[:n, :m, :rgb]
-#     else :    
-#         result = img_arr_aug[:n,:m]
+        if (color) else img_arr_aug[:n,:m]
+
     result = np.round(result).astype(int)
     result[result < 0] = 0
-#         result = img_arr_aug[:n, :m, :rgb]
-#     else :    
-#         result = img_arr_aug[:n,:m]
     result[result > 255] = 255
-    result = result.astype(int)
+    img = result.astype(int)
     
-    return result.astype(int)
+    return img

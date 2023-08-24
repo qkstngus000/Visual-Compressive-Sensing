@@ -2,7 +2,6 @@
 import pywt
 import argparse
 import sys
-sys.path.append("../")
 
 def add_colorbar_args(parser):
     '''
@@ -24,9 +23,9 @@ def add_colorbar_args(parser):
         help='[Colorbar Figure] : observation type to use when sampling',
         metavar = 'OBS', required=False, nargs=1)
     parser.add_argument(
-        '-mode', choices=['color', 'black'], action='store',
+        '-color', action='store_true',
         help='[Colorbar Figure] : color mode of reconstruction',
-        metavar='COLOR_MODE', required=False, nargs=1)
+        required=False)
     # add hyperparams REQUIRED for dwt ONLY
     parser.add_argument(
         '-dwt_type', choices=wavelist, action='store',
@@ -83,8 +82,9 @@ def eval_colorbar_args(args, parser):
         Observation used to collect data for reconstruction
         Possible observations are ['pixel', 'gaussian', 'V1']
         
-    mode : String
-        Mode to reconstruct image ['color' or 'black']
+    color : boolean
+        Color format for how image should be reconstructed.
+        True if reconstructing image in color, False if grayscaled.
     
     dwt_type : String
         Type of dwt method to be used.
@@ -114,11 +114,11 @@ def eval_colorbar_args(args, parser):
     method = args.method[0] if args.method is not None else None
     img_name = args.img_name[0] if args.img_name is not None else None
     observation = args.observation[0] if args.observation is not None else None
-    mode = args.mode[0] if args.mode is not None else None
+    color = args.color
     num_cells = eval(args.num_cells[0]) if args.num_cells is not None else None
-    if None in [method, img_name, observation, mode, num_cells]:
+    if None in [method, img_name, observation, num_cells]:
         parser.error('[Colorbar Figure] : at least method, img_name, '+
-                     'observation, mode, num_cells required for colorbar figure')
+                     'observation, num_cells required for colorbar figure')
     # deal with missing or unneccessary command line args
     if method == "dwt" and (args.dwt_type is None or args.level is None):
         parser.error(
@@ -142,7 +142,7 @@ def eval_colorbar_args(args, parser):
     cell_size = eval(args.cell_size[0]) if args.cell_size is not None else None
     sparse_freq = eval(args.sparse_freq[0]) \
         if args.sparse_freq is not None else None
-    return method, img_name, observation, mode, dwt_type, level, alpha,\
+    return method, img_name, observation, color, dwt_type, level, alpha,\
         num_cells, cell_size, sparse_freq
 
 
@@ -300,9 +300,9 @@ def parse_sweep_args():
     observation : String
         Method of observation (e.g. pixel, gaussian, v1).
     
-    mode : String
-        Desired mode to reconstruct image.
-        (e.g. 'Color' for RGB, 'Black' for greyscaled images).
+    color : boolean
+        Color format for how image should be reconstructed.
+        True if reconstructing image in color, False if grayscaled.
 
     dwt_type : String
         Type of dwt method to be used.
@@ -332,9 +332,9 @@ def parse_sweep_args():
     parser = argparse.ArgumentParser(description='Create a hyperparameter sweep')
     add_sweep_args(parser)
     args = parser.parse_args()
-    method, img_name, observation, mode, dwt_type, level, alpha_list, \
+    method, img_name, observation, color, dwt_type, level, alpha_list, \
         num_cells, cell_size, sparse_freq = eval_sweep_args(args, parser)
-    return method, img_name, observation, mode, dwt_type, \
+    return method, img_name, observation, color, dwt_type, \
         level, alpha_list, num_cells, cell_size, sparse_freq
 
 def add_sweep_args(parser):
@@ -364,9 +364,9 @@ def add_sweep_args(parser):
         help='observation type to use when sampling',
         metavar='OBSERVATION', required=True, nargs=1)
     parser.add_argument(
-        '-mode', choices=['color', 'black'], action='store', 
-        help='color mode of reconstruction',
-        metavar='COLOR_MODE', required=True, nargs=1)
+        '-color', action='store_true', 
+        help='Color mode of reconstruction',
+        required=True)
     # add hyperparams REQUIRED for dwt ONLY
     parser.add_argument(
         '-dwt_type', choices=wavelist, action='store', 
@@ -419,9 +419,9 @@ def eval_sweep_args(args, parser):
     observation : String
         Method of observation (e.g. pixel, gaussian, v1).
     
-    mode : String
-        Desired mode to reconstruct image 
-        (e.g. 'Color' for RGB, 'Black' for greyscaled images).
+    color : boolean
+        Color format for how image should be reconstructed.
+        True if reconstructing image in color, False if grayscaled.
 
     dwt_type : String
         Type of dwt method to be used
@@ -452,7 +452,7 @@ def eval_sweep_args(args, parser):
     method = args.method[0]
     img_name = args.img_name[0]
     observation = args.observation[0]
-    mode = args.mode[0]
+    color = args.color
     # deal with missing or unneccessary command line args
     if method == "dwt" and (args.dwt_type is None
                             or args.level is None):
@@ -476,5 +476,5 @@ def eval_sweep_args(args, parser):
     sparse_freq = [eval(i) for i in args.sparse_freq] \
         if args.sparse_freq is not None else None
 
-    return method, img_name, observation, mode, dwt_type, level, alpha_list, \
+    return method, img_name, observation, color, dwt_type, level, alpha_list, \
         num_cells, cell_size, sparse_freq
