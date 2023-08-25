@@ -124,10 +124,38 @@ def data_save_path(img_nm, method, observation, save_nm):
         save_nm = save_nm + "_".join(
             str.split(time.ctime().replace(":", "_"))) + '.csv'  
     
-    result_path = os.path.join(root, f"result/{method}/{img_nm}/{observation}")
+    result_path = os.path.join(root, f"result/{method}/{img_nm}/{observatin, m, on}")
     Path(result_path).mkdir(parents=True, exist_ok = True)
     
     return os.path.join(result_path, save_nm)
+
+def compute_zero_padding_dimension(n, filter_n):
+    '''
+    Computes zero padding that is needed for the large_img_experiment.
+    Bot side of n and filter_n should be matching to get exact size of new
+    (n, m) dimension. For example, If user pass n from (n, m) dimension,
+    user should also pass filter_n from (filter_n, filter_m) and vice versa
+    
+    Parameters
+    ----------
+    n : int
+        One side (width/height) of the original image dimension
+    
+    filter_n : int
+        One side (width/height) of the filter dimention
+    
+    Returns
+    ----------
+    new_n : int
+        Size of the side when the zero padding is applied
+    
+    '''
+    new_n = n
+    if n % filt_n != 0 :
+        new_n = n + (filt_n - (n % filt_n))
+    
+    return new_n
+
 
 def process_image(img, color = False, visibility = False):
     ''' 
@@ -191,6 +219,19 @@ def remove_unnamed_data(data):
             data.drop('Unnamed: 0', axis = 1, inplace=True)
     return data
 
+def load_dataframe(img_nm, method, pixel_file=None,
+                        gaussian_file=None, V1_file=None) :
+    root = search_root()
+    load_V1 = f"{root}/result/{method}/{img_nm}/V1/{V1_file}"
+    load_gaussian = f"{root}/result/{method}/{img_nm}/gaussian/{gaussian_file}"
+    load_pixel = f"{root}/result/{method}/{img_nm}/pixel/{pixel_file}"
+    
+    pixel_df = remove_unnamed_data(pd.read_csv(load_pixel))
+    gaussian_df = remove_unnamed_data(pd.read_csv(load_gaussian))
+    V1_df = remove_unnamed_data(pd.read_csv(load_V1))
+    
+    return V1_df, gaussian_df, pixel_df
+
 def process_result_data(img_file, method, pixel_file=None,
                         gaussian_file=None, V1_file=None):
     ''' 
@@ -225,7 +266,6 @@ def process_result_data(img_file, method, pixel_file=None,
         [0]th value storing plotting data with [1]st data containing 
         minimum mean error parameter for each num_cell.
     '''
-    root = search_root()
     img_nm = img_file.split('.')[0]
     
     # TODO: Currently all three files required,
@@ -234,10 +274,9 @@ def process_result_data(img_file, method, pixel_file=None,
         print("All three files required to generate figure")
         sys.exit(0)
         
-        
-    load_V1 = f"{root}/result/{method}/{img_nm}/V1/{V1_file}"
-    load_gaussian = f"{root}/result/{method}/{img_nm}/gaussian/{gaussian_file}"
-    load_pixel = f"{root}/result/{method}/{img_nm}/pixel/{pixel_file}"
+    
+    V1_df, gaussian_df, pixel_df = load_dataframe(img_nm, method, pixel_file,
+                        gaussian_file, V1_file)
     
     obs_dict= {'V1': pd.read_csv(load_V1),
                'gaussian': pd.read_csv(load_gaussian), 

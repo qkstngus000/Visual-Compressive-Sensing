@@ -22,7 +22,8 @@ def generate_Y(W, img):
     ''' 
     Generate sample y vector variable for data reconstruction using constant
     matrix W (containing open indices).
-    Function does inner product W matrix with image array to find sample y vector
+    Function does inner product W matrix with image array to find sample y 
+    vector
     
     Parameters
     ----------
@@ -86,7 +87,8 @@ def generate_V1_observation(img_arr, num_cell, cell_size, sparse_freq):
     # Retrieve y from W @ imgArr
     y = W @ img_arr.reshape(n*m, 1)
 
-    # Resize W to shape (num_cell, height of image, width of image) for fetching into function
+    # Resize W to shape (num_cell, height of image, width of image) for 
+    # fetching into function
     W = W.reshape(num_cell, dim[0], dim[1])
     return W, y
 
@@ -170,7 +172,7 @@ def error_calculation(img_arr, reconst):
         Computed normalized error value per each pixel.
     '''
     if (len(img_arr.shape) == 3):
-        n, m, rgb = img_arr.shape
+        n, m, d = img_arr.shape
     else: 
         n, m = img_arr.shape
 
@@ -214,7 +216,8 @@ def fourier_reconstruct(W, y, alpha, sample_sz, n, m, fit_intercept) :
         (n, m) shape array. Reconstructed image pixel array.
     '''
     
-    # Ignore convergence warning to allow convergence warning not filling up all spaces when testing
+    # Ignore convergence warning to allow convergence warning not filling up 
+    # all spaces when testing
     warnings.filterwarnings('ignore', category=ConvergenceWarning)
     
     theta = fft.dctn(W.reshape(sample_sz, n, m), norm = 'ortho', axes = [1, 2])
@@ -272,7 +275,8 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m,
         (n, m) shape array. Reconstructed image pixel array.
     '''
     
-    # Ignore convergence warning to allow convergence warning not filling up all spaces when testing
+    # Ignore convergence warning to allow convergence warning not filling up 
+    # all spaces when testing
     warnings.filterwarnings('ignore', category=ConvergenceWarning)
     dwt_sample = wavedecn(W[0], wavelet = dwt_type, level = lv, mode = 'zero')
     coeff, coeff_slices, coeff_shapes = pywt.ravel_coeffs(dwt_sample)
@@ -331,7 +335,8 @@ def generate_observations(img_arr, num_cell, observation, cell_size = None,
         (num_V1_weights/sample_size, 1) shape. Dot product of W and image.
    
     '''
-    # Check if the cell_size and sparse_freq is none while it is conduction V1 observation
+    # Check if the cell_size and sparse_freq is none while it is conduction 
+    # V1 observation
     if (observation.lower() == "v1" and (cell_size == None
                                          or sparse_freq == None)) :
         print(f"For {observation} observation, both cell_size"+
@@ -473,16 +478,19 @@ def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None,
     dim = img_arr[:,:,i].shape
     n, m = dim
     
+    # Computes num_cell if the num_cell is in between 0~1.
+    # Get percentage of num_cell with its img dim (num_cell * n * m)
     if (num_cell < 1):
-        num_cell = int(round(num_cell * filt_n * filt_m))
+        num_cell = int(round(num_cell * n * m))
         
+    #alpha parameter is dependent on the number of cell if alpha is not specified
     if alpha == None :
         alpha = 1 * 50 / num_cell
-    
-#     W = V1_weights(num_cell, dim, cell_size, sparse_freq) 
+
     img = np.zeros(img_arr.shape)
 
-    # with same V1 cells generated, reconstruct images for each of 3 rgb arrays and append to img
+    # with same V1 cells generated, reconstruct images for each of 3 rgb 
+    # arrays and append to img
     while (i < 3):
         img_arr_pt = img_arr[:,:,i]
         img_arr_pt_dim = img_arr_pt.shape
@@ -499,17 +507,17 @@ def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None,
         img[:,:,i] = reconst
         i+=1
         
-    img = np.round(img).astype(int)
+    # Fix any over/underestimated pixel between 0~255
     img[img < 0] = 0
     img[img > 255] = 255
-    img = img.astype(int)
+    img = np.round(img).astype(int)
     return img
 
 
 def large_img_experiment(img_arr, num_cell, cell_size = None,
                          sparse_freq = None, filter_dim = (30, 30),
                          alpha = None, method = 'dct', observation = 'pixel',
-                         lv = 4, dwt_type = 'db2', rand_weight = False,
+                         lv = 2, dwt_type = 'db2', rand_weight = False,
                          color = False) :
     ''' 
     Allows to reconstruct any size of signal data since regular reconstruct 
@@ -521,7 +529,7 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
     Parameters
     ----------
     img_arr : numpy_array
-          (n, m) shape image containing array of pixels.
+          (n, m) or (n, m, d) shape image containing array of pixels.
           
     num_cell : int
         Number of blobs that will be used to be determining which pixels to use.
@@ -529,18 +537,24 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
     cell_size : int
         Determines field size of opened and closed blob of data. 
         Affect the data training.
+        Default set to None as only V1 obervation requires it
         
     sparse_freq : int
         Determines filed frequency on how frequently 
         opened and closed area would appear. Affect the data training.
+        Default set to None as only V1 obervation requires it
     
     filter_dim : tuple
-        Determines size of data that are going to be dealt with 
-        for each reconstruction.
+        Determines area of data that are going to be reconstructed, until
+        all image is reconstructed. Zero padding technique used.
+        Default set to (30, 30)
     
     alpha : float
         Penalty for fitting data onto LASSO function to search 
-        for significant coefficents.
+        for significant coefficents. 
+        Default set to None, and if the parameter is None, it computes 
+        alpha value that would fit to the data reconstruction depending on
+        its size.
     
     fit_intercept : bool
         Parameter for LASSO function. Automatically adjust intercept 
@@ -553,85 +567,109 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
     
     observation : String
         Observation technique that are going to be used to collet sample 
-        for reconstruction. Default set up to 'pixel'.
+        for reconstruction. 
+        Default set up to 'pixel'.
         Supported observation : ['pixel', 'gaussian', 'V1']
+            pixel: Select num_cell amount of random data point throughout data
+            gaussian: Give weights to individual data, and select num_cell 
+                      amount of random data point throughout data
+            V1: Select random data that are observed by the num_cell amount of 
+                neurocomputation model of visual cortex cells
     
     lv : int
         Determines level of frequency details for wavelet transform. 
         Not used for dct.
+        Default set to level 2
     
     dwt_type : String
         Determines types of wavelet transform when dwt is used for its method.
         Not used for dct.
+        Default set to 'db2'
 
     rand_weight : bool
         Decide if reconstruction for each data part is going to use 
-        same weight or random weight. #         result = img_arr_aug[:n, :m, :rgb]
-#     else :    
-#         result = img_arr_aug[:n,:m]
-
+        same weight or random weight. 
         Default set up to be False.
     
     color : bool
-        Indicates if the image working on is color image or black/white image
-        Possible colors are [True, False]
+        Indicates if the image working on is color image or black/white image.
+        Default set to be False.
+        Possible colors are [True, False].
     
     Returns
     ----------
     img : numpy_array
-        (n * m) shaped or (n * m * z) array containing reconstructed 
+        (n * m) shaped or (n * m * d) array containing reconstructed 
         grayscale/RGB image array pixels.
     '''
                        
-    # Create Filter
+    # Create Filter with size of filter_dim
     filt = np.zeros(filter_dim)
     filt_n, filt_m = filter_dim
     
+    # Computes num_cell if the num_cell is in between 0~1.
+    # Get percentage of num_cell with its filter dim (num_cell * filt_n * filt_m)
     if (num_cell < 1):
         num_cell = int(round(num_cell * filt_n * filt_m))
+    
+    # Edge handling case when user wants black/white reconstruction, but passed
+    # in image array has rgb channel. Grayscale the image if so.
     if (not color and len(img_arr.shape) == 3):
         img_arr = np.asarray(ImageOps.grayscale(Image.fromarray(img_arr)))
+        
     #alpha parameter is dependent on the number of cell if alpha is not specified
     if (alpha == None) :
         alpha = 1 * 50 / num_cell
     
     # Retrieve image dimension
     if color :
-        n, m, rgb = img_arr.shape
+        n, m, d = img_arr.shape
     else:
         n, m = dim = img_arr.shape
     
-    # Preprocess image and add zeros so the cols and rows would fit to the filter for any size
-    if n % filt_n != 0 :
-        new_n = n + (filt_n - (n % filt_n))
-    else :
-        new_n = n
-    if m % filt_m != 0 :
-        new_m = m + (filt_m - (m % filt_m))
-    else :
-        new_m = m
-    if color :
-        img_arr_aug = np.zeros((new_n, new_m, rgb))
-        img_arr_aug[:n, :m, :] = img_arr
-    else:
-        img_arr_aug = np.zeros((new_n, new_m))
-        img_arr_aug[:n, :m] = img_arr
-        
-#     print("Process Reconstruction on {shape} image".format(shape = img_arr_aug.shape))
-    i = 1 # counter
-    result = np.zeros(img_arr.shape)
-    cur_n, cur_m = (0, 0)
-    num_work = (new_n * new_m) // (filt_n * filt_m)
+    # Compute the size of the dimension once zero padding is applied
+    padding_n = compute_zero_padding_dimension(n, filt_n)
+    padding_m = compute_zero_padding_dimension(m, filt_m)
     
+    # Process image with adding zero paddings
+    if color :
+        img_arr_padded = np.zeros((padding_n, padding_m, d))
+        img_arr_padded[:n, :m, :] = img_arr
+    else:
+        img_arr_padded = np.zeros((padding_n, padding_m))
+        img_arr_padded[:n, :m] = img_arr
+    
+    i = 1 # counter
+    # Array that saves each part of completed reconstruced array
+    result = np.zeros(img_arr.shape) 
+    cur_n, cur_m = (0, 0)
+    # Computes number of reconstruction batches to be done 
+    # base on filter dimension 
+    num_work = (padding_n * padding_m) // (filt_n * filt_m)
+    
+    
+    # TODO: Add RandWeight functionality 
+    
+    
+    
+    # For each batch of data, run reconstruction 
     for pt in range(num_work):
-        # keep track over height of the batches
-        if (cur_m >= new_m) :
+        # Keep track over height of the batches. If working column
+        # (cur_m) exceeds/equals padded column, reset the cur_m and 
+        # update row (cur_n) 
+        if (cur_m >= padding_m) :
             cur_n += filt_n
             cur_m = 0
-
+        
+        # Compute the end of column for each batch, which is also
+        # going to be the start point of next batch
         nxt_m = cur_m + filt_m
+        
+        # Reconstruct all 3 rgb channels if color
         if color :
-            img_arr_pt = img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m, :]
+            # Retrieve batch
+            img_arr_pt = img_arr_padded[cur_n : (cur_n + filt_n), cur_m : nxt_m, :]
+            
             reconst = color_experiment(
                 img_arr_pt,  
                 num_cell, 
@@ -642,9 +680,9 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
                 observation = observation,
                 lv = lv, 
                 dwt_type = dwt_type)
-            img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m, :] = reconst
+            img_arr_padded[cur_n : (cur_n + filt_n), cur_m : nxt_m, :] = reconst
         else:    
-            img_arr_pt = img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m]
+            img_arr_pt = img_arr_padded[cur_n : (cur_n + filt_n), cur_m : nxt_m]
             W, y = generate_observations(img_arr_pt, num_cell, observation,
                                          cell_size, sparse_freq)
             W_model = W.reshape(num_cell, filt_n, filt_m)    
@@ -654,16 +692,16 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
             else :
                 reconst = reconstruct(W, y, alpha, method = method, lv = lv,
                                       dwt_type = dwt_type)
-            img_arr_aug[cur_n : (cur_n + filt_n), cur_m : nxt_m] = reconst
+            img_arr_padded[cur_n : (cur_n + filt_n), cur_m : nxt_m] = reconst
         cur_m = nxt_m
 
         i+=1
-    result = img_arr_aug[:n, :m, :rgb] \
-        if (color) else img_arr_aug[:n,:m]
+    result = img_arr_padded[:n, :m, :d] \
+        if color else img_arr_padded[:n,:m]
 
-    result = np.round(result).astype(int)
+    # Fix any over/underestimated pixel between 0~255
     result[result < 0] = 0
     result[result > 255] = 255
-    img = result.astype(int)
+    img = np.round(result).astype(int)
     
     return img

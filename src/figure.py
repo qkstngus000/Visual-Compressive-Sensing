@@ -151,7 +151,7 @@ def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
         
     plt.show()
 
-def error_vs_alpha(img, method, pixel_data, gaussian_data, V1_data, save = False):
+def error_vs_alpha(img, method, pixel_file, gaussian_file, V1_file, save = False):
     ''' 
     Generate figure that compares various alpha LASSO penalty and how it affects
     the error of the reconstruction among three different observations. 
@@ -165,31 +165,36 @@ def error_vs_alpha(img, method, pixel_data, gaussian_data, V1_data, save = False
         Basis the data file was worked on. 
         Currently supporting dct and dwt (discrete cosine/wavelet transform).
     
-    pixel_data : String
+    pixel_file : String
         Pixel observation data file from hyperparameter sweep.
         Required for plotting.
 
-    gaussian_data : String
+    gaussian_file : String
         Gaussian observation data file from hyperparameter sweep.
         Required for plotting.
 
-    V1_data : String
+    V1_file : String
         V1 observation data file from hyperparameter sweep.
         Required for plotting.
 
     save : boolean
         Determines if the image will be saved.
     '''
+    
+    img_nm = img.split('.')[0]
     if None in [pixel_data, gaussian_data, V1_data]:
         print("Currently all file required")
         sys.exit(0)
     
     title = ''
     
-    # Preprocess data not to have 
-    pixel_df = remove_unnamed_data(pd.read_csv(pixel_data))
-    gaussian_df = remove_unnamed_data(pd.read_csv(gaussian_data))
-    V1_df = remove_unnamed_data(pd.read_csv(V1_data))
+    # load files into dataframes
+    V1_df, gaussian_df, pixel_df = load_dataframe(
+                                        img_nm, 
+                                        method, 
+                                        pixel_file,
+                                        gaussian_file, 
+                                        V1_file)
     
     num_cell_list = V1_df['num_cell'].unique()
     
