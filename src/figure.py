@@ -110,10 +110,6 @@ def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
         With structured path, decides to grab all three data files 
         automatically or manually. Currently not implemented.
         ['auto', 'manual'].
-    
-    save : bool
-        Save data into specified path.
-        [True, False]
     '''
     img_nm = img.split('.')[0]
     

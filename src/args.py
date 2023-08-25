@@ -115,7 +115,6 @@ def eval_colorbar_args(args, parser):
     img_name = args.img_name[0] if args.img_name is not None else None
     observation = args.observation[0] if args.observation is not None else None
     color = args.color
-    save = args.save
     num_cells = eval(args.num_cells[0]) if args.num_cells is not None else None
     if None in [method, img_name, observation, num_cells]:
         parser.error('[Colorbar Figure] : at least method, img_name, '+
@@ -144,7 +143,7 @@ def eval_colorbar_args(args, parser):
     sparse_freq = eval(args.sparse_freq[0]) \
         if args.sparse_freq is not None else None
     return method, img_name, observation, color, dwt_type, level, alpha,\
-        num_cells, cell_size, sparse_freq#, save
+        num_cells, cell_size, sparse_freq
 
 
 def add_num_cell_args(parser):
@@ -208,10 +207,6 @@ def eval_num_cell_args(args, parser):
 
     data_grab : boolean
        TODO: convert boolean to 'auto' or 'manual'
-
-    save : boolean
-       Indicates if generated plot should be saved to a file.
-
     '''
 
     img_name = args.img_name[0] if args.img_name is not None else None
@@ -219,13 +214,12 @@ def eval_num_cell_args(args, parser):
     pixel = args.pixel_file[0] if args.pixel_file is not None else None
     gaussian = args.gaussian_file[0] if args.gaussian_file is not None else None
     v1 = args.v1_file[0] if args.v1_file is not None else None
-    data_grab = args.data_grab# if args.data_grab is not None else None
-    #   save = args.save# if args.save is not None else None
+    data_grab = args.data_grab
     if None in [method, img_name, pixel, gaussian, v1]:
         parser.error(
             '[Num Cell Figure] : at least method, img_name, pixel_file, '+
             'gaussian_file, V1_file required for num cell error figure')
-    return img_name, method, pixel, gaussian, v1, data_grab#, save
+    return img_name, method, pixel, gaussian, v1, data_grab
 
 def add_generic_figure_args(parser):
     ''' 
