@@ -191,11 +191,12 @@ def remove_unnamed_data(data):
             data.drop('Unnamed: 0', axis = 1, inplace=True)
     return data
 
-def process_result_data(img_file, method, pixel_file=None,
+def process_result_data(img_file, method, target_param, pixel_file=None,
                         gaussian_file=None, V1_file=None):
     ''' 
     Open 3 csv data files, make it as pandas dataframe, remove unnecessary 
-    column, find the plotting data with minimum mean error for each of num_cell.
+    column, find the plotting data with minimum mean error 
+    for each of target_param.
     
     Parameters
     ----------
@@ -206,6 +207,10 @@ def process_result_data(img_file, method, pixel_file=None,
         Basis the data file was worked on. 
         Currently upports dct and dwt (discrete cosine/wavelet transform).
         
+    target_param : String 
+        Param for which to get min error
+        [num_cell, alpha] for num_cell and alpha error plots respectively.
+    
     pixel_file : String
         Pixel observation data file from hyperparameter sweep.
         Required for plotting.
@@ -248,11 +253,90 @@ def process_result_data(img_file, method, pixel_file=None,
         obs_dict.update({obs: remove_unnamed_data(file)})
         
     for obs, file in obs_dict.items():
-        obs_dict.update({obs: get_min_error_data(method, obs, file)})
+        obs_dict.update({obs: get_min_error_data(method, obs, file, target_param)})
     
     return obs_dict
 
-def get_min_error_data(method, observation, data_df):
+def save_reconstruction_error(img_name, method, observation):
+    '''
+    Saves the reconstruction error figure to a filepath built from params 
+
+    Parameters
+    ----------
+    img_name : String
+        Name of image file to reconstruct
+
+    method : String
+        Basis the data file was worked on. 
+        Currently supports dct and dwt (discrete cosine/wavelet transform).
+
+    observation : String
+        Observation technique to be used for sampling image data.
+    '''
+    outfile = fig_save_path(img_name, method, observation, "colorbar")
+    plt.savefig(outfile, dpi = 300, bbox_inches = "tight")
+    print(f'saving reconstruction error figure to {outfile}')
+
+def save_num_cell(img_name, pixel_file, gaussian_file, V1_file, method):
+    '''
+    Saves the num cell vs error figure to a filepath built from params 
+
+    Parameters
+    ----------
+    img_name : String
+        Name of image file to reconstruct
+
+    pixel_file : String
+        Pixel observation data file from hyperparameter sweep.
+    
+    gaussian_file : String
+        Gaussian observation data file from hyperparameter sweep.
+    
+    V1_file : String
+        V1 observation data file from hyperparameter sweep.
+
+    method : String
+        Basis the data file was worked on. 
+        Currently supports dct and dwt (discrete cosine/wavelet transform).
+    '''
+    # for its save name, the name of file order is pixel -> gaussian -> V1 
+    save_name = pixel_file.split('.')[0] + '_' + \
+        gaussian_file.split('.')[0] + '_' + V1_file.split('.')[0]
+    save_path = fig_save_path(img_name, method, 'num_cell_error', save_name)
+    plt.savefig(save_path, dpi = 200)
+    print(f'saving error vs num_cell figure to {save_path}')
+
+def save_alpha(img_name, pixel_file, gaussian_file, V1_file, method):
+    '''
+    Saves the alpha vs error figure to a filepath built from params 
+
+    Parameters
+    ----------
+    img_name : String
+        Name of image file to reconstruct
+
+    pixel_file : String
+        Pixel observation data file from hyperparameter sweep.
+    
+    gaussian_file : String
+        Gaussian observation data file from hyperparameter sweep.
+    
+    V1_file : String
+        V1 observation data file from hyperparameter sweep.
+
+    method : String
+        Basis the data file was worked on. 
+        Currently supports dct and dwt (discrete cosine/wavelet transform).
+    '''
+    # for its save name, the name of file order is pixel -> gaussian -> V1 
+    save_name = pixel_file.split('.')[0] + '_' + \
+        gaussian_file.split('.')[0] + '_' + V1_file.split('.')[0]
+    save_path = fig_save_path(img_name, method, 'alpha_error', save_name)
+    plt.savefig(save_path, dpi = 200)
+    print(f'saving error vs alpha figure to {save_path}')
+
+    
+def get_min_error_data(method, observation, data_df, target_param):
     ''' 
     Retrieve plotting data and minimum error parameter to be returned.
     
@@ -268,6 +352,10 @@ def get_min_error_data(method, observation, data_df):
     data_df : pandas dataframe
         Stores reconstruction hyperparameters and errors.
             
+    target_param : String 
+        Param for which to get min error
+        [num_cell, alpha] for num_cell and alpha error plots respectively.
+    
     Returns
     ----------
     data_plotting_data : pandas dataframe
@@ -299,7 +387,7 @@ def get_min_error_data(method, observation, data_df):
                                    as_index=False).mean().drop('rep', axis=1)
     
     # Grab the lowest mean error from each number of cell
-    data_min_df = data_mean_df.sort_values('error').drop_duplicates('num_cell')
+    data_min_df = data_mean_df.sort_values('error').drop_duplicates(target_param)
     data_min_df = data_min_df.rename(columns={'error': 'min_error'})
     
     # Mark the hyperparameter that gives lowest mean error to whole dataset

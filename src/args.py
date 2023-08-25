@@ -146,10 +146,10 @@ def eval_colorbar_args(args, parser):
         num_cells, cell_size, sparse_freq
 
 
-def add_num_cell_args(parser):
+def add_plot_args(parser):
     '''
     Add arguments to the parser that are required for 
-    the num_cell_error function in figure_library.py
+    the error_vs_alpha and error_vs_num_cell functions in figure_library.py
 
     Parameters
     ----------
@@ -159,28 +159,71 @@ def add_num_cell_args(parser):
     
     parser.add_argument(
         '-pixel_file', action='store', 
-        help='[Num Cell Figure] : file to read pixel data from',
+        help='[Alpha and Num Cell Figure] : file to read pixel data from',
         metavar='FILE', required=False, nargs=1)
     parser.add_argument(
         '-gaussian_file', action='store', 
-        help='[Num Cell Figure] : file to read gaussian data from',
+        help='[Alpha and Num Cell Figure] : file to read gaussian data from',
         metavar='FILE', required=False, nargs=1)
     parser.add_argument(
         '-v1_file', action='store', 
-        help='[Num Cell Figure] : file to read V1 data from',
+        help='[Alpha and Num Cell Figure] : file to read V1 data from',
         metavar='FILE', required=False, nargs=1)
     parser.add_argument(
         '-data_grab', action='store_true',
-        help='[Num Cell Figure] : auto grab data when argument is present',
-        required=False)
-    parser.add_argument(
-        '-save', action='store_true',
-        help='[Num Cell Figure] : save into specified path '+
-        'when argument is present',
+        help='[Alpha and Num Cell Figure] : auto grab data when '+
+        'argument is present',
         required=False)
 
-def eval_num_cell_args(args, parser):
+
+def eval_plot_args(args, parser):
     '''
+    Evaluate the args to ensure that they are sufficient for 
+    generating alpha error and num cell error plot.
+    
+    Parameters
+    ----------
+    args : NameSpace
+        Contains each arg and its assigned value.
+
+    parser : ArgumentParser
+        Parser object used to give error if needed.
+
+    Returns
+    -------
+    img_name : String
+        The name of the image that was reconstructed
+
+    method : String
+        The basis being used for reconstruction [dct, dwt]
+
+    pixel: String
+       csv file containing pixel reconstruction data
+
+    gaussian : String
+       csv file containing gaussian reconstruction data
+
+    v1 : String
+       csv file containing V1 reconstruction data
+
+    data_grab : boolean
+       TODO: convert boolean to 'auto' or 'manual'
+    '''
+    
+    img_name = args.img_name[0] if args.img_name is not None else None
+    method = args.method[0] if args.method is not None else None
+    pixel = args.pixel_file[0] if args.pixel_file is not None else None
+    gaussian = args.gaussian_file[0] if args.gaussian_file is not None else None
+    v1 = args.v1_file[0] if args.v1_file is not None else None
+    data_grab = args.data_grab
+    if None in [method, img_name, pixel, gaussian, v1]:
+        parser.error(
+            '[Alpha Figure] : at least method, img_name, pixel_file, '+
+            'gaussian_file, V1_file required for alpha error figure')
+    return img_name, method, pixel, gaussian, v1, data_grab
+'''
+def eval_num_cell_args(args, parser):
+    
     Evaluate the args to ensure that they are sufficient for 
     generating num cell error plot.
     
@@ -211,25 +254,21 @@ def eval_num_cell_args(args, parser):
 
     data_grab : boolean
        TODO: convert boolean to 'auto' or 'manual'
-
-    save : boolean
-       Indicates if generated plot should be saved to a file.
-
-    '''
+    
 
     img_name = args.img_name[0] if args.img_name is not None else None
     method = args.method[0] if args.method is not None else None
     pixel = args.pixel_file[0] if args.pixel_file is not None else None
     gaussian = args.gaussian_file[0] if args.gaussian_file is not None else None
     v1 = args.v1_file[0] if args.v1_file is not None else None
-    data_grab = args.data_grab# if args.data_grab is not None else None
-    save = args.save# if args.save is not None else None
+    data_grab = args.data_grab
     if None in [method, img_name, pixel, gaussian, v1]:
         parser.error(
             '[Num Cell Figure] : at least method, img_name, pixel_file, '+
             'gaussian_file, V1_file required for num cell error figure')
-    return img_name, method, pixel, gaussian, v1, data_grab, save
-
+    return img_name, method, pixel, gaussian, v1, data_grab
+'''
+    
 def add_generic_figure_args(parser):
     ''' 
     Add arguments that are used in every plotting function
@@ -241,20 +280,24 @@ def add_generic_figure_args(parser):
     '''
     # add figtype -- this is the only required argparse arg, determine which others should be there based on figtype
     parser.add_argument(
-        '-fig_type', choices=['colorbar', 'num_cell'], action='store',
-        help='[Colorbar and Num Cell Figure] : type of figure to generate',
+        '-fig_type', choices=['colorbar', 'num_cell', 'alpha'], action='store',
+        help='[Alpha, Colorbar and Num Cell Figure] : type of figure to generate',
         metavar='FIGTYPE', required=True, nargs=1)
     # add arguments used by both num cell and colorbar
     parser.add_argument(
         '-img_name', action='store', 
-        help='[Colorbar and Num Cell Figure] : filename of image'+
+        help='[Alpha, Colorbar and Num Cell Figure] : filename of image'+
         ' to be reconstructed',
         metavar='IMG_NAME', required=False, nargs=1)
     parser.add_argument(
         '-method', choices=['dct', 'dwt'], action='store',
-        help='[Colorbar and Num Cell Figure] : Method to use for reconstruction',
+        help='[Alpha, Colorbar and Num Cell Figure] : Method to use for reconstruction',
         metavar='METHOD', required=False, nargs=1)
-
+    parser.add_argument(
+        '-save', action='store_true',
+        help='[Alpha, Colorbar and Num Cell Figure] : save into specified path '+
+        'when argument is present',
+        required=False)
 
 def parse_figure_args():
     '''
@@ -272,15 +315,15 @@ def parse_figure_args():
         description='Generate a figure of your choosing.')
     add_generic_figure_args(parser)
     add_colorbar_args(parser)
-    add_num_cell_args(parser)
+    add_plot_args(parser) # args for num cell and alpha
     args = parser.parse_args()
     fig_type = args.fig_type[0]
+    save = args.save
     if fig_type == 'colorbar':
         params = eval_colorbar_args(args, parser)
-    elif fig_type == 'num_cell':
-        params = eval_num_cell_args(args, parser)
-
-    return fig_type, params
+    elif fig_type in ['num_cell', 'alpha']:
+        params = eval_plot_args(args, parser)
+    return fig_type, params, save
 
 
 
