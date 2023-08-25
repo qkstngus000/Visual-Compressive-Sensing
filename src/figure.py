@@ -118,10 +118,10 @@ def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
         sys.exit(0)
     
     #Pre-processing data to receive
-    data = process_result_data(img, method, pixel_file, gaussian_file, V1_file)
+    data = process_result_data(img, method, 'num_cell', pixel_file, gaussian_file, V1_file)
     plt.xticks(data['V1'][0]['num_cell'])
     plt.xlabel('num_cell')
-    title = "Num_Cell_Vs_Error_{img}_".format(img = img_nm)
+    title = f"Num_Cell_Vs_Error_{img_nm}_"
     plt.title(title.replace('_', ' '))
     plt.legend(['V1', 'Pixel', 'Gaussian'], loc = 'best')
     
@@ -131,7 +131,7 @@ def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
     plt.legend(loc = 'best')
 
 
-def error_vs_alpha(img, method, pixel_data, gaussian_data, V1_data, save = False):
+def error_vs_alpha(img, method, pixel_file, gaussian_file, V1_file, save = False):
     ''' 
     Generate figure that compares various alpha LASSO penalty and how it affects
     the error of the reconstruction among three different observations. 
@@ -160,70 +160,28 @@ def error_vs_alpha(img, method, pixel_data, gaussian_data, V1_data, save = False
     save : boolean
         Determines if the image will be saved.
     '''
-    if None in [pixel_data, gaussian_data, V1_data]:
-        print("Currently all file required")
+    print('not implemented')
+    img_nm = img.split('.')[0]
+    
+    if None in [pixel_file, gaussian_file, V1_file] and data_grab == 'manual': 
+        print("All observation data file must be given")    
         sys.exit(0)
     
-    title = ''
+    #Pre-processing data to receive
+    data = process_result_data(img, method, 'alp', pixel_file, gaussian_file, V1_file)
+    print(data['V1'])
     
-    # Preprocess data not to have 
-    pixel_df = remove_unnamed_data(pd.read_csv(pixel_data))
-    gaussian_df = remove_unnamed_data(pd.read_csv(gaussian_data))
-    V1_df = remove_unnamed_data(pd.read_csv(V1_data))
+    plt.xticks(data['V1'][0]['alp'])
+    plt.xlabel('alpha')
+    title = f"Alpha_Vs_Error_{img_nm}_"
+    plt.title(title.replace('_', ' '))
+    plt.legend(['V1', 'Pixel', 'Gaussian'], loc = 'best')
+    plt.xscale('log')
+    for obs, plot in data.items():
+        sns.lineplot(data = plot[0], x = 'alp', y = 'error', label = obs)
+        plt.plot(plot[1]['alp'], plot[1]['min_error'], 'r.')
+    plt.legend(loc = 'best')
     
-    num_cell_list = V1_df['num_cell'].unique()
-    
-    for num_cell in num_cell_list :
-        # In order to bring fixed cell_size and sparse_frequency, bring parameter that has median error value
-        V1_df_mean = V1_df.loc[V1_df["num_cell"] == num_cell].groupby(
-            list(V1_df.columns[1:-1]),
-            as_index = False).mean().drop('rep', axis=1)
-        median_col = V1_df_mean.loc[V1_df_mean['error'] == \
-                                    V1_df_mean['error'].median()]
-
-        # Depending on the basis used (dct / dwt) add lv parameter
-        if (method.lower() == 'dct') :
-            cell_size, sparse_freq = V1_df_mean.loc[
-                V1_df_mean['error'] == V1_df_mean['error'].median()]\
-                [['cell_size', 'sparse_freq']].values.squeeze()
-            V1_df_mod = V1_df.loc[(V1_df['cell_size'] == cell_size) & 
-                                  (V1_df['sparse_freq'] == sparse_freq)]
-            title=rf"$\alpha$_Error for {num_cell} cells"+\
-            rf" (cell_size: {cell_size}, sparse_freq: {sparse_freq})"
-        else :
-            cell_size, sparse_freq, lv = V1_df_mean.loc[
-                V1_df_mean['error'] == V1_df_mean['error'].median()]\
-                [['cell_size', 'sparse_freq', 'lv']].values.squeeze()
-            V1_df_mod = V1_df.loc[(V1_df['cell_size'] == cell_size) & 
-                                  (V1_df['sparse_freq'] == sparse_freq) & 
-                                  (V1_df['lv'] == lv)]
-            title=rf"$\alpha$_Error for {num_cell} cells "+\
-                rf"(cell_size: {cell_size}, sparse_freq: {sparse_freq}, lv: {lv})"
-
-        fig = sns.relplot(data = V1_df_mod, x = 'alp', y = 'error', kind='line',
-                          palette='Accent', legend = True, label = 'V1')
-
-
-        fig.map(sns.lineplot, x = 'alp', y = 'error',
-                data = pixel_df.loc[pixel_df["num_cell"] == num_cell], 
-                label= 'pixel', color = 'red', 
-                legend = True)
-        fig.map(sns.lineplot, x = 'alp', y = 'error',
-                data = gaussian_df.loc[gaussian_df["num_cell"] == num_cell], 
-                label= 'gaussian', color = 'green', 
-                legend = True)
-        fig.set(title = title)
-        fig.add_legend(title='Observation', loc = 'right')
-        fig.set(xscale='log')
-        fig.set(yscale='log')
-        plt.xlabel(r"$\alpha$")
-        
-        # Save the figure
-        if save :
-            path = fig_save_path(img, method, 'combined', title)
-            plt.savefig(path, dpi = 200)
-        plt.show()
-
 def colorbar_live_reconst(method, img_name, observation, color, dwt_type, level,
                           alpha, num_cells, cell_size, sparse_freq):
     '''
@@ -297,8 +255,10 @@ def main():
         if save:
             save_num_cell(img_name, pixel, gaussian, v1, method)
     elif fig_type == 'alpha':
-        print("NOT IMPLEMENTED")
-
+        img_name, method, pixel, gaussian, v1, data_grab = args
+        error_vs_alpha(img_name, method, pixel, gaussian, v1, data_grab)
+        if save:
+            save_alpha(img_name, pixel, gaussian, v1, method)
     if not save:
         plt.show()
 
