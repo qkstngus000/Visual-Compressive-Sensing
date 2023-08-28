@@ -46,7 +46,7 @@ def show_reconstruction_error(img_arr, reconst, method,
 
     # setup figures and axes
     # NOTE: changing figsize here requires you to rescale the colorbar as well
-    ## --adjust the shrink parameter to fit.
+    # adjust the shrink parameter to fit.
     fig, axis = plt.subplots(1, 2, figsize = (8, 8))
     plt.tight_layout()
 
@@ -73,8 +73,8 @@ def show_reconstruction_error(img_arr, reconst, method,
         vmax = vmax.max() if vmax.max() < 255 else 255
         err = axis[1].imshow((img_arr - reconst), 'Reds', vmin = 0, vmax = vmax)
 
-
-    # apply colorbar -- NOTE : if figsize is not (8, 8) then shrink value must be changeed as well
+    # apply colorbar -- NOTE : if figsize is not (8, 8)
+    # then shrink value must be changeed as well
     cbar = fig.colorbar(err, ax=axis, shrink = 0.363, aspect=10)
     cbar.set_label("Error")
 
@@ -118,7 +118,8 @@ def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
         sys.exit(0)
     
     #Pre-processing data to receive
-    data = process_result_data(img, method, 'num_cell', pixel_file, gaussian_file, V1_file)
+    data = process_result_data(img, method, 'num_cell', pixel_file,
+                               gaussian_file, V1_file)
     plt.xticks(data['V1'][0]['num_cell'])
     plt.xlabel('num_cell')
     title = f"Num_Cell_Vs_Error_{img_nm}_"
@@ -160,17 +161,14 @@ def error_vs_alpha(img, method, pixel_file, gaussian_file, V1_file, save = False
     save : boolean
         Determines if the image will be saved.
     '''
-    print('not implemented')
     img_nm = img.split('.')[0]
-    
     if None in [pixel_file, gaussian_file, V1_file] and data_grab == 'manual': 
         print("All observation data file must be given")    
         sys.exit(0)
     
     #Pre-processing data to receive
     data = process_result_data(img, method, 'alp', pixel_file, gaussian_file, V1_file)
-    print(data['V1'])
-    
+        
     plt.xticks(data['V1'][0]['alp'])
     plt.xlabel('alpha')
     title = f"Alpha_Vs_Error_{img_nm}_"
@@ -180,6 +178,15 @@ def error_vs_alpha(img, method, pixel_file, gaussian_file, V1_file, save = False
     for obs, plot in data.items():
         sns.lineplot(data = plot[0], x = 'alp', y = 'error', label = obs)
         plt.plot(plot[1]['alp'], plot[1]['min_error'], 'r.')
+        # labelling points on graph
+        if obs == 'V1':
+            sizes = list(plot[1]['cell_size'])
+            freqs = list(plot[1]['sparse_freq'])
+            alphas = list(plot[1]['alp'])
+            errors = list(plot[1]['min_error'])
+            for i, err in  enumerate(errors):
+                plt.annotate(f'cell_size = {sizes[i]}, sparse_freq = {freqs[i]}',
+                      (alphas[i], err))
     plt.legend(loc = 'best')
     
 def colorbar_live_reconst(method, img_name, observation, color, dwt_type, level,
