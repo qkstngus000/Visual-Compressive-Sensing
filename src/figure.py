@@ -16,7 +16,7 @@ from PIL import Image, ImageOps
 
 
 def show_reconstruction_error(img_arr, reconst, method,
-                              observation, num_cell, img_name, save_img = False): 
+                              observation, num_cell, img_name): 
     ''' 
     Display the reconstructed image along with pixel error and a colorbar.
     
@@ -42,9 +42,6 @@ def show_reconstruction_error(img_arr, reconst, method,
 
     img_name : String
         Name of the original image file (e.g. "Peppers")
-
-    save_img : boolean
-        Determines if the image will be saved.
     '''
 
     # setup figures and axes
@@ -80,17 +77,11 @@ def show_reconstruction_error(img_arr, reconst, method,
     # apply colorbar -- NOTE : if figsize is not (8, 8) then shrink value must be changeed as well
     cbar = fig.colorbar(err, ax=axis, shrink = 0.363, aspect=10)
     cbar.set_label("Error")
-    # save image to outfile if desired, else display to the user
-    if save_img == True:
-        outfile = fig_save_path(img_name, method, observation, "colorbar")
-        plt.savefig(outfile, dpi = 300, bbox_inches = "tight")
-    else:
-        plt.show()
 
 
 
 def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
-                          V1_file=None, data_grab = 'auto', save = False) :
+                          V1_file=None, data_grab = 'auto') :
     ''' 
     Generate figure that compares which method gives the best minimum error
     
@@ -119,10 +110,6 @@ def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
         With structured path, decides to grab all three data files 
         automatically or manually. Currently not implemented.
         ['auto', 'manual'].
-    
-    save : bool
-        Save data into specified path.
-        [True, False]
     '''
     img_nm = img.split('.')[0]
     
@@ -131,10 +118,10 @@ def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
         sys.exit(0)
     
     #Pre-processing data to receive
-    data = process_result_data(img, method, pixel_file, gaussian_file, V1_file)
+    data = process_result_data(img, method, 'num_cell', pixel_file, gaussian_file, V1_file)
     plt.xticks(data['V1'][0]['num_cell'])
     plt.xlabel('num_cell')
-    title = "Num_Cell_Vs_Error_{img}_".format(img = img_nm)
+    title = f"Num_Cell_Vs_Error_{img_nm}_"
     plt.title(title.replace('_', ' '))
     plt.legend(['V1', 'Pixel', 'Gaussian'], loc = 'best')
     
@@ -142,14 +129,6 @@ def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
         sns.lineplot(data = plot[0], x = 'num_cell', y = 'error', label = obs)
         plt.plot(plot[1]['num_cell'], plot[1]['min_error'], 'r.')
     plt.legend(loc = 'best')
-    if save :
-        # for its save name, the name of file order is pixel -> gaussian -> V1 
-        save_nm = pixel_file.split('.')[0] + '_' + \
-            gaussian_file.split('.')[0] + '_' + V1_file.split('.')[0]
-        save_path = fig_save_path(img_nm, method, 'num_cell_error', save_nm)
-        plt.savefig(save_path, dpi = 200)
-        
-    plt.show()
 
 def error_vs_alpha(img, method, pixel_file, gaussian_file, V1_file, save = False):
     ''' 
@@ -180,75 +159,32 @@ def error_vs_alpha(img, method, pixel_file, gaussian_file, V1_file, save = False
     save : boolean
         Determines if the image will be saved.
     '''
+
     
     img_nm = img.split('.')[0]
     if None in [pixel_data, gaussian_data, V1_data]:
         print("Currently all file required")
         sys.exit(0)
     
-    title = ''
+    if None in [pixel_file, gaussian_file, V1_file] and data_grab == 'manual': 
+        print("All observation data file must be given")    
+        sys.exit(0)
+
+    #Pre-processing data to receive
+    data = process_result_data(img, method, 'alp', pixel_file, gaussian_file, V1_file)
+    print(data['V1'])
     
-    # load files into dataframes
-    V1_df, gaussian_df, pixel_df = load_dataframe(
-                                        img_nm, 
-                                        method, 
-                                        pixel_file,
-                                        gaussian_file, 
-                                        V1_file)
+    plt.xticks(data['V1'][0]['alp'])
+    plt.xlabel('alpha')
+    title = f"Alpha_Vs_Error_{img_nm}_"
+    plt.title(title.replace('_', ' '))
+    plt.legend(['V1', 'Pixel', 'Gaussian'], loc = 'best')
+    plt.xscale('log')
+    for obs, plot in data.items():
+        sns.lineplot(data = plot[0], x = 'alp', y = 'error', label = obs)
+        plt.plot(plot[1]['alp'], plot[1]['min_error'], 'r.')
+    plt.legend(loc = 'best')
     
-    num_cell_list = V1_df['num_cell'].unique()
-    
-    for num_cell in num_cell_list :
-        # In order to bring fixed cell_size and sparse_frequency, bring parameter that has median error value
-        V1_df_mean = V1_df.loc[V1_df["num_cell"] == num_cell].groupby(
-            list(V1_df.columns[1:-1]),
-            as_index = False).mean().drop('rep', axis=1)
-        median_col = V1_df_mean.loc[V1_df_mean['error'] == \
-                                    V1_df_mean['error'].median()]
-
-        # Depending on the basis used (dct / dwt) add lv parameter
-        if (method.lower() == 'dct') :
-            cell_size, sparse_freq = V1_df_mean.loc[
-                V1_df_mean['error'] == V1_df_mean['error'].median()]\
-                [['cell_size', 'sparse_freq']].values.squeeze()
-            V1_df_mod = V1_df.loc[(V1_df['cell_size'] == cell_size) & 
-                                  (V1_df['sparse_freq'] == sparse_freq)]
-            title=rf"$\alpha$_Error for {num_cell} cells"+\
-            rf" (cell_size: {cell_size}, sparse_freq: {sparse_freq})"
-        else :
-            cell_size, sparse_freq, lv = V1_df_mean.loc[
-                V1_df_mean['error'] == V1_df_mean['error'].median()]\
-                [['cell_size', 'sparse_freq', 'lv']].values.squeeze()
-            V1_df_mod = V1_df.loc[(V1_df['cell_size'] == cell_size) & 
-                                  (V1_df['sparse_freq'] == sparse_freq) & 
-                                  (V1_df['lv'] == lv)]
-            title=rf"$\alpha$_Error for {num_cell} cells "+\
-                rf"(cell_size: {cell_size}, sparse_freq: {sparse_freq}, lv: {lv})"
-
-        fig = sns.relplot(data = V1_df_mod, x = 'alp', y = 'error', kind='line',
-                          palette='Accent', legend = True, label = 'V1')
-
-
-        fig.map(sns.lineplot, x = 'alp', y = 'error',
-                data = pixel_df.loc[pixel_df["num_cell"] == num_cell], 
-                label= 'pixel', color = 'red', 
-                legend = True)
-        fig.map(sns.lineplot, x = 'alp', y = 'error',
-                data = gaussian_df.loc[gaussian_df["num_cell"] == num_cell], 
-                label= 'gaussian', color = 'green', 
-                legend = True)
-        fig.set(title = title)
-        fig.add_legend(title='Observation', loc = 'right')
-        fig.set(xscale='log')
-        fig.set(yscale='log')
-        plt.xlabel(r"$\alpha$")
-        
-        # Save the figure
-        if save :
-            path = fig_save_path(img, method, 'combined', title)
-            plt.savefig(path, dpi = 200)
-        plt.show()
-
 def colorbar_live_reconst(method, img_name, observation, color, dwt_type, level,
                           alpha, num_cells, cell_size, sparse_freq):
     '''
@@ -302,24 +238,32 @@ def colorbar_live_reconst(method, img_name, observation, color, dwt_type, level,
     reconst = large_img_experiment(
         img_arr, num_cells, cell_size, sparse_freq, filter_dim, alpha, method,
         observation, level, dwt_type, rand_weight, color) 
-    print(f"Image {img_name} reconstructed. Displaying reconstruction and error.") 
     show_reconstruction_error(img_arr, reconst, method, observation,
-                   num_cells, img_name.split('.')[0], False)
+                   num_cells, img_name.split('.')[0])
 
-    
 def main():
-    fig_type, args = parse_figure_args()
+    fig_type, args, save = parse_figure_args()
     if fig_type == 'colorbar' :
       method, img_name, observation, color, dwt_type, level, alpha, num_cells,\
           cell_size, sparse_freq = args
       colorbar_live_reconst(
           method, img_name, observation, color, dwt_type, level,
-          alpha, num_cells, cell_size, sparse_freq)      
+          alpha, num_cells, cell_size, sparse_freq)
+      if save:
+          save_reconstruction_error(img_name, method, observation)
     elif fig_type == 'num_cell':
-        img_name, method, pixel, gaussian, v1, data_grab, save = args
+        img_name, method, pixel, gaussian, v1, data_grab = args
         error_vs_num_cell(img_name, method, pixel,
-                              gaussian, v1, data_grab, save)
-
+                              gaussian, v1, data_grab)
+        if save:
+            save_num_cell(img_name, pixel, gaussian, v1, method)
+    elif fig_type == 'alpha':
+        img_name, method, pixel, gaussian, v1, data_grab = args
+        error_vs_alpha(img_name, method, pixel, gaussian, v1, data_grab)
+        if save:
+            save_alpha(img_name, pixel, gaussian, v1, method)
+    if not save:
+        plt.show()
 
 if __name__ == "__main__":
     main()
