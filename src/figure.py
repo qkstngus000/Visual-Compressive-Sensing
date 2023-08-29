@@ -130,7 +130,6 @@ def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
         plt.plot(plot[1]['num_cell'], plot[1]['min_error'], 'r.')
     plt.legend(loc = 'best')
 
-
 def error_vs_alpha(img, method, pixel_file, gaussian_file, V1_file, save = False):
     ''' 
     Generate figure that compares various alpha LASSO penalty and how it affects
@@ -145,28 +144,32 @@ def error_vs_alpha(img, method, pixel_file, gaussian_file, V1_file, save = False
         Basis the data file was worked on. 
         Currently supporting dct and dwt (discrete cosine/wavelet transform).
     
-    pixel_data : String
+    pixel_file : String
         Pixel observation data file from hyperparameter sweep.
         Required for plotting.
 
-    gaussian_data : String
+    gaussian_file : String
         Gaussian observation data file from hyperparameter sweep.
         Required for plotting.
 
-    V1_data : String
+    V1_file : String
         V1 observation data file from hyperparameter sweep.
         Required for plotting.
 
     save : boolean
         Determines if the image will be saved.
     '''
-    print('not implemented')
+
+    
     img_nm = img.split('.')[0]
+    if None in [pixel_data, gaussian_data, V1_data]:
+        print("Currently all file required")
+        sys.exit(0)
     
     if None in [pixel_file, gaussian_file, V1_file] and data_grab == 'manual': 
         print("All observation data file must be given")    
         sys.exit(0)
-    
+
     #Pre-processing data to receive
     data = process_result_data(img, method, 'alp', pixel_file, gaussian_file, V1_file)
     print(data['V1'])
