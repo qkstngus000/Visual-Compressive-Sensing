@@ -278,9 +278,9 @@ def process_result_data(img_file, method, pixel_file=None,
     V1_df, gaussian_df, pixel_df = load_dataframe(img_nm, method, pixel_file,
                         gaussian_file, V1_file)
     
-    obs_dict= {'V1': pd.read_csv(load_V1),
-               'gaussian': pd.read_csv(load_gaussian), 
-               'pixel': pd.read_csv(load_pixel), 
+    obs_dict= {'V1': V1_df,
+               'gaussian': gaussian_df, 
+               'pixel': pixel_df, 
               }
     # Remove unnecessary index column in pandas
     for obs, file in obs_dict.items():
