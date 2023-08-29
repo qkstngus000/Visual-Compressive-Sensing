@@ -151,8 +151,8 @@ def compute_zero_padding_dimension(n, filter_n):
     
     '''
     new_n = n
-    if n % filt_n != 0 :
-        new_n = n + (filt_n - (n % filt_n))
+    if n % filter_n != 0 :
+        new_n = n + (filter_n - (n % filter_n))
     
     return new_n
 

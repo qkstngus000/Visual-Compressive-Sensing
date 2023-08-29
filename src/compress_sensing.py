@@ -18,7 +18,7 @@ from PIL import Image, ImageOps
 
 
 # Generate General Variables
-def generate_Y(W, img):
+def generate_Y(W, img_arr):
     ''' 
     Generate sample y vector variable for data reconstruction using constant
     matrix W (containing open indices).
@@ -41,9 +41,9 @@ def generate_Y(W, img):
     '''
     
     num_cell = W.shape[0]
-    n, m = img.shape
+    n, m = img_arr.shape[:2]
     W = W.reshape(num_cell, n*m)
-    y = W @ img.reshape(n * m, 1)
+    y = W @ img_arr.reshape(n * m, 1)
     return y
 
 def generate_V1_observation(img_arr, num_cell, cell_size, sparse_freq):
@@ -89,7 +89,7 @@ def generate_V1_observation(img_arr, num_cell, cell_size, sparse_freq):
 
     # Resize W to shape (num_cell, height of image, width of image) for 
     # fetching into function
-    W = W.reshape(num_cell, dim[0], dim[1])
+    W = W.reshape(num_cell, n, m)
     return W, y
 
 # Generate pixel Variables
@@ -421,7 +421,7 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct',
 
 def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None,
                      alpha = None, fit_intercept = False, method = 'dct',
-                     observation = 'pixel', lv = 4, dwt_type = 'db2') :
+                     observation = 'pixel', lv = 4, dwt_type = 'db2', W = None) :
     ''' 
     Reconstruct colored (RGB) image with sample data.
     
@@ -496,10 +496,14 @@ def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None,
         img_arr_pt_dim = img_arr_pt.shape
         n_pt, m_pt = img_arr_pt_dim
         
-        W, y = generate_observations(img_arr_pt, num_cell, observation,
+        if W is not None:
+            y = generate_Y(W, img_arr_pt)
+        
+        else :
+            W, y = generate_observations(img_arr_pt, num_cell, observation,
                                      cell_size, sparse_freq)
             
-        if (method == 'dct'):
+        if (method == 'dct') :
             reconst = reconstruct(W, y, alpha, method = method)
         else :
             reconst = reconstruct(W, y, alpha, method = method,
@@ -517,7 +521,7 @@ def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None,
 def large_img_experiment(img_arr, num_cell, cell_size = None,
                          sparse_freq = None, filter_dim = (30, 30),
                          alpha = None, method = 'dct', observation = 'pixel',
-                         lv = 2, dwt_type = 'db2', rand_weight = False,
+                         lv = 2, dwt_type = 'db2', rand_weight = True,
                          color = False) :
     ''' 
     Allows to reconstruct any size of signal data since regular reconstruct 
@@ -626,6 +630,15 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
         n, m, d = img_arr.shape
     else:
         n, m = dim = img_arr.shape
+
+    # If user wants to test the fixed weights. Default set to None
+    W = None
+    if rand_weight == False:
+        dim = (filt_n, filt_m)
+        # Store generated V1 cells in W
+        W = V1_weights(num_cell, dim, cell_size, sparse_freq)
+        W = W.reshape(num_cell, filt_n, filt_m)
+
     
     # Compute the size of the dimension once zero padding is applied
     padding_n = compute_zero_padding_dimension(n, filt_n)
@@ -679,12 +692,21 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
                 method = method, 
                 observation = observation,
                 lv = lv, 
-                dwt_type = dwt_type)
+                dwt_type = dwt_type,
+                W = W)
             img_arr_padded[cur_n : (cur_n + filt_n), cur_m : nxt_m, :] = reconst
         else:    
             img_arr_pt = img_arr_padded[cur_n : (cur_n + filt_n), cur_m : nxt_m]
-            W, y = generate_observations(img_arr_pt, num_cell, observation,
+            
+            # if rand_weight == True, there is pre-set weight, so just compute y
+            if rand_weight : 
+                y = generate_Y(W, img_arr)
+            
+            # else, all W is randomized for each batch of reconstruction
+            else :
+                W, y = generate_observations(img_arr_pt, num_cell, observation,
                                          cell_size, sparse_freq)
+                
             W_model = W.reshape(num_cell, filt_n, filt_m)    
 
             if (method == 'dct'):
