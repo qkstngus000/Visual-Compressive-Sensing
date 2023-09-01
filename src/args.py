@@ -17,7 +17,6 @@ def add_colorbar_args(parser):
     # theres a lot of these -- use this function instead of manually typing all
     wavelist = pywt.wavelist()
     # get image infile
-    
     parser.add_argument(
         '-observation', choices=['pixel', 'V1', 'gaussian'], action='store',
         help='[Colorbar Figure] : observation type to use when sampling',
@@ -136,7 +135,7 @@ def eval_colorbar_args(args, parser):
                                           or args.sparse_freq is not None):
         parser.error('[Colorbar Figure] : Cell size and sparse freq params'+
                      ' are only required for V1 observation.')
-    dwt_type = eval(args.dwt_type[0]) if args.dwt_type is not None else None
+    dwt_type = args.dwt_type[0] if args.dwt_type is not None else None
     level = eval(args.level[0]) if args.level is not None else None
     alpha = eval(args.alpha[0]) if args.alpha is not None else None
     cell_size = eval(args.cell_size[0]) if args.cell_size is not None else None
