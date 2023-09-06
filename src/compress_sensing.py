@@ -18,7 +18,7 @@ from PIL import Image, ImageOps
 
 
 # Generate General Variables
-def generate_Y(W, img_arr):
+def generate_Y(W, img_arr, observation, rand_index = None):
     ''' 
     Generate sample y vector variable for data reconstruction using constant
     matrix W (containing open indices).
@@ -39,12 +39,31 @@ def generate_Y(W, img_arr):
         (num_V1_weights/sample_size, 1) shape. Dot product of W and image
     
     '''
-    
+    num_cells, n, m = W.shape
+    if observation == 'V1':
+        y = generate_v1_y(img_arr, W)
+    elif observation == 'gaussian':
+        y = generate_gaussian_y(W, img_arr)
+    elif observation == 'pixel':
+        y = generate_pixel_y(img_arr, rand_index, num_cells)
+    return y
+
+def generate_v1_y(img_arr, W):
+    # Get size of image
     num_cell = W.shape[0]
     n, m = img_arr.shape[:2]
     W = W.reshape(num_cell, n*m)
     y = W @ img_arr.reshape(n * m, 1)
     return y
+
+def generate_V1_weights(num_cell, dim, cell_size, sparse_freq):
+    # Store generated V1 cells in W
+    n, m = dim
+    W = V1_weights(num_cell, dim, cell_size, sparse_freq)
+    # Resize W to shape (num_cell, height of image, width of image) for 
+    # fetching into function
+    W = W.reshape(num_cell, n, m)
+    return W
 
 def generate_V1_observation(img_arr, num_cell, cell_size, sparse_freq):
     ''' 
@@ -77,20 +96,24 @@ def generate_V1_observation(img_arr, num_cell, cell_size, sparse_freq):
     y : vector
         (num_V1_weights/sample_size, 1) shape. Dot product of W and image
     '''
-    
-    # Get size of image
-    dim = np.asanyarray(img_arr).shape[:2]
-    n, m = dim
-    # Store generated V1 cells in W
-    W = V1_weights(num_cell, dim, cell_size, sparse_freq) 
-    
-    # Retrieve y from W @ imgArr
-    y = W @ img_arr.reshape(n*m, 1)
 
-    # Resize W to shape (num_cell, height of image, width of image) for 
-    # fetching into function
-    W = W.reshape(num_cell, n, m)
+    dim = np.asanyarray(img_arr).shape[:2]
+    W = generate_V1_weights(num_cell, dim, cell_size, sparse_freq)
+    # Retrieve y from W @ imgArr
+    y = generate_Y(W, img_arr, 'V1')
+    # y = W @ img_arr.reshape(n*m, 1)
     return W, y
+
+def generate_pixel_y(img_arr, rand_index, num_cell):
+    y = img_arr.flatten()[rand_index].reshape(num_cell, 1)
+    n, m = img_arr.shape[:2]
+    y = y * np.sqrt(n * m)
+    return y
+
+def generate_pixel_weights(num_cell, n, m, rand_index):
+    W = np.eye(n * m)[rand_index, :] * np.sqrt(n * m)
+    W = W.reshape(num_cell, n, m)
+    return W
 
 # Generate pixel Variables
 def generate_pixel_observation(img_arr, num_cell) :
@@ -117,14 +140,22 @@ def generate_pixel_observation(img_arr, num_cell) :
     
     n, m = img_arr.shape[:2]
     rand_index = np.random.randint(0, n * m, num_cell)
-    y = img_arr.flatten()[rand_index].reshape(num_cell, 1)
-    
-    y = y * np.sqrt(n * m)
-    W = np.eye(n * m)[rand_index, :] * np.sqrt(n * m)
-    W = W.reshape(num_cell, n, m)
+    W = generate_pixel_weights(num_cell, n, m, rand_index)
+    y = generate_Y(W, img_arr, 'pixel', rand_index)
     return W, y
 
+def generate_gaussian_y(W, img_arr):
+    num_cell = W.shape[0]
+    n, m = img_arr.shape[:2]
+    W = W.reshape(num_cell, n*m)
+    y = W @ img_arr.reshape(n * m, 1)
+    return y
+
 # Generate Gaussian Weights
+def generate_gaussian_weights(num_cell, n, m):
+    W = np.random.randn(num_cell, n, m)
+    return W
+
 def generate_gaussian_observation(img_arr, num_cell):
     ''' 
     Generate 3 dimensional arrays. 
@@ -149,8 +180,8 @@ def generate_gaussian_observation(img_arr, num_cell):
         (num_V1_weights/sample_size, 1) shape. Dot product of W and image.
     '''
     n, m = img_arr.shape[:2]
-    W = np.random.randn(num_cell, n, m)
-    y = generate_Y(W, img_arr)
+    W = generate_gaussian_weights(num_cell, n, m)
+    y = generate_Y(W, img_arr, 'gaussian')
     return W, y
 
 # Error Calculation by Frobenius Norm
@@ -288,7 +319,7 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m,
         theta_i = wavedecn(W[i], wavelet= dwt_type, level = lv, mode = 'zero')
         theta[i, :] = pywt.ravel_coeffs(theta_i)[0]
 
-    mini = Lasso(alpha = alpha, fit_intercept = False)
+    mini = Lasso(alpha = alpha, fit_intercept = fit_intercept)
     mini.fit(theta, y)
 
     s = mini.coef_
@@ -421,7 +452,7 @@ def reconstruct(W, y, alpha = None, fit_intercept = False, method = 'dct',
 
 def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None,
                      alpha = None, fit_intercept = False, method = 'dct',
-                     observation = 'pixel', lv = 4, dwt_type = 'db2', W = None) :
+                     observation = 'pixel', lv = 4, dwt_type = 'db2', W = None, rand_index=None) :
     ''' 
     Reconstruct colored (RGB) image with sample data.
     
@@ -497,7 +528,7 @@ def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None,
         n_pt, m_pt = img_arr_pt_dim
         
         if W is not None:
-            y = generate_Y(W, img_arr_pt)
+            y = generate_Y(W, img_arr_pt, observation, rand_index)
         
         else :
             W, y = generate_observations(img_arr_pt, num_cell, observation,
@@ -521,7 +552,7 @@ def color_experiment(img_arr, num_cell, cell_size = None, sparse_freq = None,
 def large_img_experiment(img_arr, num_cell, cell_size = None,
                          sparse_freq = None, filter_dim = (30, 30),
                          alpha = None, method = 'dct', observation = 'pixel',
-                         lv = 2, dwt_type = 'db2', rand_weight = True,
+                         lv = 2, dwt_type = 'db2', fixed_weights = False,
                          color = False) :
     ''' 
     Allows to reconstruct any size of signal data since regular reconstruct 
@@ -590,9 +621,9 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
         Not used for dct.
         Default set to 'db2'
 
-    rand_weight : bool
+    fixed_weight : bool
         Decide if reconstruction for each data part is going to use 
-        same weight or random weight. 
+        same weight or random weight.
         Default set up to be False.
     
     color : bool
@@ -631,13 +662,25 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
     else:
         n, m = dim = img_arr.shape
 
-    # If user wants to test the fixed weights. Default set to None
+    # If user wants to test the fixed weights. Default set to Fixed
     W = None
-    if rand_weight == False:
+    rand_index = None
+    if fixed_weights == True:
         dim = (filt_n, filt_m)
         # Store generated V1 cells in W
-        W = V1_weights(num_cell, dim, cell_size, sparse_freq)
-        W = W.reshape(num_cell, filt_n, filt_m)
+        if observation == 'V1':
+            W = generate_V1_weights(num_cell, dim, cell_size, sparse_freq)
+            # W = V1_weights(num_cell, dim, cell_size, sparse_freq)
+            # W = W.reshape(num_cell, filt_n, filt_m)
+        elif observation == 'pixel':
+            n, m = img_arr.shape[:2]
+            rand_index = np.random.randint(0, filt_n * filt_m, num_cell)
+            # W = np.eye(filt_n * filt_m)[rand_index, :] * np.sqrt(filt_n * filt_m)
+            # W = W.reshape(num_cell, filt_n, filt_m)
+            W = generate_pixel_weights(num_cell, filt_n, filt_m, rand_index)
+        elif observation == 'gaussian':
+            # W = np.random.randn(num_cell, filt_n, filt_m)
+            W = generate_gaussian_weights(num_cell, filt_n, filt_m)
 
     
     # Compute the size of the dimension once zero padding is applied
@@ -661,10 +704,6 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
     num_work = (padding_n * padding_m) // (filt_n * filt_m)
     
     
-    # TODO: Add RandWeight functionality 
-    
-    
-    
     # For each batch of data, run reconstruction 
     for pt in range(num_work):
         # Keep track over height of the batches. If working column
@@ -673,11 +712,10 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
         if (cur_m >= padding_m) :
             cur_n += filt_n
             cur_m = 0
-        
+        print(f"{pt} of {num_work}")
         # Compute the end of column for each batch, which is also
         # going to be the start point of next batch
         nxt_m = cur_m + filt_m
-        
         # Reconstruct all 3 rgb channels if color
         if color :
             # Retrieve batch
@@ -693,20 +731,20 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
                 observation = observation,
                 lv = lv, 
                 dwt_type = dwt_type,
-                W = W)
+                W = W, 
+                rand_index=rand_index)
             img_arr_padded[cur_n : (cur_n + filt_n), cur_m : nxt_m, :] = reconst
         else:    
             img_arr_pt = img_arr_padded[cur_n : (cur_n + filt_n), cur_m : nxt_m]
             
-            # if rand_weight == True, there is pre-set weight, so just compute y
-            if rand_weight : 
-                y = generate_Y(W, img_arr)
-            
+            # if fixed_weights == True, there is pre-set weight, so just compute y
+            if fixed_weights == True:
+                y = generate_Y(W, img_arr_pt, observation, rand_index)
             # else, all W is randomized for each batch of reconstruction
             else :
                 W, y = generate_observations(img_arr_pt, num_cell, observation,
                                          cell_size, sparse_freq)
-                
+
             W_model = W.reshape(num_cell, filt_n, filt_m)    
 
             if (method == 'dct'):
@@ -720,7 +758,6 @@ def large_img_experiment(img_arr, num_cell, cell_size = None,
         i+=1
     result = img_arr_padded[:n, :m, :d] \
         if color else img_arr_padded[:n,:m]
-
     # Fix any over/underestimated pixel between 0~255
     result[result < 0] = 0
     result[result > 255] = 255

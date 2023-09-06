@@ -121,6 +121,7 @@ def error_vs_num_cell(img, method, pixel_file=None, gaussian_file=None,
     data = process_result_data(img, method, 'num_cell', pixel_file, gaussian_file, V1_file)
     plt.xticks(data['V1'][0]['num_cell'])
     plt.xlabel('num_cell')
+    print(data)
     title = f"Num_Cell_Vs_Error_{img_nm}_"
     plt.title(title.replace('_', ' '))
     plt.legend(['V1', 'Pixel', 'Gaussian'], loc = 'best')
@@ -162,7 +163,7 @@ def error_vs_alpha(img, method, pixel_file, gaussian_file, V1_file, save = False
 
     
     img_nm = img.split('.')[0]
-    if None in [pixel_data, gaussian_data, V1_data]:
+    if None in [pixel_file, gaussian_file, V1_file]:
         print("Currently all file required")
         sys.exit(0)
     
@@ -172,7 +173,7 @@ def error_vs_alpha(img, method, pixel_file, gaussian_file, V1_file, save = False
 
     #Pre-processing data to receive
     data = process_result_data(img, method, 'alp', pixel_file, gaussian_file, V1_file)
-    print(data['V1'])
+    print(data)
     
     plt.xticks(data['V1'][0]['alp'])
     plt.xlabel('alpha')
@@ -183,6 +184,14 @@ def error_vs_alpha(img, method, pixel_file, gaussian_file, V1_file, save = False
     for obs, plot in data.items():
         sns.lineplot(data = plot[0], x = 'alp', y = 'error', label = obs)
         plt.plot(plot[1]['alp'], plot[1]['min_error'], 'r.')
+        if obs == 'V1':
+            sizes = list(plot[1]['cell_size'])  
+            freqs = list(plot[1]['sparse_freq'])
+            alphas = list(plot[1]['alp'])
+            errors = list(plot[1]['min_error'])
+            for i, err in  enumerate(errors):  
+                plt.annotate(f'cell_size = {sizes[i]}, sparse_freq = {freqs[i]}',
+                      (alphas[i], err))
     plt.legend(loc = 'best')
     
 def colorbar_live_reconst(method, img_name, observation, color, dwt_type, level,
@@ -231,13 +240,14 @@ def colorbar_live_reconst(method, img_name, observation, color, dwt_type, level,
         Determines filed frequency on how frequently 
         opened and closed area would appear. Affect the data training
     '''
-    rand_weight = False
+
+    fixed_weights = True
     filter_dim = (30, 30)
     img_arr = process_image(img_name, color, False)
     print(f"Image \"{img_name}\" loaded.") 
     reconst = large_img_experiment(
         img_arr, num_cells, cell_size, sparse_freq, filter_dim, alpha, method,
-        observation, level, dwt_type, rand_weight, color) 
+        observation, level, dwt_type, fixed_weights, color) 
     show_reconstruction_error(img_arr, reconst, method, observation,
                    num_cells, img_name.split('.')[0])
 

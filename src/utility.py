@@ -24,7 +24,7 @@ def search_root():
     '''
     back_path = './'
     root = Path(os.path.abspath('./'))
-    while not root.match('*/research'):
+    while not root.match('*Visual-Compressive-Sensing'):
         back_path += '../'
         root = Path(os.path.abspath(back_path))
     return root
@@ -180,7 +180,9 @@ def process_image(img, color = False, visibility = False):
     img_arr : array_like
         Return numpy array of image
     '''
+
     root = search_root()
+
     img_path = Image.open(os.path.join(root, 'image/{img}'.format(img=img)))
     if not color:
         img_path = ImageOps.grayscale(img_path)
