@@ -319,7 +319,7 @@ def wavelet_reconstruct(W, y, alpha, sample_sz, n, m,
         theta_i = wavedecn(W[i], wavelet= dwt_type, level = lv, mode = 'zero')
         theta[i, :] = pywt.ravel_coeffs(theta_i)[0]
 
-    mini = Lasso(alpha = alpha, fit_intercept = False)
+    mini = Lasso(alpha = alpha, fit_intercept = fit_intercept)
     mini.fit(theta, y)
 
     s = mini.coef_
